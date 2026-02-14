@@ -22,6 +22,8 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
+      "@database": ["libs/database/src"],
+      "@database/*": ["libs/database/src/*"],
       "@common": ["libs/common/src"],
       "@common/*": ["libs/common/src/*"],
       "@contract": ["libs/contract/src"],

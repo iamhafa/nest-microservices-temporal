@@ -4,7 +4,7 @@ import { WorkFlowTaskQueue } from '@temporal/queue/enum/workflow-task.queue';
 import { proxyActivities } from '@temporalio/workflow';
 
 export interface OrderResult {
-  orderId: string;
+  orderId: number;
   status: 'CONFIRMED' | 'FAILED';
   shipmentId?: string;
   paymentId?: string;
@@ -34,19 +34,19 @@ const shippingActivities = proxyActivities<IShippingActivity>({
   },
 });
 
-export async function processOrderWorkflow(input: CreateOrderDto): Promise<OrderResult> {
-  console.log('Starting processOrderWorkflow for order:', input.orderId);
+export async function processOrderWorkflow(input: CreateOrderDto, orderId: number): Promise<OrderResult> {
+  console.log('Starting processOrderWorkflow for order:', orderId);
   let paymentId: string | undefined;
 
   try {
-    await inventoryActivities.reserveInventory(input.orderId, input.items);
+    await inventoryActivities.reserveInventory(orderId, input.items);
 
-    paymentId = await paymentActivities.chargePayment(input.orderId, input.amount);
+    paymentId = await paymentActivities.chargePayment(orderId);
 
-    const shipmentId = await shippingActivities.createShipment(input.orderId, input.address);
+    const shipmentId = await shippingActivities.createShipment(orderId, input.address);
 
     return {
-      orderId: input.orderId,
+      orderId,
       status: 'CONFIRMED',
       shipmentId,
       paymentId,
@@ -57,10 +57,10 @@ export async function processOrderWorkflow(input: CreateOrderDto): Promise<Order
       await paymentActivities.refundPayment(paymentId);
     }
 
-    await inventoryActivities.releaseInventory(input.orderId, input.items);
+    await inventoryActivities.releaseInventory(orderId, input.items);
 
     return {
-      orderId: input.orderId,
+      orderId,
       status: 'FAILED',
       paymentId,
     };

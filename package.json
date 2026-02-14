@@ -26,6 +26,7 @@
     "@nestjs/config": "^4.0.3",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/typeorm": "^11.0.0",
     "@temporalio/client": "^1.12.2",
     "@temporalio/common": "^1.14.1",
     "@temporalio/worker": "^1.12.2",
@@ -34,8 +35,10 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.3",
     "nestjs-temporal-core": "^3.0.10",
+    "pg": "^8.18.0",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "typeorm": "^0.3.28"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
@@ -87,6 +90,7 @@
     "moduleNameMapper": {
       "^@app/common(|/.*)$": "<rootDir>/libs/common/src/$1",
       "^@app/contract(|/.*)$": "<rootDir>/libs/contract/src/$1",
+      "^@app/database(|/.*)$": "<rootDir>/libs/database/src/$1",
       "^@app/temporal(|/.*)$": "<rootDir>/libs/temporal/src/$1",
       "^@shared/shared(|/.*)$": "<rootDir>/libs/shared/src/$1"
     }

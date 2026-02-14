@@ -1,3 +1,3 @@
 export interface IShippingActivity {
-  createShipment(orderId: string, address: string): Promise<string>;
+  createShipment(orderId: number, address: string): Promise<string>;
 }

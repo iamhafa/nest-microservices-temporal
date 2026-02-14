@@ -42,5 +42,19 @@ services:
       - "8233:8080"
     restart: unless-stopped
 
+  postgres-order-service:
+    image: postgres:16-alpine
+    container_name: temporal-postgres-order-service
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: nestjs-temporal-order-service
+    ports:
+      - "5433:5432"
+    volumes:
+      - temporal-postgres-order-service-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
 volumes:
   temporal-postgres-data:
+  temporal-postgres-order-service-data:

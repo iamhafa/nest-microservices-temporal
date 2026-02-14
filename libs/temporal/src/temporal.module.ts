@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TemporalModule, TemporalOptions } from 'nestjs-temporal-core';
 
 @Module({
+  imports: [ConfigModule.forRoot()],
   providers: [],
   exports: [],
 })

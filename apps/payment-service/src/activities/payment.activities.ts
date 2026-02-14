@@ -4,8 +4,7 @@ import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 @Activity()
 export class PaymentActivities implements IPaymentActivity {
   @ActivityMethod()
-  async chargePayment(orderId: string, amount: number): Promise<string> {
-    void amount;
+  async chargePayment(orderId: number): Promise<string> {
     return `payment_${orderId}_${Date.now()}`;
   }
 

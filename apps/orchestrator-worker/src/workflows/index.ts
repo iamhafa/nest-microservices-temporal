@@ -1,1 +1,1 @@
-export { processOrderWorkflow } from './order.workflow';
+export { processOrderWorkflow } from './order/order.workflow';
