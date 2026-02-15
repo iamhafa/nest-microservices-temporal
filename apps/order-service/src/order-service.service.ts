@@ -1,8 +1,8 @@
-import { CreateOrderDto } from '@contract/order';
+import { CreateOrderRequestDto, CreateOrderResponseDto } from '@contract/order';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { WorkFlowTaskQueue } from '@temporal/queue/enum/workflow-task.queue';
-import { TemporalService } from 'nestjs-temporal-core';
+import { TemporalService, WorkflowExecutionResult } from 'nestjs-temporal-core';
 import { Repository } from 'typeorm';
 import { OrderEntity } from './entity/order.entity';
 
@@ -10,11 +10,10 @@ import { OrderEntity } from './entity/order.entity';
 export class OrderService {
   constructor(
     private readonly temporalService: TemporalService,
-    @InjectRepository(OrderEntity)
-    private readonly orderRepository: Repository<OrderEntity>,
+    @InjectRepository(OrderEntity) private readonly orderRepository: Repository<OrderEntity>,
   ) {}
 
-  async createOrder(createOrderDto: CreateOrderDto) {
+  async createOrder(createOrderDto: CreateOrderRequestDto): Promise<CreateOrderResponseDto> {
     const order: OrderEntity = this.orderRepository.create({
       status: 'CREATED',
       address: createOrderDto.address,
@@ -23,10 +22,14 @@ export class OrderService {
     const orderSaved: OrderEntity = await this.orderRepository.save(order);
 
     const workflowId: string = `order_${orderSaved.id}`;
-    const response = await this.temporalService.startWorkflow('processOrderWorkflow', [createOrderDto, orderSaved.id], {
-      taskQueue: WorkFlowTaskQueue.ORDER,
-      workflowId,
-    });
+    const response: WorkflowExecutionResult = await this.temporalService.startWorkflow(
+      'processOrderWorkflow',
+      [createOrderDto, orderSaved.id],
+      {
+        taskQueue: WorkFlowTaskQueue.ORDER,
+        workflowId,
+      },
+    );
 
     if (!response.success) {
       throw response.error ?? new Error('Failed to start workflow');

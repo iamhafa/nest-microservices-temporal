@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { WorkFlowTaskQueue } from '@temporal/queue/enum/workflow-task.queue';
 import { SharedTemporalModule } from '@temporal/temporal.module';
-import { InventoryActivities } from './activities/inventory.activities';
+import { InventoryActivity } from './activity/inventory.activity';
 
 @Module({
   imports: [
@@ -10,10 +10,10 @@ import { InventoryActivities } from './activities/inventory.activities';
     SharedTemporalModule.forRoot({
       taskQueue: WorkFlowTaskQueue.INVENTORY,
       worker: {
-        activityClasses: [InventoryActivities],
+        activityClasses: [InventoryActivity],
       },
     }),
   ],
-  providers: [InventoryActivities],
+  providers: [InventoryActivity],
 })
 export class InventoryServiceModule {}

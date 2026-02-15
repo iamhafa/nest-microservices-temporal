@@ -1,27 +1,22 @@
-import { CreateOrderDto } from '@contract/order/dto/create-order.dto';
-import { HttpService } from '@nestjs/axios';
-import { Body, Controller, Post } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { firstValueFrom } from 'rxjs';
+import { CreateOrderRequestDto, CreateOrderResponseDto } from '@contract/order';
+import { Body, Controller, Inject, Post } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
+import { ApiBadRequestResponse, ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Observable } from 'rxjs';
 
 @ApiTags('Order')
 @Controller('orders')
 export class OrderController {
   constructor(
-    private readonly httpService: HttpService,
-    private readonly configService: ConfigService,
+    @Inject('ORDER_SERVICE_CLIENT')
+    private readonly orderServiceClient: ClientProxy,
   ) {}
 
   @Post()
   @ApiOperation({ summary: 'Place an order' })
-  @ApiResponse({ status: 201, description: 'Order placed successfully' })
-  @ApiResponse({ status: 400, description: 'Invalid request' })
-  async createOrder(@Body() createOrderDto: CreateOrderDto) {
-    const response = await firstValueFrom(
-      this.httpService.post(`${this.configService.get<string>('ORDER_SERVICE_URL')}/orders`, createOrderDto, {}),
-    );
-
-    return response.data;
+  @ApiCreatedResponse({ type: CreateOrderResponseDto, description: 'Order placed successfully' })
+  @ApiBadRequestResponse({ description: 'Invalid request' })
+  createOrder(@Body() createOrderDto: CreateOrderRequestDto): Observable<CreateOrderResponseDto> {
+    return this.orderServiceClient.send({ cmd: 'create-order' }, createOrderDto);
   }
 }

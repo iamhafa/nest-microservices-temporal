@@ -1,4 +1,4 @@
-import { CreateOrderDto } from '@contract/order/dto/create-order.dto';
+import { CreateOrderRequestDto } from '@contract/order';
 import { IInventoryActivity, IPaymentActivity, IShippingActivity } from '@temporal/activity';
 import { WorkFlowTaskQueue } from '@temporal/queue/enum/workflow-task.queue';
 import { proxyActivities } from '@temporalio/workflow';
@@ -34,7 +34,7 @@ const shippingActivities = proxyActivities<IShippingActivity>({
   },
 });
 
-export async function processOrderWorkflow(input: CreateOrderDto, orderId: number): Promise<OrderResult> {
+export async function processOrderWorkflow(input: CreateOrderRequestDto, orderId: number): Promise<OrderResult> {
   console.log('Starting processOrderWorkflow for order:', orderId);
   let paymentId: string | undefined;
 

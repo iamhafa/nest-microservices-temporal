@@ -12,7 +12,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 20
-    restart: unless-stopped
 
   temporal:
     image: temporalio/auto-setup:latest
@@ -28,7 +27,6 @@ services:
       POSTGRES_SEEDS: postgres
       POSTGRES_USER: temporal
       POSTGRES_PWD: temporal
-    restart: unless-stopped
 
   temporal-ui:
     image: temporalio/ui:latest
@@ -40,7 +38,6 @@ services:
       TEMPORAL_UI_PORT: 8080
     ports:
       - "8233:8080"
-    restart: unless-stopped
 
   postgres-order-service:
     image: postgres:16-alpine
@@ -53,7 +50,6 @@ services:
       - "5433:5432"
     volumes:
       - temporal-postgres-order-service-data:/var/lib/postgresql/data
-    restart: unless-stopped
 
 volumes:
   temporal-postgres-data:

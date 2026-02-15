@@ -21,7 +21,7 @@ export class OrderItemDto {
   price: number;
 }
 
-export class CreateOrderDto {
+export class CreateOrderRequestDto {
   @ApiProperty({ type: [OrderItemDto] })
   @IsArray()
   @IsNotEmpty()

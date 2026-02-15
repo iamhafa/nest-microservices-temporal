@@ -1,13 +1,14 @@
-import { CreateOrderDto } from '@contract/order';
-import { Body, Controller, Post } from '@nestjs/common';
+import { CreateOrderRequestDto, CreateOrderResponseDto } from '@contract/order';
+import { Controller } from '@nestjs/common';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 import { OrderService } from './order-service.service';
 
-@Controller('orders')
+@Controller()
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
-  @Post()
-  createOrder(@Body() createOrderDto: CreateOrderDto) {
+  @MessagePattern({ cmd: 'create-order' })
+  createOrder(@Payload() createOrderDto: CreateOrderRequestDto): Promise<CreateOrderResponseDto> {
     return this.orderService.createOrder(createOrderDto);
   }
 }

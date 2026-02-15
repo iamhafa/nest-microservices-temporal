@@ -11,7 +11,6 @@ export class SharedTemporalModule {
   static forRoot(options?: TemporalOptions): DynamicModule {
     return TemporalModule.registerAsync({
       imports: [ConfigModule],
-      inject: [ConfigService],
       useFactory: (config: ConfigService): TemporalOptions => ({
         ...options,
         connection: {
@@ -19,6 +18,7 @@ export class SharedTemporalModule {
           namespace: config.getOrThrow<string>('TEMPORAL_NAMESPACE'),
         },
       }),
+      inject: [ConfigService],
     });
   }
 }
