@@ -1,21 +1,22 @@
-import { CreateOrderRequestDto, CreateOrderResponseDto } from '@contract/order';
+import { CreateOrderRequestDto } from '@libs/contract/order/dto/create-order-request.dto';
+import { CreateOrderResponseDto } from '@libs/contract/order/dto/create-order-response.dto';
+import { OrderStatus } from '@libs/contract/order/enum/order-status.enum';
+import { WorkFlowTaskQueue } from '@libs/temporal/queue/enum/workflow-task.queue';
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { WorkFlowTaskQueue } from '@temporal/queue/enum/workflow-task.queue';
 import { TemporalService, WorkflowExecutionResult } from 'nestjs-temporal-core';
-import { Repository } from 'typeorm';
 import { OrderEntity } from './entity/order.entity';
+import { OrderRepository } from './repository/order.repository';
 
 @Injectable()
 export class OrderService {
   constructor(
     private readonly temporalService: TemporalService,
-    @InjectRepository(OrderEntity) private readonly orderRepository: Repository<OrderEntity>,
+    private readonly orderRepository: OrderRepository,
   ) {}
 
   async createOrder(createOrderDto: CreateOrderRequestDto): Promise<CreateOrderResponseDto> {
     const order: OrderEntity = this.orderRepository.create({
-      status: 'CREATED',
+      status: OrderStatus.PENDING,
       address: createOrderDto.address,
       email: createOrderDto.email,
     });

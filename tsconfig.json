@@ -22,14 +22,12 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@database": ["libs/database/src"],
-      "@database/*": ["libs/database/src/*"],
-      "@common": ["libs/common/src"],
-      "@common/*": ["libs/common/src/*"],
-      "@contract": ["libs/contract/src"],
-      "@contract/*": ["libs/contract/src/*"],
-      "@temporal": ["libs/temporal/src"],
-      "@temporal/*": ["libs/temporal/src/*"]
+      "@libs/common": ["libs/common/src"],
+      "@libs/common/*": ["libs/common/src/*"],
+      "@libs/contract": ["libs/contract/src"],
+      "@libs/contract/*": ["libs/contract/src/*"],
+      "@libs/temporal": ["libs/temporal/src"],
+      "@libs/temporal/*": ["libs/temporal/src/*"]
     }
   }
 }

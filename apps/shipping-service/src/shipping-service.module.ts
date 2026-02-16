@@ -1,8 +1,8 @@
+import { WorkFlowTaskQueue } from '@libs/temporal/queue/enum/workflow-task.queue';
+import { SharedTemporalModule } from '@libs/temporal/temporal.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { WorkFlowTaskQueue } from '@temporal/queue/enum/workflow-task.queue';
-import { SharedTemporalModule } from '@temporal/temporal.module';
-import { ShippingActivities } from './activities/shipping.activities';
+import { ShippingActivities } from './activity/shipping.activity';
 
 @Module({
   imports: [

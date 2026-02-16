@@ -51,6 +51,19 @@ services:
     volumes:
       - temporal-postgres-order-service-data:/var/lib/postgresql/data
 
+  postgres-inventory-service:
+    image: postgres:16-alpine
+    container_name: temporal-postgres-inventory-service
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: nestjs-temporal-inventory-service
+    ports:
+      - "5434:5432"
+    volumes:
+      - temporal-postgres-inventory-service-data:/var/lib/postgresql/data
+
 volumes:
   temporal-postgres-data:
   temporal-postgres-order-service-data:
+  temporal-postgres-inventory-service-data:

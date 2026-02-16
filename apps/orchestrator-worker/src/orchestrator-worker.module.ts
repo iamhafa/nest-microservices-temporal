@@ -1,7 +1,7 @@
+import { WorkFlowTaskQueue } from '@libs/temporal/queue/enum/workflow-task.queue';
+import { SharedTemporalModule } from '@libs/temporal/temporal.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { WorkFlowTaskQueue } from '@temporal/queue/enum/workflow-task.queue';
-import { SharedTemporalModule } from '@temporal/temporal.module';
 import { join } from 'path';
 
 @Module({
@@ -10,7 +10,7 @@ import { join } from 'path';
     SharedTemporalModule.forRoot({
       taskQueue: WorkFlowTaskQueue.ORDER,
       worker: {
-        workflowsPath: join(__dirname, 'workflows'),
+        workflowsPath: join(__dirname, 'workflows/order'),
       },
     }),
   ],

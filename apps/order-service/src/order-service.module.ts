@@ -1,12 +1,16 @@
+import { WorkFlowTaskQueue } from '@libs/temporal/queue/enum/workflow-task.queue';
+import { SharedTemporalModule } from '@libs/temporal/temporal.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { SharedTemporalModule } from '@temporal/temporal.module';
 import { join } from 'path';
 import { cwd } from 'process';
+import { OrderActivity } from './activity/order.activity';
+import { OrderItemEntity } from './entity/order-item.entity';
 import { OrderEntity } from './entity/order.entity';
 import { OrderController } from './order-service.controller';
 import { OrderService } from './order-service.service';
+import { OrderRepository } from './repository/order.repository';
 
 @Module({
   imports: [
@@ -14,7 +18,7 @@ import { OrderService } from './order-service.service';
       isGlobal: true,
       envFilePath: [join(cwd(), 'apps/order-service/.env'), join(cwd(), '.env')],
     }),
-    TypeOrmModule.forFeature([OrderEntity]),
+    TypeOrmModule.forFeature([OrderEntity, OrderItemEntity]),
 
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -31,9 +35,14 @@ import { OrderService } from './order-service.service';
       inject: [ConfigService],
     }),
 
-    SharedTemporalModule.forRoot(),
+    SharedTemporalModule.forRoot({
+      taskQueue: WorkFlowTaskQueue.ORDER,
+      worker: {
+        activityClasses: [OrderActivity],
+      },
+    }),
   ],
   controllers: [OrderController],
-  providers: [OrderService],
+  providers: [OrderService, OrderActivity, OrderRepository],
 })
 export class OrderServiceModule {}

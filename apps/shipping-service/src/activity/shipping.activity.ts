@@ -1,4 +1,4 @@
-import { IShippingActivity } from '@temporal/activity';
+import { IShippingActivity } from '@libs/temporal/activity';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 
 @Activity({ name: 'shipping-activities' })

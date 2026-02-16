@@ -1,4 +1,5 @@
-import { CreateOrderRequestDto, CreateOrderResponseDto } from '@contract/order';
+import { CreateOrderRequestDto } from '@libs/contract/order/dto/create-order-request.dto';
+import { CreateOrderResponseDto } from '@libs/contract/order/dto/create-order-response.dto';
 import { Body, Controller, Inject, Post } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { ApiBadRequestResponse, ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -12,7 +13,7 @@ export class OrderController {
     private readonly orderServiceClient: ClientProxy,
   ) {}
 
-  @Post()
+  @Post('place')
   @ApiOperation({ summary: 'Place an order' })
   @ApiCreatedResponse({ type: CreateOrderResponseDto, description: 'Order placed successfully' })
   @ApiBadRequestResponse({ description: 'Invalid request' })

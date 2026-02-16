@@ -1,4 +1,4 @@
-import { IPaymentActivity } from '@temporal/activity';
+import { IPaymentActivity } from '@libs/temporal/activity';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 
 @Activity()
