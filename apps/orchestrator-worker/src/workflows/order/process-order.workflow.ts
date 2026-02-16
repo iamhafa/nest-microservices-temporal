@@ -69,17 +69,15 @@ export async function processOrderWorkflow(input: CreateOrderRequestDto, orderId
       return { orderId, status: OrderStatus.FAILED };
     }
 
-    // 1st: Reserve inventory → CONFIRMED
+    // 1st: Reserve inventory (status vẫn là PENDING)
     await inventoryActivities.reserveInventory(orderId, input.items);
-    await orderActivities.updateOrderStatus(orderId, OrderStatus.CONFIRMED);
 
-    // 2nd: Charge payment → PAYMENT_PROCESSING → PAID
-    await orderActivities.updateOrderStatus(orderId, OrderStatus.PAYMENT_PROCESSING);
+    // 2nd: Charge payment → PAID
     paymentId = await paymentActivities.chargePayment(orderId);
     await orderActivities.savePaymentId(orderId, paymentId);
     await orderActivities.updateOrderStatus(orderId, OrderStatus.PAID);
 
-    // 3rd: Confirm inventory
+    // 3rd: Confirm inventory (trừ kho vĩnh viễn)
     await inventoryActivities.confirmInventory(orderId, input.items);
 
     // 4th: Create shipment → SHIPPING
@@ -103,13 +101,11 @@ export async function processOrderWorkflow(input: CreateOrderRequestDto, orderId
     // Compensation: hoàn lại inventory
     await inventoryActivities.releaseInventory(orderId, input.items);
 
-    // Set status cụ thể dựa trên bước bị lỗi
-    const failedStatus = paymentId ? OrderStatus.PAYMENT_FAILED : OrderStatus.FAILED;
-    await orderActivities.updateOrderStatus(orderId, failedStatus);
+    await orderActivities.updateOrderStatus(orderId, OrderStatus.FAILED);
 
     return {
       orderId,
-      status: failedStatus,
+      status: OrderStatus.FAILED,
       paymentId,
     };
   }

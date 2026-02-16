@@ -1,34 +1,22 @@
 export enum OrderStatus {
-  /** Đơn hàng vừa được tạo, chưa có bất kỳ xử lý nào */
+  /** 1. Vừa tạo đơn, đang đợi thanh toán (bao gồm cả lúc đang giữ kho) */
   PENDING = 'PENDING',
 
-  /** Đã kiểm tra và xác nhận đủ hàng trong kho (inventory reserved thành công) */
-  CONFIRMED = 'CONFIRMED',
-
-  /** Đang gọi payment gateway để xử lý thanh toán */
-  PAYMENT_PROCESSING = 'PAYMENT_PROCESSING',
-
-  /** Thanh toán thành công, đơn hàng sẵn sàng để giao */
+  /** 2. Thanh toán thành công, đơn hàng hợp lệ */
   PAID = 'PAID',
 
-  /** Thanh toán thất bại, cần kích hoạt compensation (hoàn lại inventory) */
-  PAYMENT_FAILED = 'PAYMENT_FAILED',
-
-  /** Đơn hàng đã được bàn giao cho đơn vị vận chuyển */
+  /** 3. Đã bàn giao cho bên giao hàng */
   SHIPPING = 'SHIPPING',
 
-  /** Khách hàng đã nhận được hàng — trạng thái cuối của happy path */
+  /** 4. Hoàn thành (Happy path kết thúc) */
   DELIVERED = 'DELIVERED',
 
-  /** Yêu cầu huỷ đơn đã được gửi, Saga compensation đang chạy */
-  CANCEL_REQUESTED = 'CANCEL_REQUESTED',
-
-  /** Đã huỷ hoàn toàn — hoàn tiền + khôi phục inventory thành công */
+  /** 5. Đơn hàng bị hủy (do khách chủ động hoặc do Saga rollback thành công) */
   CANCELLED = 'CANCELLED',
 
-  /** Đã hoàn tiền sau khi giao hàng (trả hàng, hàng lỗi, hoàn tiền một phần) */
-  REFUNDED = 'REFUNDED',
-
-  /** Xử lý đơn hàng thất bại (lỗi inventory, payment, hoặc lỗi hệ thống) */
+  /** 6. Lỗi hệ thống hoặc lỗi nghiệp vụ không thể tự phục hồi (Cần manual check) */
   FAILED = 'FAILED',
+
+  /** 7. Hoàn tiền (Nếu hệ thống có tính năng trả hàng) */
+  REFUNDED = 'REFUNDED',
 }
