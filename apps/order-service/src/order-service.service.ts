@@ -19,6 +19,11 @@ export class OrderService {
       status: OrderStatus.PENDING,
       address: createOrderDto.address,
       email: createOrderDto.email,
+      items: createOrderDto.items.map(item => ({
+        product_id: item.product_id,
+        quantity: item.quantity,
+        price: item.price,
+      })),
     });
     const orderSaved: OrderEntity = await this.orderRepository.save(order);
 

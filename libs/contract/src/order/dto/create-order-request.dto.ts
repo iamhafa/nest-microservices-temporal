@@ -3,10 +3,10 @@ import { Type } from 'class-transformer';
 import { IsArray, IsInt, IsNotEmpty, IsString, Min, ValidateNested } from 'class-validator';
 
 export class OrderItemDto {
-  @ApiProperty({ example: 'PROD-001' })
-  @IsString()
+  @ApiProperty({ example: 1 })
+  @IsInt()
   @IsNotEmpty()
-  product_id: string;
+  product_id: number;
 
   @ApiProperty({ example: 2 })
   @IsInt()
@@ -22,7 +22,13 @@ export class OrderItemDto {
 }
 
 export class CreateOrderRequestDto {
-  @ApiProperty({ type: [OrderItemDto] })
+  @ApiProperty({
+    type: [OrderItemDto],
+    example: [
+      { product_id: 2, quantity: 2, price: 29990000 },
+      { product_id: 4, quantity: 1, price: 5990000 },
+    ],
+  })
   @IsArray()
   @IsNotEmpty()
   @ValidateNested({ each: true })

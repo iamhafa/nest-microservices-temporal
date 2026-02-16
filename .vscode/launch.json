@@ -61,6 +61,16 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "restart": true
+    },
+    {
+      "name": "product-service",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["start:dev", "product-service"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "restart": true
     }
   ],
 
@@ -75,10 +85,11 @@
       "configurations": [
         "api-gateway",
         "orchestrator-worker",
+        "product-service",
         "order-service",
         "inventory-service",
         "payment-service",
-        "shipping-service"
+        "shipping-service",
       ]
     }
   ]

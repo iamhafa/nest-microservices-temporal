@@ -14,7 +14,7 @@ export class InventoryEntity {
   id: number;
 
   @Column({ unique: true, comment: 'Mã sản phẩm' })
-  product_id: string;
+  product_id: number;
 
   @Column({ type: 'int', default: 0, comment: 'Số lượng tồn kho' })
   stock: number;
@@ -34,7 +34,9 @@ export class InventoryEntity {
    * Giúp ngăn chặn lỗi khi 2 request cùng trừ kho một lúc.
    * TypeORM sẽ tự động kiểm tra version này.
    */
-  @VersionColumn()
+  @VersionColumn({
+    comment: 'Phiên bản khóa lạc quan (Optimistic Locking) dùng để ngăn chặn tranh chấp dữ liệu (Race Condition).',
+  })
   version: number;
 
   @CreateDateColumn()

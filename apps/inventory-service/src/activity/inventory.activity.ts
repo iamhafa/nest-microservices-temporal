@@ -2,20 +2,20 @@ import { OrderItemDto } from '@libs/contract/order/dto/create-order-request.dto'
 import { IInventoryActivity } from '@libs/temporal/activity';
 import { Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
-import { DataSource, EntityManager, UpdateResult } from 'typeorm';
+import { EntityManager, UpdateResult } from 'typeorm';
 import { InventoryEntity } from '../entity/inventory.entity';
 
 @Activity({ name: 'inventory-activity' })
 export class InventoryActivity implements IInventoryActivity {
   private readonly logger = new Logger(InventoryActivity.name);
 
-  constructor(private readonly dataSource: DataSource) {}
+  constructor(private readonly entityManager: EntityManager) {}
 
   @ActivityMethod()
   reserveInventory(orderId: number, items: OrderItemDto[]): Promise<void> {
     this.logger.log(`[Order ${orderId}] Đang giữ kho tạm thời...`);
 
-    return this.dataSource.transaction(async (manager: EntityManager) => {
+    return this.entityManager.transaction(async (manager: EntityManager) => {
       for (const item of items) {
         const result: UpdateResult = await manager
           .createQueryBuilder()
@@ -39,7 +39,7 @@ export class InventoryActivity implements IInventoryActivity {
   releaseInventory(orderId: number, items: OrderItemDto[]): Promise<void> {
     this.logger.warn(`[Order ${orderId}] Đang nhả kho (Rollback)...`);
 
-    return this.dataSource.transaction(async (manager: EntityManager) => {
+    return this.entityManager.transaction(async (manager: EntityManager) => {
       for (const item of items) {
         await manager
           .createQueryBuilder()
@@ -63,7 +63,7 @@ export class InventoryActivity implements IInventoryActivity {
   confirmInventory(orderId: number, items: OrderItemDto[]): Promise<void> {
     this.logger.log(`[Order ${orderId}] Xác nhận trừ kho vĩnh viễn.`);
 
-    return this.dataSource.transaction(async (manager: EntityManager) => {
+    return this.entityManager.transaction(async (manager: EntityManager) => {
       for (const item of items) {
         const result = await manager
           .createQueryBuilder()
@@ -91,7 +91,7 @@ export class InventoryActivity implements IInventoryActivity {
   restoreInventory(orderId: number, items: OrderItemDto[]): Promise<void> {
     this.logger.warn(`[Order ${orderId}] Khôi phục tồn kho (Cancel Order)...`);
 
-    return this.dataSource.transaction(async (manager: EntityManager) => {
+    return this.entityManager.transaction(async (manager: EntityManager) => {
       for (const item of items) {
         await manager
           .createQueryBuilder()

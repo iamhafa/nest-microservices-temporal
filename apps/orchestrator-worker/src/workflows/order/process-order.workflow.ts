@@ -1,6 +1,12 @@
 import { CreateOrderRequestDto } from '@libs/contract/order/dto/create-order-request.dto';
 import { OrderStatus } from '@libs/contract/order/enum/order-status.enum';
-import type { IInventoryActivity, IOrderActivity, IPaymentActivity, IShippingActivity } from '@libs/temporal/activity';
+import type {
+  IInventoryActivity,
+  IOrderActivity,
+  IPaymentActivity,
+  IProductActivity,
+  IShippingActivity,
+} from '@libs/temporal/activity';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue/enum/workflow-task.queue';
 import { proxyActivities } from '@temporalio/workflow';
 
@@ -10,6 +16,14 @@ export interface OrderResult {
   shipmentId?: string;
   paymentId?: string;
 }
+
+const productActivities = proxyActivities<IProductActivity>({
+  startToCloseTimeout: '30 seconds',
+  taskQueue: WorkFlowTaskQueue.PRODUCT,
+  retry: {
+    maximumAttempts: 3,
+  },
+});
 
 const inventoryActivities = proxyActivities<IInventoryActivity>({
   startToCloseTimeout: '30 seconds',
@@ -48,6 +62,13 @@ export async function processOrderWorkflow(input: CreateOrderRequestDto, orderId
   let paymentId: string | undefined;
 
   try {
+    // 0th: Validate products exist & active
+    const validation = await productActivities.validateProducts(input.items.map(i => i.product_id));
+    if (!validation.valid) {
+      await orderActivities.updateOrderStatus(orderId, OrderStatus.FAILED);
+      return { orderId, status: OrderStatus.FAILED };
+    }
+
     // 1st: Reserve inventory → CONFIRMED
     await inventoryActivities.reserveInventory(orderId, input.items);
     await orderActivities.updateOrderStatus(orderId, OrderStatus.CONFIRMED);
