@@ -1,4 +1,3 @@
-import { ProductValidationResult } from '@libs/contract/product/dto/product-info.dto';
 import { IProductActivity } from '@libs/temporal/activity';
 import { Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
@@ -13,7 +12,7 @@ export class ProductActivity implements IProductActivity {
   constructor(private readonly productRepository: ProductRepository) {}
 
   @ActivityMethod()
-  async validateProducts(productIds: number[]): Promise<ProductValidationResult> {
+  async validateProducts(productIds: number[]): Promise<boolean> {
     this.logger.log(`Validating products: ${productIds.join(', ')}`);
 
     const products: ProductEntity[] = await this.productRepository.find({
@@ -23,22 +22,16 @@ export class ProductActivity implements IProductActivity {
       },
     });
 
-    const foundIds = products.map(p => p.id);
-    const missingIds = productIds.filter(id => !foundIds.includes(id));
+    const foundIds: number[] = products.map(product => product.id);
+    const missingIds: number[] = productIds.filter(productId => !foundIds.includes(productId));
 
     if (missingIds.length > 0) {
       this.logger.warn(`Products not found or inactive: ${missingIds.join(', ')}`);
-      return { valid: false, products: [] };
+      return false;
     }
 
     this.logger.log(`All ${productIds.length} products validated successfully`);
-    return {
-      valid: true,
-      products: products.map(p => ({
-        product_id: p.id,
-        name: p.name,
-        price: p.price,
-      })),
-    };
+
+    return true;
   }
 }

@@ -1,4 +1,4 @@
-import { CreateOrderRequestDto } from '@libs/contract/order/dto/create-order-request.dto';
+import { CreateOrderRequestDto, OrderItemDto } from '@libs/contract/order/dto/create-order-request.dto';
 import { OrderStatus } from '@libs/contract/order/enum/order-status.enum';
 import type {
   IInventoryActivity,
@@ -8,16 +8,9 @@ import type {
   IShippingActivity,
 } from '@libs/temporal/activity';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue/enum/workflow-task.queue';
-import { proxyActivities } from '@temporalio/workflow';
+import { ActivityInterfaceFor, proxyActivities } from '@temporalio/workflow';
 
-export interface OrderResult {
-  orderId: number;
-  status: OrderStatus;
-  shipmentId?: string;
-  paymentId?: string;
-}
-
-const productActivities = proxyActivities<IProductActivity>({
+const productActivities: ActivityInterfaceFor<IProductActivity> = proxyActivities({
   startToCloseTimeout: '30 seconds',
   taskQueue: WorkFlowTaskQueue.PRODUCT,
   retry: {
@@ -25,7 +18,7 @@ const productActivities = proxyActivities<IProductActivity>({
   },
 });
 
-const inventoryActivities = proxyActivities<IInventoryActivity>({
+const inventoryActivities: ActivityInterfaceFor<IInventoryActivity> = proxyActivities({
   startToCloseTimeout: '30 seconds',
   taskQueue: WorkFlowTaskQueue.INVENTORY,
   retry: {
@@ -33,7 +26,7 @@ const inventoryActivities = proxyActivities<IInventoryActivity>({
   },
 });
 
-const paymentActivities = proxyActivities<IPaymentActivity>({
+const paymentActivities: ActivityInterfaceFor<IPaymentActivity> = proxyActivities({
   startToCloseTimeout: '30 seconds',
   taskQueue: WorkFlowTaskQueue.PAYMENT,
   retry: {
@@ -41,7 +34,7 @@ const paymentActivities = proxyActivities<IPaymentActivity>({
   },
 });
 
-const shippingActivities = proxyActivities<IShippingActivity>({
+const shippingActivities: ActivityInterfaceFor<IShippingActivity> = proxyActivities({
   startToCloseTimeout: '30 seconds',
   taskQueue: WorkFlowTaskQueue.SHIPPING,
   retry: {
@@ -49,7 +42,7 @@ const shippingActivities = proxyActivities<IShippingActivity>({
   },
 });
 
-const orderActivities = proxyActivities<IOrderActivity>({
+const orderActivities: ActivityInterfaceFor<IOrderActivity> = proxyActivities({
   startToCloseTimeout: '30 seconds',
   taskQueue: WorkFlowTaskQueue.ORDER,
   retry: {
@@ -57,14 +50,15 @@ const orderActivities = proxyActivities<IOrderActivity>({
   },
 });
 
-export async function processOrderWorkflow(input: CreateOrderRequestDto, orderId: number): Promise<OrderResult> {
+export async function processOrderWorkflow(input: CreateOrderRequestDto, orderId: number) {
   console.log('Starting processOrderWorkflow for order:', orderId);
   let paymentId: string | undefined;
 
   try {
     // 0th: Validate products exist & active
-    const validation = await productActivities.validateProducts(input.items.map(i => i.product_id));
-    if (!validation.valid) {
+    const productIds: number[] = input.items.map((item: OrderItemDto) => item.product_id);
+    const isValid: boolean = await productActivities.validateProducts(productIds);
+    if (!isValid) {
       await orderActivities.updateOrderStatus(orderId, OrderStatus.FAILED);
       return { orderId, status: OrderStatus.FAILED };
     }
@@ -91,7 +85,7 @@ export async function processOrderWorkflow(input: CreateOrderRequestDto, orderId
       paymentId,
     };
   } catch (error) {
-    console.log('Error:', error);
+    console.log('Error in processOrderWorkflow:', error);
 
     // Compensation: refund nếu đã thanh toán
     if (paymentId) {
