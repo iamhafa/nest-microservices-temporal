@@ -12,7 +12,6 @@ import { InventoryRepository } from './repository/inventory.repository';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true,
       envFilePath: [join(cwd(), 'apps/inventory-service/.env'), join(cwd(), '.env')],
     }),
     TypeOrmModule.forFeature([InventoryEntity]),

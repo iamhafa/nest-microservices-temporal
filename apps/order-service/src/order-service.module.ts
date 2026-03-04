@@ -15,7 +15,6 @@ import { OrderRepository } from './repository/order.repository';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true,
       envFilePath: [join(cwd(), 'apps/order-service/.env'), join(cwd(), '.env')],
     }),
     TypeOrmModule.forFeature([OrderEntity, OrderItemEntity]),

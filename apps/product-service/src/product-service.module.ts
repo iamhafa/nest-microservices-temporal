@@ -14,7 +14,6 @@ import { ProductRepository } from './repository/product.repository';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true,
       envFilePath: [join(cwd(), 'apps/product-service/.env'), join(cwd(), '.env')],
     }),
     TypeOrmModule.forFeature([ProductEntity]),
