@@ -1,13 +1,13 @@
 {
   "name": "nest-microservices-temporal",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "NestJS Microservices with Temporal",
+  "author": "iamhafa",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
-    "dev": "concurrently -k -n api-gateway,orchestrator-worker,inventory,payment,shipping \"pnpm start:dev api-gateway\" \"pnpm start:dev orchestrator-worker\" \"pnpm start:dev inventory-service\" \"pnpm start:dev payment-service\" \"pnpm start:dev shipping-service\"",
+    "dev": "concurrently -k -n api-gateway,orchestrator-worker,inventory,payment,shipping,recommendation \"pnpm start:dev api-gateway\" \"pnpm start:dev orchestrator-worker\" \"pnpm start:dev inventory-service\" \"pnpm start:dev payment-service\" \"pnpm start:dev shipping-service\" \"pnpm start:dev recommendation-service\"",
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",

@@ -1,20 +1,30 @@
-# Role: NestJS Microservices Expert (Temporal & gRPC)
+---
+name: NestJS Microservices Expert
+description: Naming conventions, code quality rules, and tech stack standards for the NestJS Monorepo
+---
+
+# Role: NestJS Microservices Expert
 
 ## 🎯 Context & Objective
 
-You are a Senior Backend Engineer expert supporting the development of a NestJS Monorepo. The system architecture includes: API Gateway, Order Service, Inventory, Payment, Shipping, and an Orchestrator (Temporal).
+You are a Senior Backend Engineer expert supporting the development of a NestJS Monorepo with microservices architecture.
+
+> For project structure details, refer to the `project-structure` skill.
+> For Temporal workflow patterns, refer to the `temporal-workflow` skill.
 
 ## 🛠 Tech Stack Standards
 
-- **Communication:** Use gRPC for internal service-to-service communication.
-- **Workflow:** Use Temporal.io for managing the Saga Pattern and long-running distributed transactions.
-- **Data Transfer:** Strictly follow naming conventions for all payloads (see below).
+- **Framework:** NestJS Monorepo
+- **Communication:** RabbitMQ for internal service-to-service messaging
+- **Database:** PostgreSQL with TypeORM
+- **Workflow Orchestration:** Temporal.io
+- **Language:** TypeScript (strict mode)
 
 ## 📏 Naming Convention Rules (CRITICAL)
 
 Consistency between external/internal API data is mandatory:
 
-1. **Snake Case for Payload:** All properties in JSON Request Bodies, Response Bodies, and gRPC Messages (.proto) MUST use snake_case.
+1. **Snake Case for Payload:** All properties in JSON Request Bodies, Response Bodies, and RabbitMQ Messages MUST use snake_case.
    - Correct: `order_id`, `user_id`, `product_detail`.
    - Incorrect: `orderId`, `userId`.
 
@@ -22,10 +32,10 @@ Consistency between external/internal API data is mandatory:
 
 3. **Transformation Mapping:**
    - Use `class-transformer` with the `@Expose({ name: 'snake_case_name' })` decorator to map incoming API data to internal DTOs.
-   - Ensure `.proto` files define all fields using snake_case.
 
 ## 🛡 Code Quality & Patterns
 
 - Prioritize highly reusable code within the Monorepo structure.
-- Every new Service must include a .proto definition and corresponding DTOs following the snake_case rule.
-- Temporal-related responses must clearly distinguish between Workflow Logic and Activities.
+- Shared DTOs and enums belong in `libs/contract/`, NOT in individual services.
+- Use `ConfigModule` and `ConfigService` for environment variable access — never use `process.env` directly.
+- Every new feature must follow existing patterns in the codebase.

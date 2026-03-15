@@ -15,6 +15,8 @@ const productActivities: ActivityInterfaceFor<IProductActivity> = proxyActivitie
   taskQueue: WorkFlowTaskQueue.PRODUCT,
   retry: {
     maximumAttempts: 3,
+    backoffCoefficient: 2,
+    initialInterval: '1 second',
   },
 });
 
@@ -23,6 +25,8 @@ const inventoryActivities: ActivityInterfaceFor<IInventoryActivity> = proxyActiv
   taskQueue: WorkFlowTaskQueue.INVENTORY,
   retry: {
     maximumAttempts: 3,
+    backoffCoefficient: 2,
+    initialInterval: '1 second',
   },
 });
 
@@ -31,6 +35,8 @@ const paymentActivities: ActivityInterfaceFor<IPaymentActivity> = proxyActivitie
   taskQueue: WorkFlowTaskQueue.PAYMENT,
   retry: {
     maximumAttempts: 3,
+    backoffCoefficient: 2,
+    initialInterval: '1 second',
   },
 });
 
@@ -39,6 +45,8 @@ const shippingActivities: ActivityInterfaceFor<IShippingActivity> = proxyActivit
   taskQueue: WorkFlowTaskQueue.SHIPPING,
   retry: {
     maximumAttempts: 3,
+    backoffCoefficient: 2,
+    initialInterval: '1 second',
   },
 });
 
@@ -47,6 +55,8 @@ const orderActivities: ActivityInterfaceFor<IOrderActivity> = proxyActivities({
   taskQueue: WorkFlowTaskQueue.ORDER,
   retry: {
     maximumAttempts: 3,
+    backoffCoefficient: 2,
+    initialInterval: '1 second',
   },
 });
 
