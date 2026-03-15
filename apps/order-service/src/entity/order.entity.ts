@@ -28,6 +28,9 @@ export class OrderEntity {
   @Column({ nullable: true })
   payment_id: string;
 
+  @Column({ type: 'int', default: 0 })
+  total_amount: number;
+
   @CreateDateColumn()
   created_at: Date;
 
@@ -38,5 +41,5 @@ export class OrderEntity {
   deleted_at: Date;
 
   @OneToMany(() => OrderItemEntity, item => item.order, { cascade: true })
-  items: Relation<OrderItemEntity[]>;
+  readonly items: Relation<OrderItemEntity[]>;
 }

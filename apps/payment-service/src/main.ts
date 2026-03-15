@@ -4,10 +4,11 @@ import { PaymentServiceModule } from './payment-service.module';
 
 async function bootstrap() {
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(PaymentServiceModule, {
-    transport: Transport.TCP,
+    transport: Transport.RMQ,
     options: {
-      host: 'localhost',
-      port: 3003,
+      urls: ['amqp://admin:admin@localhost:5672'],
+      queue: 'payment-service-queue',
+      queueOptions: { durable: true },
     },
   });
   app.enableShutdownHooks();

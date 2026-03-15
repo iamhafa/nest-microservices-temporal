@@ -4,10 +4,11 @@ import { OrderServiceModule } from './order-service.module';
 
 async function bootstrap() {
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(OrderServiceModule, {
-    transport: Transport.TCP,
+    transport: Transport.RMQ,
     options: {
-      host: 'localhost',
-      port: 3002,
+      urls: ['amqp://admin:admin@localhost:5672'],
+      queue: 'order-service-queue',
+      queueOptions: { durable: true },
     },
   });
   app.enableShutdownHooks();

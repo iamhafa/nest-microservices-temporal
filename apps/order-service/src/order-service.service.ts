@@ -2,7 +2,7 @@ import { CreateOrderRequestDto } from '@libs/contract/order/dto/create-order-req
 import { CreateOrderResponseDto } from '@libs/contract/order/dto/create-order-response.dto';
 import { OrderStatus } from '@libs/contract/order/enum/order-status.enum';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue/enum/workflow-task.queue';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { TemporalService, WorkflowExecutionResult } from 'nestjs-temporal-core';
 import { OrderEntity } from './entity/order.entity';
 import { OrderRepository } from './repository/order.repository';
@@ -15,10 +15,13 @@ export class OrderService {
   ) {}
 
   async createOrder(createOrderDto: CreateOrderRequestDto): Promise<CreateOrderResponseDto> {
+    const totalAmount: number = createOrderDto.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
     const order: OrderEntity = this.orderRepository.create({
       status: OrderStatus.PENDING,
       address: createOrderDto.address,
       email: createOrderDto.email,
+      total_amount: totalAmount,
       items: createOrderDto.items.map(item => ({
         product_id: item.product_id,
         quantity: item.quantity,
@@ -46,5 +49,18 @@ export class OrderService {
       status: orderSaved.status,
       message: 'Order created successfully',
     };
+  }
+
+  async getOrder(orderId: number): Promise<OrderEntity> {
+    const order = await this.orderRepository.findOne({
+      where: { id: orderId },
+      relations: { items: true },
+    });
+
+    if (!order) {
+      throw new NotFoundException(`Order #${orderId} not found`);
+    }
+
+    return order;
   }
 }

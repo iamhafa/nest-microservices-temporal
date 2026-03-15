@@ -34,5 +34,5 @@ export class OrderItemEntity {
   deleted_at: Date;
 
   @ManyToOne(() => OrderEntity, order => order.items)
-  order: Relation<OrderEntity>;
+  readonly order: Relation<OrderEntity>;
 }

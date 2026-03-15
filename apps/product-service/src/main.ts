@@ -4,10 +4,11 @@ import { ProductServiceModule } from './product-service.module';
 
 async function bootstrap() {
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(ProductServiceModule, {
-    transport: Transport.TCP,
+    transport: Transport.RMQ,
     options: {
-      host: 'localhost',
-      port: 3005,
+      urls: ['amqp://admin:admin@localhost:5672'],
+      queue: 'product-service-queue',
+      queueOptions: { durable: true },
     },
   });
   app.enableShutdownHooks();

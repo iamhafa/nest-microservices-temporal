@@ -1,4 +1,4 @@
 export interface IPaymentActivity {
-  chargePayment(orderId: number): Promise<string>;
+  chargePayment(orderId: number, totalAmount: number): Promise<string>;
   refundPayment(paymentId: string): Promise<void>;
 }

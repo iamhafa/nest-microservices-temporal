@@ -4,10 +4,11 @@ import { InventoryServiceModule } from './inventory-service.module';
 
 async function bootstrap() {
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(InventoryServiceModule, {
-    transport: Transport.TCP,
+    transport: Transport.RMQ,
     options: {
-      host: 'localhost',
-      port: 3001,
+      urls: ['amqp://admin:admin@localhost:5672'],
+      queue: 'inventory-service-queue',
+      queueOptions: { durable: true },
     },
   });
   app.enableShutdownHooks();

@@ -2,6 +2,7 @@ import { CreateOrderRequestDto } from '@libs/contract/order/dto/create-order-req
 import { CreateOrderResponseDto } from '@libs/contract/order/dto/create-order-response.dto';
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
+import { OrderEntity } from './entity/order.entity';
 import { OrderService } from './order-service.service';
 
 @Controller()
@@ -11,5 +12,10 @@ export class OrderController {
   @MessagePattern({ cmd: 'create-order' })
   createOrder(@Payload() createOrderDto: CreateOrderRequestDto): Promise<CreateOrderResponseDto> {
     return this.orderService.createOrder(createOrderDto);
+  }
+
+  @MessagePattern({ cmd: 'get-order' })
+  getOrder(@Payload() orderId: number): Promise<OrderEntity> {
+    return this.orderService.getOrder(orderId);
   }
 }

@@ -60,13 +60,14 @@ const orderActivities: ActivityInterfaceFor<IOrderActivity> = proxyActivities({
   },
 });
 
-export async function processOrderWorkflow(input: CreateOrderRequestDto, orderId: number) {
-  console.log('Starting processOrderWorkflow for order:', orderId);
+export async function processOrderWorkflow(createOrderRequestDto: CreateOrderRequestDto, orderId: number) {
+  const { items, address } = createOrderRequestDto;
+  console.log('Starting processOrderWorkflow for order:', createOrderRequestDto);
   let paymentId: string | undefined;
 
   try {
     // 0th: Validate products exist & active
-    const productIds: number[] = input.items.map((item: OrderItemDto) => item.product_id);
+    const productIds: number[] = items.map((item: OrderItemDto) => item.product_id);
     const isValid: boolean = await productActivities.validateProducts(productIds);
     if (!isValid) {
       await orderActivities.updateOrderStatus(orderId, OrderStatus.FAILED);
@@ -74,18 +75,19 @@ export async function processOrderWorkflow(input: CreateOrderRequestDto, orderId
     }
 
     // 1st: Reserve inventory (status vẫn là PENDING)
-    await inventoryActivities.reserveInventory(orderId, input.items);
+    await inventoryActivities.reserveInventory(orderId, items);
 
     // 2nd: Charge payment → PAID
-    paymentId = await paymentActivities.chargePayment(orderId);
+    const totalAmount: number = await orderActivities.getOrderTotalAmount(orderId);
+    paymentId = await paymentActivities.chargePayment(orderId, totalAmount);
     await orderActivities.savePaymentId(orderId, paymentId);
     await orderActivities.updateOrderStatus(orderId, OrderStatus.PAID);
 
     // 3rd: Confirm inventory (trừ kho vĩnh viễn)
-    await inventoryActivities.confirmInventory(orderId, input.items);
+    await inventoryActivities.confirmInventory(orderId, items);
 
     // 4th: Create shipment → SHIPPING
-    const shipmentId = await shippingActivities.createShipment(orderId, input.address);
+    const shipmentId = await shippingActivities.createShipment(orderId, address);
     await orderActivities.updateOrderStatus(orderId, OrderStatus.SHIPPING);
 
     return {
@@ -103,7 +105,7 @@ export async function processOrderWorkflow(input: CreateOrderRequestDto, orderId
     }
 
     // Compensation: hoàn lại inventory
-    await inventoryActivities.releaseInventory(orderId, input.items);
+    await inventoryActivities.releaseInventory(orderId, items);
 
     await orderActivities.updateOrderStatus(orderId, OrderStatus.FAILED);
 

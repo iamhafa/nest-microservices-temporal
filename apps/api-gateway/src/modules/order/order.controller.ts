@@ -1,8 +1,15 @@
 import { CreateOrderRequestDto } from '@libs/contract/order/dto/create-order-request.dto';
 import { CreateOrderResponseDto } from '@libs/contract/order/dto/create-order-response.dto';
-import { Body, Controller, Inject, Post } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Param, ParseIntPipe, Post } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { ApiBadRequestResponse, ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiCreatedResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { Observable } from 'rxjs';
 
 @ApiTags('Order')
@@ -19,5 +26,13 @@ export class OrderController {
   @ApiBadRequestResponse({ description: 'Invalid request' })
   createOrder(@Body() createOrderDto: CreateOrderRequestDto): Observable<CreateOrderResponseDto> {
     return this.orderServiceClient.send({ cmd: 'create-order' }, createOrderDto);
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get order by ID' })
+  @ApiOkResponse({ description: 'Order details' })
+  @ApiNotFoundResponse({ description: 'Order not found' })
+  getOrder(@Param('id', ParseIntPipe) id: number): Observable<any> {
+    return this.orderServiceClient.send({ cmd: 'get-order' }, id);
   }
 }

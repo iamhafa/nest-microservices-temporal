@@ -21,4 +21,19 @@ export class OrderActivity implements IOrderActivity {
     await this.orderRepository.update(orderId, { status });
     this.logger.log(`[Order ${orderId}] Updated status to ${status}`);
   }
+
+  @ActivityMethod()
+  async getOrderTotalAmount(orderId: number): Promise<number> {
+    const order = await this.orderRepository.findOneOrFail({
+      where: {
+        id: orderId,
+      },
+      select: {
+        total_amount: true,
+      },
+    });
+    this.logger.log(`[Order ${orderId}] Total amount: ${order.total_amount}`);
+
+    return order.total_amount;
+  }
 }

@@ -35,6 +35,7 @@ Consistency between external/internal API data is mandatory:
 
 ## 🛡 Code Quality & Patterns
 
+- **TypeORM Query Optimization**: When you only need to retrieve a single column or a few specific values from an Entity, ALWAYS prioritize using the `select` option in TypeORM methods (e.g., `findOneOrFail({ select: { id: true, total_amount: true } })`) instead of loading the entire Entity.
 - Prioritize highly reusable code within the Monorepo structure.
 - Shared DTOs and enums belong in `libs/contract/`, NOT in individual services.
 - Use `ConfigModule` and `ConfigService` for environment variable access — never use `process.env` directly.
