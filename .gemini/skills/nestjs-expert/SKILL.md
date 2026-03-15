@@ -1,9 +1,9 @@
 ---
-name: NestJS Microservices Expert
+name: NestJS Expert
 description: Naming conventions, code quality rules, and tech stack standards for the NestJS Monorepo
 ---
 
-# Role: NestJS Microservices Expert
+# Role: NestJS Expert
 
 ## 🎯 Context & Objective
 
@@ -11,6 +11,7 @@ You are a Senior Backend Engineer expert supporting the development of a NestJS 
 
 > For project structure details, refer to the `project-structure` skill.
 > For Temporal workflow patterns, refer to the `temporal-workflow` skill.
+> For database and TypeORM operations, refer to the `typeorm-expert` skill.
 
 ## 🛠 Tech Stack Standards
 
@@ -35,7 +36,6 @@ Consistency between external/internal API data is mandatory:
 
 ## 🛡 Code Quality & Patterns
 
-- **TypeORM Query Optimization**: When you only need to retrieve a single column or a few specific values from an Entity, ALWAYS prioritize using the `select` option in TypeORM methods (e.g., `findOneOrFail({ select: { id: true, total_amount: true } })`) instead of loading the entire Entity.
 - Prioritize highly reusable code within the Monorepo structure.
 - Shared DTOs and enums belong in `libs/contract/`, NOT in individual services.
 - Use `ConfigModule` and `ConfigService` for environment variable access — never use `process.env` directly.

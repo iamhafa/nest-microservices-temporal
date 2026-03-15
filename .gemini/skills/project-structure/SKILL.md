@@ -71,13 +71,12 @@ apps/api-gateway/src/
 
 ## 🔗 Communication Flow
 
-```
-Client → [HTTP] → API Gateway → [RabbitMQ] → Services
-                                      ↕
-                              Orchestrator Worker
-                            (Temporal Workflows)
-                                      ↕
-                         Services (via Temporal Activities)
+```mermaid
+flowchart TD
+    Client -->|HTTP| APIGW[API Gateway]
+    APIGW -->|RabbitMQ| Services[Services]
+    Services <--> Orchestrator[Orchestrator Worker<br/>Temporal Workflows]
+    Orchestrator <--> Activities[Services<br/>via Temporal Activities]
 ```
 
 - **Client ↔ API Gateway**: HTTP/REST
