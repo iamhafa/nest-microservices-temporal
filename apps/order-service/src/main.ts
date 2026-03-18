@@ -1,3 +1,4 @@
+import { RpcExceptionFilter } from '@libs/common/filter';
 import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { OrderServiceModule } from './order-service.module';
@@ -11,6 +12,7 @@ async function bootstrap() {
       queueOptions: { durable: true },
     },
   });
+  app.useGlobalFilters(new RpcExceptionFilter());
   app.enableShutdownHooks();
   await app.listen();
 }

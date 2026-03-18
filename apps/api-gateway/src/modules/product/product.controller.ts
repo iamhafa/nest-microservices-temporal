@@ -17,7 +17,7 @@ export class ProductController {
   @ApiOperation({ summary: 'Create a product' })
   @ApiCreatedResponse({ type: CreateProductResponseDto, description: 'Product created successfully' })
   @ApiBadRequestResponse({ description: 'Invalid request' })
-  createProduct(@Body() dto: CreateProductRequestDto): Observable<CreateProductResponseDto> {
+  createProduct(@Body() dto: CreateProductRequestDto): Observable<any> {
     return this.productServiceClient.send({ cmd: 'create-product' }, dto);
   }
 

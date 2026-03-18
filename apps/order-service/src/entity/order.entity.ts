@@ -31,6 +31,9 @@ export class OrderEntity {
   @Column({ type: 'int', default: 0 })
   total_amount: number;
 
+  @Column({ type: 'text', nullable: true, comment: 'Reason for order cancellation' })
+  cancel_reason: string;
+
   @CreateDateColumn()
   created_at: Date;
 
@@ -42,4 +45,8 @@ export class OrderEntity {
 
   @OneToMany(() => OrderItemEntity, item => item.order, { cascade: true })
   readonly items: Relation<OrderItemEntity[]>;
+
+  get isCancelable(): boolean {
+    return this.status === OrderStatus.PENDING || this.status === OrderStatus.PAID;
+  }
 }

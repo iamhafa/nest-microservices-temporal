@@ -60,9 +60,9 @@ const orderActivities: ActivityInterfaceFor<IOrderActivity> = proxyActivities({
   },
 });
 
-export async function processOrderWorkflow(createOrderRequestDto: CreateOrderRequestDto, orderId: number) {
+export async function placeOrderWorkflow(createOrderRequestDto: CreateOrderRequestDto, orderId: number) {
+  console.log('Payload:', createOrderRequestDto);
   const { items, address } = createOrderRequestDto;
-  console.log('Starting processOrderWorkflow for order:', createOrderRequestDto);
   let paymentId: string | undefined;
 
   try {
@@ -97,7 +97,7 @@ export async function processOrderWorkflow(createOrderRequestDto: CreateOrderReq
       paymentId,
     };
   } catch (error) {
-    console.log('Error in processOrderWorkflow:', error);
+    console.log('Error:', error);
 
     // Compensation: refund nếu đã thanh toán
     if (paymentId) {

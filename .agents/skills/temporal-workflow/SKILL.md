@@ -46,6 +46,7 @@ const paymentActivities: ActivityInterfaceFor<IPaymentActivity> = proxyActivitie
 ```
 
 **Rules:**
+
 - Always use `ActivityInterfaceFor<T>` for type-safe proxy.
 - Each proxy MUST specify its dedicated `taskQueue` from `WorkFlowTaskQueue`.
 - Default retry: `maximumAttempts: 3`, `backoffCoefficient: 2`, `initialInterval: '1 second'`.
@@ -54,7 +55,7 @@ const paymentActivities: ActivityInterfaceFor<IPaymentActivity> = proxyActivitie
 ### Workflow Function Signature
 
 - Workflows are **plain async functions** (NOT classes).
-- Export with descriptive names: `export async function processOrderWorkflow(...)`.
+- Export with descriptive names: `export async function placeOrderWorkflow(...)`.
 - Workflow must accept a DTO input and a resource ID (e.g., `orderId`).
 
 ## 🔄 Saga Pattern & Compensation (CRITICAL)
@@ -72,6 +73,7 @@ try {
 ```
 
 **Rules:**
+
 1. Track compensatable resources (e.g., `paymentId`) as variables declared before `try`.
 2. In `catch`, check what was completed before compensating (e.g., `if (paymentId)` before refund).
 3. Always update the order status to `FAILED` as the last compensation step.

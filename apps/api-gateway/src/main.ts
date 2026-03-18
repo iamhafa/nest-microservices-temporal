@@ -1,3 +1,4 @@
+import { HttpExceptionFilter } from '@libs/common/filter';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -9,6 +10,7 @@ async function bootstrap() {
   app.enableCors();
   app.enableShutdownHooks();
   app.setGlobalPrefix('api');
+  app.useGlobalFilters(new HttpExceptionFilter());
   app.enableVersioning({
     type: VersioningType.URI,
     defaultVersion: '1',
