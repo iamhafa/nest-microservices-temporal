@@ -1,4 +1,4 @@
-import { OrderItemDto } from '@libs/contract/order/dto/create-order-request.dto';
+import { CreateOrderRequestDto, OrderItemDto } from '@libs/contract/order/dto/create-order-request.dto';
 import { OrderStatus } from '@libs/contract/order/enum/order-status.enum';
 import { IOrderActivity } from '@libs/temporal/activity';
 import { Logger } from '@nestjs/common';
@@ -50,6 +50,34 @@ export class OrderActivity implements IOrderActivity {
       quantity: item.quantity,
       price: Number(item.price),
     }));
+  }
+
+  @ActivityMethod()
+  async createOrder(createOrderRequestDto: CreateOrderRequestDto): Promise<number> {
+    const { items, address, email } = createOrderRequestDto;
+    const totalAmount: number = items.reduce((sum: number, item: OrderItemDto) => sum + item.price * item.quantity, 0);
+
+    const order = this.orderRepository.create({
+      status: OrderStatus.PENDING,
+      address,
+      email,
+      total_amount: totalAmount,
+      items: items.map(item => ({
+        product_id: item.product_id,
+        quantity: item.quantity,
+        price: item.price,
+      })),
+    });
+
+    const savedOrder = await this.orderRepository.save(order);
+    this.logger.log(`Created order: ${savedOrder.id}`);
+    return savedOrder.id;
+  }
+
+  @ActivityMethod()
+  async deleteOrder(orderId: number): Promise<void> {
+    this.logger.warn(`Compensating: Deleting order ${orderId}`);
+    await this.orderRepository.delete(orderId);
   }
 
   @ActivityMethod()

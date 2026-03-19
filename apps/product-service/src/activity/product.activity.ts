@@ -1,3 +1,4 @@
+import { CreateProductRequestDto } from '@libs/contract/product/dto/create-product-request.dto';
 import { IProductActivity } from '@libs/temporal/activity';
 import { Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
@@ -33,5 +34,19 @@ export class ProductActivity implements IProductActivity {
     this.logger.log(`All ${productIds.length} products validated successfully`);
 
     return true;
+  }
+
+  @ActivityMethod()
+  async createProduct(dto: CreateProductRequestDto): Promise<number> {
+    this.logger.log(`Creating product: ${dto.name}`);
+    const product: ProductEntity = this.productRepository.create(dto);
+    const savedProduct = await this.productRepository.save(product);
+    return savedProduct.id;
+  }
+
+  @ActivityMethod()
+  async deleteProduct(productId: number): Promise<void> {
+    this.logger.warn(`Compensating: Deleting product ${productId}`);
+    await this.productRepository.delete(productId);
   }
 }

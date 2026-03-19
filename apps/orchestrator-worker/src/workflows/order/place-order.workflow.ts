@@ -60,9 +60,10 @@ const orderActivities: ActivityInterfaceFor<IOrderActivity> = proxyActivities({
   },
 });
 
-export async function placeOrderWorkflow(createOrderRequestDto: CreateOrderRequestDto, orderId: number) {
+export async function placeOrderWorkflow(createOrderRequestDto: CreateOrderRequestDto) {
   console.log('Payload:', createOrderRequestDto);
   const { items, address } = createOrderRequestDto;
+  let orderId: number | undefined;
   let paymentId: string | undefined;
 
   try {
@@ -70,23 +71,25 @@ export async function placeOrderWorkflow(createOrderRequestDto: CreateOrderReque
     const productIds: number[] = items.map((item: OrderItemDto) => item.product_id);
     const isValid: boolean = await productActivities.validateProducts(productIds);
     if (!isValid) {
-      await orderActivities.updateOrderStatus(orderId, OrderStatus.FAILED);
-      return { orderId, status: OrderStatus.FAILED };
+      throw new Error('Some products are invalid or inactive');
     }
 
-    // 1st: Reserve inventory (status vẫn là PENDING)
+    // 1st: Create Order (Initial Persistence moved into workflow)
+    orderId = await orderActivities.createOrder(createOrderRequestDto);
+
+    // 2nd: Reserve inventory
     await inventoryActivities.reserveInventory(orderId, items);
 
-    // 2nd: Charge payment → PAID
+    // 3rd: Charge payment → PAID
     const totalAmount: number = await orderActivities.getOrderTotalAmount(orderId);
     paymentId = await paymentActivities.chargePayment(orderId, totalAmount);
     await orderActivities.savePaymentId(orderId, paymentId);
     await orderActivities.updateOrderStatus(orderId, OrderStatus.PAID);
 
-    // 3rd: Confirm inventory (trừ kho vĩnh viễn)
+    // 4th: Confirm inventory (trừ kho vĩnh viễn)
     await inventoryActivities.confirmInventory(orderId, items);
 
-    // 4th: Create shipment → SHIPPING
+    // 5th: Create shipment → SHIPPING
     const shipmentId = await shippingActivities.createShipment(orderId, address);
     await orderActivities.updateOrderStatus(orderId, OrderStatus.SHIPPING);
 
@@ -104,15 +107,15 @@ export async function placeOrderWorkflow(createOrderRequestDto: CreateOrderReque
       await paymentActivities.refundPayment(paymentId);
     }
 
-    // Compensation: hoàn lại inventory
-    await inventoryActivities.releaseInventory(orderId, items);
+    if (orderId) {
+      // Compensation: hoàn lại inventory nếu đã reserve
+      await inventoryActivities.releaseInventory(orderId, items);
 
-    await orderActivities.updateOrderStatus(orderId, OrderStatus.FAILED);
+      // Final step: Update status to FAILED or DELETE depending on visibility rules
+      // Here we keep it for audit but mark as FAILED
+      await orderActivities.updateOrderStatus(orderId, OrderStatus.FAILED, error.message);
+    }
 
-    return {
-      orderId,
-      status: OrderStatus.FAILED,
-      paymentId,
-    };
+    throw error;
   }
 }

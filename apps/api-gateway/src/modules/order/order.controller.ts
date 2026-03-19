@@ -1,7 +1,6 @@
 import { CancelOrderRequestDto } from '@libs/contract/order/dto/cancel-order-request.dto';
 import { CancelOrderResponseDto } from '@libs/contract/order/dto/cancel-order-response.dto';
 import { CreateOrderRequestDto } from '@libs/contract/order/dto/create-order-request.dto';
-import { CreateOrderResponseDto } from '@libs/contract/order/dto/create-order-response.dto';
 import { Body, Controller, Get, HttpCode, HttpStatus, Inject, Param, ParseIntPipe, Post } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import {
@@ -25,9 +24,9 @@ export class OrderController {
   @Post('place')
   @HttpCode(HttpStatus.ACCEPTED)
   @ApiOperation({ summary: 'Place an order' })
-  @ApiAcceptedResponse({ type: CreateOrderResponseDto, description: 'Order is processing' })
+  @ApiAcceptedResponse({ description: 'Order is processing' })
   @ApiBadRequestResponse({ description: 'Invalid request' })
-  createOrder(@Body() createOrderDto: CreateOrderRequestDto): Observable<CreateOrderResponseDto> {
+  createOrder(@Body() createOrderDto: CreateOrderRequestDto): Observable<any> {
     return this.orderServiceClient.send({ cmd: 'create-order' }, createOrderDto);
   }
 

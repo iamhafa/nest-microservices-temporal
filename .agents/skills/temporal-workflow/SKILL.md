@@ -1,5 +1,5 @@
 ---
-name: Temporal Workflow Patterns
+name: temporal-workflow
 description: Rules and patterns for writing Temporal workflows, activities, and Saga compensation in this NestJS monorepo
 ---
 
@@ -28,6 +28,12 @@ description: Rules and patterns for writing Temporal workflows, activities, and 
    - One queue per service. Every new service MUST register a new enum value.
 
 ## ⚙️ Workflow Implementation Rules (CRITICAL)
+
+### Mandatory Workflow Rule
+
+- **ALL cross-service operations** (e.g., Product + Inventory, Order + Payment) MUST use a Temporal workflow for orchestration.
+- **Initial Persistence**: Moving the initial record creation (e.g., `Order`, `Product`) into a workflow activity is MANDATORY to ensure atomicity across services.
+- **Service Response**: Services initiating a workflow should return the `workflowId` or a "Pending" response, rather than waiting for completion or assuming synchronous success.
 
 ### Proxy Activities Setup
 

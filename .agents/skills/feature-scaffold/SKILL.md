@@ -1,5 +1,5 @@
 ---
-name: Feature Scaffold
+name: feature-scaffold
 description: Standard workflow and guide for scaffolding a highly consistent cross-service feature (End-to-End flow) from API Gateway to the Database.
 ---
 
@@ -51,8 +51,10 @@ Implement the actual business logic, workflow execution, or database interaction
 - **Rules:** Follow existing standards in `typeorm-expert` and `temporal-workflow` skills.
 
 ---
+
 ## 🌟 Concrete Example: Product Creation Flow
-*If asked to "Create Product API"*
+
+_If asked to "Create Product API"_
 
 1. **Contracts (`libs/contract/src/product/dto/`)**:
    - `CreateProductRequestDto`: `{ name: string, price: number }`
@@ -67,4 +69,5 @@ Implement the actual business logic, workflow execution, or database interaction
    - Database operations are invoked directly via Service layer (if no Temporal orchestrator) or via Activity (e.g. `ProductActivity.ts`) if Saga is required.
 
 ---
+
 > 💡 **AI Instruction:** When generating a feature, present your plan to the user mirroring these 4 steps explicitly before generating the code to confirm the approach.

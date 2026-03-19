@@ -1,8 +1,6 @@
 import { CancelOrderRequestDto } from '@libs/contract/order/dto/cancel-order-request.dto';
 import { CancelOrderResponseDto } from '@libs/contract/order/dto/cancel-order-response.dto';
 import { CreateOrderRequestDto } from '@libs/contract/order/dto/create-order-request.dto';
-import { CreateOrderResponseDto } from '@libs/contract/order/dto/create-order-response.dto';
-import { OrderStatus } from '@libs/contract/order/enum/order-status.enum';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue/enum/workflow-task.queue';
 import { Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
@@ -17,26 +15,11 @@ export class OrderService {
     private readonly orderRepository: OrderRepository,
   ) {}
 
-  async createOrder(createOrderDto: CreateOrderRequestDto): Promise<CreateOrderResponseDto> {
-    const totalAmount: number = createOrderDto.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-
-    const order: OrderEntity = this.orderRepository.create({
-      status: OrderStatus.PENDING,
-      address: createOrderDto.address,
-      email: createOrderDto.email,
-      total_amount: totalAmount,
-      items: createOrderDto.items.map(item => ({
-        product_id: item.product_id,
-        quantity: item.quantity,
-        price: item.price,
-      })),
-    });
-    const orderSaved: OrderEntity = await this.orderRepository.save(order);
-
-    const workflowId: string = `order_${orderSaved.id}`;
+  async createOrder(createOrderDto: CreateOrderRequestDto): Promise<any> {
+    const workflowId: string = `place-order-${Date.now()}`;
     const workFlowResponse: WorkflowExecutionResult = await this.temporalService.startWorkflow(
       'placeOrderWorkflow',
-      [createOrderDto, orderSaved.id],
+      [createOrderDto],
       {
         taskQueue: WorkFlowTaskQueue.ORDER,
         workflowId,
@@ -48,9 +31,8 @@ export class OrderService {
     }
 
     return {
-      order_id: orderSaved.id,
-      status: orderSaved.status,
-      message: 'Order processed successfully',
+      workflowId,
+      message: 'Order placement initiated',
     };
   }
 

@@ -1,5 +1,5 @@
 ---
-name: Project Structure
+name: project-structure
 description: Monorepo layout, service responsibilities, and shared libraries structure
 ---
 
@@ -17,16 +17,16 @@ description: Monorepo layout, service responsibilities, and shared libraries str
 
 ## 🚀 Services (`apps/`)
 
-| Service | Vai trò | Có DB | Có Activity |
-|---|---|---|---|
-| `api-gateway` | HTTP entrypoint, route requests to internal services via RabbitMQ | ❌ | ❌ |
-| `order-service` | Quản lý đơn hàng (CRUD, status updates) | ✅ | ✅ |
-| `inventory-service` | Quản lý tồn kho (reserve, confirm, release, restore) | ✅ | ✅ |
-| `payment-service` | Xử lý thanh toán (charge, refund) | ❌ | ✅ |
-| `shipping-service` | Tạo và quản lý vận chuyển | ❌ | ✅ |
-| `product-service` | Quản lý sản phẩm (CRUD, validation) | ✅ | ✅ |
-| `recommendation-service` | Gợi ý sản phẩm | ❌ | ❌ |
-| `orchestrator-worker` | Chạy Temporal workflows (KHÔNG phải HTTP service) | ❌ | ❌ |
+| Service                  | Vai trò                                                           | Có DB | Có Activity |
+| ------------------------ | ----------------------------------------------------------------- | ----- | ----------- |
+| `api-gateway`            | HTTP entrypoint, route requests to internal services via RabbitMQ | ❌    | ❌          |
+| `order-service`          | Quản lý đơn hàng (CRUD, status updates)                           | ✅    | ✅          |
+| `inventory-service`      | Quản lý tồn kho (reserve, confirm, release, restore)              | ✅    | ✅          |
+| `payment-service`        | Xử lý thanh toán (charge, refund)                                 | ❌    | ✅          |
+| `shipping-service`       | Tạo và quản lý vận chuyển                                         | ❌    | ✅          |
+| `product-service`        | Quản lý sản phẩm (CRUD, validation)                               | ✅    | ✅          |
+| `recommendation-service` | Gợi ý sản phẩm                                                    | ❌    | ❌          |
+| `orchestrator-worker`    | Chạy Temporal workflows (KHÔNG phải HTTP service)                 | ❌    | ❌          |
 
 ### Standard Service Structure
 
@@ -56,10 +56,10 @@ apps/api-gateway/src/
 
 ## 📚 Shared Libraries (`libs/`)
 
-| Library | Path alias | Mục đích |
-|---|---|---|
-| `common` | `@libs/common` | Shared enums, logger, utilities, decorators |
-| `contract` | `@libs/contract` | DTOs và enums dùng chung giữa services (data contracts) |
+| Library    | Path alias       | Mục đích                                                      |
+| ---------- | ---------------- | ------------------------------------------------------------- |
+| `common`   | `@libs/common`   | Shared enums, logger, utilities, decorators                   |
+| `contract` | `@libs/contract` | DTOs và enums dùng chung giữa services (data contracts)       |
 | `temporal` | `@libs/temporal` | Activity interfaces, task queue enums, shared Temporal module |
 
 ### Key Rules

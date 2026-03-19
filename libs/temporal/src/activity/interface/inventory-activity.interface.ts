@@ -5,4 +5,5 @@ export interface IInventoryActivity {
   releaseInventory(orderId: number, items: OrderItemDto[]): Promise<void>;
   confirmInventory(orderId: number, items: OrderItemDto[]): Promise<void>;
   restoreInventory(orderId: number, items: OrderItemDto[]): Promise<void>;
+  initializeInventory(productId: number, quantity: number): Promise<void>;
 }

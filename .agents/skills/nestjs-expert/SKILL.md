@@ -1,5 +1,5 @@
 ---
-name: NestJS Expert
+name: nestjs-expert
 description: Naming conventions, code quality rules, and tech stack standards for the NestJS Monorepo
 ---
 

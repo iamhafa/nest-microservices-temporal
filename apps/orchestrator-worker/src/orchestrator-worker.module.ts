@@ -13,6 +13,12 @@ import { join } from 'path';
         workflowsPath: join(__dirname, 'workflows/order'),
       },
     }),
+    SharedTemporalModule.forRoot({
+      taskQueue: WorkFlowTaskQueue.PRODUCT,
+      worker: {
+        workflowsPath: join(__dirname, 'workflows/product'),
+      },
+    }),
   ],
 })
 export class OrchestratorWorkerModule {}

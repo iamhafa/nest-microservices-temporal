@@ -1,5 +1,5 @@
 ---
-name: TypeORM Expert
+name: typeorm-expert
 description: Expert guidance on database operations, query optimization, and TypeORM usage
 ---
 
