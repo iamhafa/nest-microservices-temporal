@@ -1,4 +1,4 @@
-import { OrderItemDto } from '@libs/contract/order/dto/create-order-request.dto';
+import { OrderItemDto } from '@libs/contract/order/dto/create-order.dto';
 
 export interface IInventoryActivity {
   reserveInventory(orderId: number, items: OrderItemDto[]): Promise<void>;

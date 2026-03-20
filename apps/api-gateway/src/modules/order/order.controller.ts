@@ -1,7 +1,8 @@
 import { CancelOrderRequestDto } from '@libs/contract/order/dto/cancel-order-request.dto';
 import { CancelOrderResponseDto } from '@libs/contract/order/dto/cancel-order-response.dto';
-import { CreateOrderRequestDto } from '@libs/contract/order/dto/create-order-request.dto';
-import { Body, Controller, Get, HttpCode, HttpStatus, Inject, Param, ParseIntPipe, Post } from '@nestjs/common';
+import { CreateOrderDto } from '@libs/contract/order/dto/create-order.dto';
+import { UpdateOrderStatusDto } from '@libs/contract/order/dto/update-order-status.dto';
+import { Body, Controller, Get, HttpCode, HttpStatus, Inject, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import {
   ApiAcceptedResponse,
@@ -26,8 +27,15 @@ export class OrderController {
   @ApiOperation({ summary: 'Place an order' })
   @ApiAcceptedResponse({ description: 'Order is processing' })
   @ApiBadRequestResponse({ description: 'Invalid request' })
-  createOrder(@Body() createOrderDto: CreateOrderRequestDto): Observable<any> {
+  createOrder(@Body() createOrderDto: CreateOrderDto): Observable<any> {
     return this.orderServiceClient.send({ cmd: 'create-order' }, createOrderDto);
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'Get all orders' })
+  @ApiOkResponse({ description: 'List of orders' })
+  getOrders(): Observable<any> {
+    return this.orderServiceClient.send({ cmd: 'get-orders' }, {});
   }
 
   @Get(':id')
@@ -36,6 +44,16 @@ export class OrderController {
   @ApiNotFoundResponse({ description: 'Order not found' })
   getOrder(@Param('id', ParseIntPipe) id: number): Observable<any> {
     return this.orderServiceClient.send({ cmd: 'get-order' }, id);
+  }
+
+  @Patch(':id/status')
+  @ApiOperation({ summary: 'Update order status' })
+  @ApiOkResponse({ description: 'Order status updated successfully' })
+  @ApiNotFoundResponse({ description: 'Order not found' })
+  @ApiBadRequestResponse({ description: 'Invalid status transition' })
+  updateOrderStatus(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateOrderStatusDto): Observable<any> {
+    dto.order_id = id;
+    return this.orderServiceClient.send({ cmd: 'update-order-status' }, dto);
   }
 
   @Post(':id/cancel')

@@ -1,4 +1,4 @@
-import { CreateOrderRequestDto, OrderItemDto } from '@libs/contract/order/dto/create-order-request.dto';
+import { CreateOrderRequestDto, OrderItemDto } from '@libs/contract/order/dto/create-order.dto';
 import { OrderStatus } from '@libs/contract/order/enum/order-status.enum';
 import type {
   IInventoryActivity,

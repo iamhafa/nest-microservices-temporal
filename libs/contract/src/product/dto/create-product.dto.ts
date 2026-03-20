@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsInt, IsNotEmpty, IsOptional, IsString, Min } from 'class-validator';
 
-export class CreateProductRequestDto {
+export class CreateProductDto {
   @ApiProperty({ example: 'iPhone 15 Pro Max' })
   @IsString()
   @IsNotEmpty()

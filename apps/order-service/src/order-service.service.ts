@@ -1,6 +1,7 @@
 import { CancelOrderRequestDto } from '@libs/contract/order/dto/cancel-order-request.dto';
 import { CancelOrderResponseDto } from '@libs/contract/order/dto/cancel-order-response.dto';
-import { CreateOrderRequestDto } from '@libs/contract/order/dto/create-order-request.dto';
+import { CreateOrderDto } from '@libs/contract/order/dto/create-order.dto';
+import { UpdateOrderStatusDto } from '@libs/contract/order/dto/update-order-status.dto';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue/enum/workflow-task.queue';
 import { Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
@@ -15,7 +16,7 @@ export class OrderService {
     private readonly orderRepository: OrderRepository,
   ) {}
 
-  async createOrder(createOrderDto: CreateOrderRequestDto): Promise<any> {
+  async createOrder(createOrderDto: CreateOrderDto): Promise<any> {
     const workflowId: string = `place-order-${Date.now()}`;
     const workFlowResponse: WorkflowExecutionResult = await this.temporalService.startWorkflow(
       'placeOrderWorkflow',
@@ -79,5 +80,18 @@ export class OrderService {
       message: 'Cancel order workflow started successfully',
       cancelled_at: new Date(),
     };
+  }
+
+  getOrders(): Promise<OrderEntity[]> {
+    return this.orderRepository.find({
+      relations: { items: true },
+      order: { created_at: 'DESC' },
+    });
+  }
+
+  async updateOrderStatus(updateOrderStatusDto: UpdateOrderStatusDto): Promise<OrderEntity> {
+    const order = await this.getOrder(updateOrderStatusDto.order_id);
+    order.status = updateOrderStatusDto.status;
+    return this.orderRepository.save(order);
   }
 }

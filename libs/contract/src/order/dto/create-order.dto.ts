@@ -21,7 +21,7 @@ export class OrderItemDto {
   price: number;
 }
 
-export class CreateOrderRequestDto {
+export class CreateOrderDto {
   @ApiProperty({
     type: [OrderItemDto],
     example: [

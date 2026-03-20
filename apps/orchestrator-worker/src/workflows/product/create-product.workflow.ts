@@ -1,4 +1,4 @@
-import { CreateProductRequestDto } from '@libs/contract/product/dto/create-product-request.dto';
+import { CreateProductDto } from '@libs/contract/product/dto/create-product.dto';
 import { IInventoryActivity, IProductActivity } from '@libs/temporal/activity';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue/enum/workflow-task.queue';
 import { proxyActivities } from '@temporalio/workflow';
@@ -23,12 +23,12 @@ const inventoryActivities = proxyActivities<IInventoryActivity>({
   },
 });
 
-export async function createProductWorkflow(dto: CreateProductRequestDto) {
+export async function createProductWorkflow(createProductDto: CreateProductDto) {
   let productId: number | undefined;
 
   try {
     // Step 1: Create Product
-    productId = await productActivities.createProduct(dto);
+    productId = await productActivities.createProduct(createProductDto);
 
     // Step 2: Initialize Inventory (default quantity 0 if not provided)
     // Note: You might want to extend the DTO to include initial quantity

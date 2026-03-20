@@ -1,2 +1,2 @@
-export * from './create-product-request.dto';
-export * from './create-product-response.dto';
+export * from './create-product.dto';
+export * from './update-product.dto';

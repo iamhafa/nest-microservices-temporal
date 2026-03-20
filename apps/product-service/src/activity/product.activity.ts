@@ -1,4 +1,4 @@
-import { CreateProductRequestDto } from '@libs/contract/product/dto/create-product-request.dto';
+import { CreateProductDto } from '@libs/contract/product/dto/create-product.dto';
 import { IProductActivity } from '@libs/temporal/activity';
 import { Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
@@ -37,9 +37,9 @@ export class ProductActivity implements IProductActivity {
   }
 
   @ActivityMethod()
-  async createProduct(dto: CreateProductRequestDto): Promise<number> {
-    this.logger.log(`Creating product: ${dto.name}`);
-    const product: ProductEntity = this.productRepository.create(dto);
+  async createProduct(createProductDto: CreateProductDto): Promise<number> {
+    this.logger.log(`Creating product: ${createProductDto.name}`);
+    const product: ProductEntity = this.productRepository.create(createProductDto);
     const savedProduct = await this.productRepository.save(product);
     return savedProduct.id;
   }
