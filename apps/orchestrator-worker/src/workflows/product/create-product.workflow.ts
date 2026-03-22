@@ -24,18 +24,23 @@ const inventoryActivities = proxyActivities<IInventoryActivity>({
 });
 
 export async function createProductWorkflow(createProductDto: CreateProductDto) {
+  console.log('createProductDto:', createProductDto);
   let productId: number | undefined;
 
   try {
+    const { quantity, ...productDto } = createProductDto;
     // Step 1: Create Product
-    productId = await productActivities.createProduct(createProductDto);
+    productId = await productActivities.createProduct(productDto);
 
     // Step 2: Initialize Inventory (default quantity 0 if not provided)
-    // Note: You might want to extend the DTO to include initial quantity
-    await inventoryActivities.initializeInventory(productId, 0);
+    await inventoryActivities.initializeInventory(productId, quantity);
 
-    return { success: true, productId };
+    return {
+      success: true,
+      productId,
+    };
   } catch (error) {
+    console.error('Error:', error);
     // Compensation
     if (productId) {
       await productActivities.deleteProduct(productId);

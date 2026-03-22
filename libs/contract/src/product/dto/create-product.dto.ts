@@ -10,7 +10,7 @@ export class CreateProductDto {
   @ApiProperty({ example: 'Apple iPhone 15 Pro Max 256GB' })
   @IsString()
   @IsOptional()
-  description?: string;
+  description: string;
 
   @ApiProperty({ example: 25000000 })
   @IsInt()
@@ -18,8 +18,14 @@ export class CreateProductDto {
   @IsNotEmpty()
   price: number;
 
+  @ApiProperty({ example: 10 })
+  @IsInt()
+  @Min(0)
+  @IsOptional()
+  quantity: number;
+
   @ApiProperty({ example: 'https://example.com/iphone.jpg' })
   @IsString()
   @IsOptional()
-  image_url?: string;
+  image_url: string;
 }

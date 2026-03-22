@@ -1,9 +1,28 @@
 import { OrderItemDto } from '@libs/contract/order/dto/create-order.dto';
 
 export interface IInventoryActivity {
-  reserveInventory(orderId: number, items: OrderItemDto[]): Promise<void>;
-  releaseInventory(orderId: number, items: OrderItemDto[]): Promise<void>;
-  confirmInventory(orderId: number, items: OrderItemDto[]): Promise<void>;
-  restoreInventory(orderId: number, items: OrderItemDto[]): Promise<void>;
+  /**
+   * Giữ kho tạm thời cho đơn hàng
+   */
+  reserveInventory(orderId: number, orderItems: OrderItemDto[]): Promise<void>;
+
+  /**
+   * Nhả kho tạm thời (Rollback)
+   */
+  releaseInventory(orderId: number, orderItems: OrderItemDto[]): Promise<void>;
+
+  /**
+   * Xác nhận trừ kho vĩnh viễn
+   */
+  confirmInventory(orderId: number, orderItems: OrderItemDto[]): Promise<void>;
+
+  /**
+   * Khôi phục tồn kho khi hủy đơn hàng
+   */
+  restoreInventory(orderId: number, orderItems: OrderItemDto[]): Promise<void>;
+
+  /**
+   * Khởi tạo tồn kho cho sản phẩm
+   */
   initializeInventory(productId: number, quantity: number): Promise<void>;
 }

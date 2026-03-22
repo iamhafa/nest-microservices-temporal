@@ -64,6 +64,7 @@ apps/api-gateway/src/
 
 ### Key Rules
 
+- **Strict Service Isolation**: Services are **NOT ALLOWED** to import files from other services. They may only import from shared `libs` to ensure complete independence between services.
 - **DTOs** shared giữa services → đặt trong `libs/contract/src/<domain>/dto/`.
 - **Enums** shared → đặt trong `libs/contract/src/<domain>/enum/` hoặc `libs/common/src/enum/`.
 - **Activity interfaces** → đặt trong `libs/temporal/src/activity/interface/`.

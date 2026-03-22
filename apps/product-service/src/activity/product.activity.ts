@@ -37,16 +37,16 @@ export class ProductActivity implements IProductActivity {
   }
 
   @ActivityMethod()
-  async createProduct(createProductDto: CreateProductDto): Promise<number> {
+  async createProduct(createProductDto: Omit<CreateProductDto, 'quantity'>): Promise<number> {
     this.logger.log(`Creating product: ${createProductDto.name}`);
     const product: ProductEntity = this.productRepository.create(createProductDto);
-    const savedProduct = await this.productRepository.save(product);
+    const savedProduct: ProductEntity = await this.productRepository.save(product);
     return savedProduct.id;
   }
 
   @ActivityMethod()
   async deleteProduct(productId: number): Promise<void> {
     this.logger.warn(`Compensating: Deleting product ${productId}`);
-    await this.productRepository.delete(productId);
+    await this.productRepository.softDelete(productId);
   }
 }

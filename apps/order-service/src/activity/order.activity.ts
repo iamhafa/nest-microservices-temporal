@@ -1,4 +1,4 @@
-import { CreateOrderRequestDto, OrderItemDto } from '@libs/contract/order/dto/create-order.dto';
+import { CreateOrderDto, OrderItemDto } from '@libs/contract/order/dto/create-order.dto';
 import { OrderStatus } from '@libs/contract/order/enum/order-status.enum';
 import { IOrderActivity } from '@libs/temporal/activity';
 import { Logger } from '@nestjs/common';
@@ -53,8 +53,8 @@ export class OrderActivity implements IOrderActivity {
   }
 
   @ActivityMethod()
-  async createOrder(createOrderRequestDto: CreateOrderRequestDto): Promise<number> {
-    const { items, address, email } = createOrderRequestDto;
+  async createOrder(createOrderDto: CreateOrderDto): Promise<number> {
+    const { items, address, email } = createOrderDto;
     const totalAmount: number = items.reduce((sum: number, item: OrderItemDto) => sum + item.price * item.quantity, 0);
 
     const order = this.orderRepository.create({

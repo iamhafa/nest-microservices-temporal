@@ -1,4 +1,4 @@
-import { CreateOrderRequestDto, OrderItemDto } from '@libs/contract/order/dto/create-order.dto';
+import { CreateOrderDto, OrderItemDto } from '@libs/contract/order/dto/create-order.dto';
 import { OrderStatus } from '@libs/contract/order/enum/order-status.enum';
 import type {
   IInventoryActivity,
@@ -60,9 +60,9 @@ const orderActivities: ActivityInterfaceFor<IOrderActivity> = proxyActivities({
   },
 });
 
-export async function placeOrderWorkflow(createOrderRequestDto: CreateOrderRequestDto) {
-  console.log('Payload:', createOrderRequestDto);
-  const { items, address } = createOrderRequestDto;
+export async function placeOrderWorkflow(createOrderDto: CreateOrderDto) {
+  console.log('Payload:', createOrderDto);
+  const { items, address } = createOrderDto;
   let orderId: number | undefined;
   let paymentId: string | undefined;
 
@@ -75,7 +75,7 @@ export async function placeOrderWorkflow(createOrderRequestDto: CreateOrderReque
     }
 
     // 1st: Create Order (Initial Persistence moved into workflow)
-    orderId = await orderActivities.createOrder(createOrderRequestDto);
+    orderId = await orderActivities.createOrder(createOrderDto);
 
     // 2nd: Reserve inventory
     await inventoryActivities.reserveInventory(orderId, items);

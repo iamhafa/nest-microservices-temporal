@@ -12,44 +12,44 @@ export class InventoryActivity implements IInventoryActivity {
   constructor(private readonly entityManager: EntityManager) {}
 
   @ActivityMethod()
-  reserveInventory(orderId: number, items: OrderItemDto[]): Promise<void> {
-    this.logger.log(`[Order ${orderId}] Đang giữ kho tạm thời...`);
+  reserveInventory(orderId: number, orderItems: OrderItemDto[]): Promise<void> {
+    this.logger.log(`[Order ${orderId}] Reserving inventory...`);
 
     return this.entityManager.transaction(async (manager: EntityManager) => {
-      for (const item of items) {
+      for (const orderItem of orderItems) {
         const result: UpdateResult = await manager
           .createQueryBuilder()
           .update(InventoryEntity)
           .set({
-            reserved_quantity: () => `reserved_quantity + ${item.quantity}`,
+            reserved_quantity: () => `reserved_quantity + ${orderItem.quantity}`,
           })
-          .where('product_id = :productId', { productId: item.product_id })
+          .where('product_id = :productId', { productId: orderItem.product_id })
           // Kiểm tra tồn kho thực tế: stock - reserved >= quantity
-          .andWhere('stock - reserved_quantity >= :quantity', { quantity: item.quantity })
+          .andWhere('stock - reserved_quantity >= :quantity', { quantity: orderItem.quantity })
           .execute();
 
         if (result.affected === 0) {
-          throw new Error(`Sản phẩm ${item.product_id} không đủ tồn kho.`);
+          throw new Error(`Product ${orderItem.product_id} out of stock.`);
         }
       }
     });
   }
 
   @ActivityMethod()
-  releaseInventory(orderId: number, items: OrderItemDto[]): Promise<void> {
+  releaseInventory(orderId: number, orderItems: OrderItemDto[]): Promise<void> {
     this.logger.warn(`[Order ${orderId}] Đang nhả kho (Rollback)...`);
 
     return this.entityManager.transaction(async (manager: EntityManager) => {
-      for (const item of items) {
+      for (const orderItem of orderItems) {
         await manager
           .createQueryBuilder()
           .update(InventoryEntity)
           .set({
-            reserved_quantity: () => `reserved_quantity - ${item.quantity}`,
+            reserved_quantity: () => `reserved_quantity - ${orderItem.quantity}`,
           })
-          .where('product_id = :productId', { productId: item.product_id })
+          .where('product_id = :productId', { productId: orderItem.product_id })
           // Idempotency: Đảm bảo không trừ xuống âm
-          .andWhere('reserved_quantity >= :quantity', { quantity: item.quantity })
+          .andWhere('reserved_quantity >= :quantity', { quantity: orderItem.quantity })
           .execute();
       }
     });
@@ -60,24 +60,24 @@ export class InventoryActivity implements IInventoryActivity {
    * Nó sẽ trừ hẳn vào Stock và giải phóng Reserved.
    */
   @ActivityMethod()
-  confirmInventory(orderId: number, items: OrderItemDto[]): Promise<void> {
-    this.logger.log(`[Order ${orderId}] Xác nhận trừ kho vĩnh viễn.`);
+  confirmInventory(orderId: number, orderItems: OrderItemDto[]): Promise<void> {
+    this.logger.log(`[Order ${orderId}] Confirming inventory deduction.`);
 
     return this.entityManager.transaction(async (manager: EntityManager) => {
-      for (const item of items) {
+      for (const orderItem of orderItems) {
         const result = await manager
           .createQueryBuilder()
           .update(InventoryEntity)
           .set({
-            stock: () => `stock - ${item.quantity}`,
-            reserved_quantity: () => `reserved_quantity - ${item.quantity}`,
+            stock: () => `stock - ${orderItem.quantity}`,
+            reserved_quantity: () => `reserved_quantity - ${orderItem.quantity}`,
           })
-          .where('product_id = :productId', { productId: item.product_id })
-          .andWhere('reserved_quantity >= :quantity', { quantity: item.quantity })
+          .where('product_id = :productId', { productId: orderItem.product_id })
+          .andWhere('reserved_quantity >= :quantity', { quantity: orderItem.quantity })
           .execute();
 
         if (result.affected === 0) {
-          throw new Error(`Lỗi đối soát kho cho sản phẩm ${item.product_id}`);
+          throw new Error(`Inventory reconciliation error for product ${orderItem.product_id}`);
         }
       }
     });
@@ -88,18 +88,18 @@ export class InventoryActivity implements IInventoryActivity {
    * Cộng lại stock cho các sản phẩm đã bị trừ.
    */
   @ActivityMethod()
-  restoreInventory(orderId: number, items: OrderItemDto[]): Promise<void> {
-    this.logger.warn(`[Order ${orderId}] Khôi phục tồn kho (Cancel Order)...`);
+  restoreInventory(orderId: number, orderItems: OrderItemDto[]): Promise<void> {
+    this.logger.warn(`[Order ${orderId}] Restoring inventory (Cancel Order)...`);
 
     return this.entityManager.transaction(async (manager: EntityManager) => {
-      for (const item of items) {
+      for (const orderItem of orderItems) {
         await manager
           .createQueryBuilder()
           .update(InventoryEntity)
           .set({
-            stock: () => `stock + ${item.quantity}`,
+            stock: () => `stock + ${orderItem.quantity}`,
           })
-          .where('product_id = :productId', { productId: item.product_id })
+          .where('product_id = :productId', { productId: orderItem.product_id })
           .execute();
       }
     });
