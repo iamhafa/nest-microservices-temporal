@@ -25,7 +25,7 @@ export class ProductController {
   }
 
   @MessagePattern({ cmd: 'update-product' })
-  updateProduct(@Payload() updateProductDto: UpdateProductDto): Promise<ProductEntity> {
+  updateProduct(@Payload() updateProductDto: UpdateProductDto): Promise<void> {
     return this.productService.updateProduct(updateProductDto);
   }
 

@@ -7,6 +7,8 @@ import { join } from 'path';
 import { cwd } from 'process';
 import { InventoryActivity } from './activity/inventory.activity';
 import { InventoryEntity } from './entity/inventory.entity';
+import { InventoryController } from './inventory-service.controller';
+import { InventoryService } from './inventory-service.service';
 import { InventoryRepository } from './repository/inventory.repository';
 
 @Module({
@@ -38,6 +40,7 @@ import { InventoryRepository } from './repository/inventory.repository';
       },
     }),
   ],
-  providers: [InventoryActivity, InventoryRepository],
+  controllers: [InventoryController],
+  providers: [InventoryActivity, InventoryRepository, InventoryService],
 })
 export class InventoryServiceModule {}

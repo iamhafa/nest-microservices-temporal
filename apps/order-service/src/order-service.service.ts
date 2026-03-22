@@ -1,5 +1,4 @@
-import { CancelOrderRequestDto } from '@libs/contract/order/dto/cancel-order-request.dto';
-import { CancelOrderResponseDto } from '@libs/contract/order/dto/cancel-order-response.dto';
+import { CancelOrderDto } from '@libs/contract/order/dto/cancel-order-request.dto';
 import { CreateOrderDto } from '@libs/contract/order/dto/create-order.dto';
 import { UpdateOrderStatusDto } from '@libs/contract/order/dto/update-order-status.dto';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue/enum/workflow-task.queue';
@@ -50,7 +49,7 @@ export class OrderService {
     return order;
   }
 
-  async cancelOrder(cancelOrderDto: CancelOrderRequestDto): Promise<CancelOrderResponseDto> {
+  async cancelOrder(cancelOrderDto: CancelOrderDto): Promise<any> {
     const order: OrderEntity = await this.getOrder(cancelOrderDto.order_id);
 
     if (!order.isCancelable) {
@@ -63,7 +62,7 @@ export class OrderService {
     const workflowId: string = `cancel_order_${order.id}`;
     const response: WorkflowExecutionResult = await this.temporalService.startWorkflow(
       'cancelOrderWorkflow',
-      [cancelOrderDto, order.id],
+      [cancelOrderDto],
       {
         taskQueue: WorkFlowTaskQueue.ORDER,
         workflowId,

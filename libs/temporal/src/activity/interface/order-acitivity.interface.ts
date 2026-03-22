@@ -20,7 +20,7 @@ export interface IOrderActivity {
   /**
    * Cập nhật trạng thái đơn hàng
    */
-  updateOrderStatus(orderId: number, status: OrderStatus, reason?: string): Promise<void>;
+  updateOrderStatus(orderId: number, status: OrderStatus, cancel_reason?: string): Promise<void>;
 
   /**
    * Lấy tổng tiền đơn hàng

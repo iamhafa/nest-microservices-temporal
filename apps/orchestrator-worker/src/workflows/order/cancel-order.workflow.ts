@@ -1,4 +1,4 @@
-import { CancelOrderRequestDto } from '@libs/contract/order/dto/cancel-order-request.dto';
+import { CancelOrderDto } from '@libs/contract/order/dto/cancel-order-request.dto';
 import { OrderItemDto } from '@libs/contract/order/dto/create-order.dto';
 import { OrderStatus } from '@libs/contract/order/enum/order-status.enum';
 import { IInventoryActivity, IOrderActivity, IPaymentActivity } from '@libs/temporal/activity';
@@ -35,15 +35,17 @@ const inventoryActivities: ActivityInterfaceFor<IInventoryActivity> = proxyActiv
   },
 });
 
-export async function cancelOrderWorkflow(cancelDto: CancelOrderRequestDto, orderId: number): Promise<void> {
-  const paymentId = await orderActivities.getPaymentId(orderId);
+export async function cancelOrderWorkflow(cancelOrderDto: CancelOrderDto): Promise<void> {
+  const { order_id, cancel_reason } = cancelOrderDto;
+
+  const paymentId = await orderActivities.getPaymentId(order_id);
   if (paymentId) {
     await paymentActivities.refundPayment(paymentId);
   }
 
-  const items: OrderItemDto[] = await orderActivities.getOrderItems(orderId);
+  const items: OrderItemDto[] = await orderActivities.getOrderItems(order_id);
   // Hoàn lại số lượng sản phẩm
-  await inventoryActivities.releaseInventory(orderId, items);
+  await inventoryActivities.releaseInventory(order_id, items);
   // Cập nhật trạng thái đơn hàng
-  await orderActivities.updateOrderStatus(orderId, OrderStatus.CANCELLED, cancelDto.reason);
+  await orderActivities.updateOrderStatus(order_id, OrderStatus.CANCELLED, cancel_reason);
 }

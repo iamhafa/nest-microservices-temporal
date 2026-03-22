@@ -4,6 +4,7 @@ import { WorkFlowTaskQueue } from '@libs/temporal/queue/enum/workflow-task.queue
 import { Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { TemporalService, WorkflowExecutionResult } from 'nestjs-temporal-core';
+import { UpdateResult } from 'typeorm';
 import { ProductEntity } from './entity/product.entity';
 import { ProductRepository } from './repository/product.repository';
 
@@ -49,13 +50,16 @@ export class ProductService {
     return product;
   }
 
-  async updateProduct(updateProductDto: UpdateProductDto): Promise<ProductEntity> {
-    const product = await this.getProduct(updateProductDto.id);
+  async updateProduct(updateProductDto: UpdateProductDto): Promise<void> {
+    const product: ProductEntity = await this.getProduct(updateProductDto.id);
 
     const { id, ...fieldsToUpdate } = updateProductDto;
-    Object.assign(product, fieldsToUpdate);
 
-    return this.productRepository.save(product);
+    const updated: UpdateResult = await this.productRepository.update(product.id, fieldsToUpdate);
+
+    if (!updated.affected) {
+      throw new RpcException({ message: 'Failed to update product' });
+    }
   }
 
   async deleteProduct(id: number): Promise<void> {

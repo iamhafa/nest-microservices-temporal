@@ -1,5 +1,4 @@
-import { CancelOrderRequestDto } from '@libs/contract/order/dto/cancel-order-request.dto';
-import { CancelOrderResponseDto } from '@libs/contract/order/dto/cancel-order-response.dto';
+import { CancelOrderDto } from '@libs/contract/order/dto/cancel-order-request.dto';
 import { CreateOrderDto } from '@libs/contract/order/dto/create-order.dto';
 import { UpdateOrderStatusDto } from '@libs/contract/order/dto/update-order-status.dto';
 import { Controller } from '@nestjs/common';
@@ -22,7 +21,7 @@ export class OrderController {
   }
 
   @MessagePattern({ cmd: 'cancel-order' })
-  cancelOrder(@Payload() cancelOrderDto: CancelOrderRequestDto): Promise<CancelOrderResponseDto> {
+  cancelOrder(@Payload() cancelOrderDto: CancelOrderDto): Promise<any> {
     return this.orderService.cancelOrder(cancelOrderDto);
   }
 

@@ -10,13 +10,14 @@ import {
   Inject,
   Param,
   ParseIntPipe,
-  Patch,
   Post,
+  Put,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import {
   ApiAcceptedResponse,
   ApiBadRequestResponse,
+  ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
@@ -56,9 +57,10 @@ export class ProductController {
     return this.productServiceClient.send({ cmd: 'get-product' }, id);
   }
 
-  @Patch(':id')
+  @Put(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Update a product' })
-  @ApiOkResponse({ description: 'Product updated successfully' })
+  @ApiNoContentResponse({ description: 'Product updated successfully' })
   @ApiNotFoundResponse({ description: 'Product not found' })
   @ApiBadRequestResponse({ description: 'Invalid request' })
   updateProduct(@Param('id', ParseIntPipe) id: number, @Body() updateProductDto: UpdateProductDto): Observable<any> {
@@ -67,8 +69,9 @@ export class ProductController {
   }
 
   @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a product' })
-  @ApiOkResponse({ description: 'Product deleted successfully' })
+  @ApiNoContentResponse({ description: 'Product deleted successfully' })
   @ApiNotFoundResponse({ description: 'Product not found' })
   deleteProduct(@Param('id', ParseIntPipe) id: number): Observable<any> {
     return this.productServiceClient.send({ cmd: 'delete-product' }, id);

@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { InventoryModule } from './modules/inventory/inventory.module';
 import { OrderModule } from './modules/order/order.module';
 import { ProductModule } from './modules/product/product.module';
 
@@ -9,6 +10,7 @@ import { ProductModule } from './modules/product/product.module';
     ConfigModule.forRoot(),
 
     // Feature Modules
+    InventoryModule,
     OrderModule,
     ProductModule,
   ],
