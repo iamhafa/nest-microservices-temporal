@@ -31,6 +31,7 @@ Create the public-facing entry point that clients will call.
 - Define the endpoint (`@Post`, `@Get`, etc.) in the Controller.
 - Mount `@ApiOperation`, `@ApiBody`, and target Response DTOs using `@ApiResponse`.
 - Inject the target microservice's `ClientProxy`.
+- **Rule (Payload Mapping):** For update or action endpoints (e.g., `PATCH`, `POST`), prioritize placing the resource `id` inside the `@Body` DTO instead of using `@Param('id')` in the URL. Since RabbitMQ's `.send()` only accepts a single `data` payload, passing the ID directly within the DTO avoids having to manually merge parameters before forwarding the request to the microservice.
 - Pass the request payload via RabbitMQ using `this.clientProxy.send('message-pattern', payload)`. Ensure you handle the `Observable` properly (e.g. `firstValueFrom`).
 
 ### 3. Handle Message at Target Service (`apps/<target-service>`)

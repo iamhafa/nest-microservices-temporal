@@ -57,14 +57,13 @@ export class ProductController {
     return this.productServiceClient.send({ cmd: 'get-product' }, id);
   }
 
-  @Put(':id')
+  @Put()
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Update a product' })
   @ApiNoContentResponse({ description: 'Product updated successfully' })
   @ApiNotFoundResponse({ description: 'Product not found' })
   @ApiBadRequestResponse({ description: 'Invalid request' })
-  updateProduct(@Param('id', ParseIntPipe) id: number, @Body() updateProductDto: UpdateProductDto): Observable<any> {
-    updateProductDto.id = id;
+  updateProduct(@Body() updateProductDto: UpdateProductDto): Observable<any> {
     return this.productServiceClient.send({ cmd: 'update-product' }, updateProductDto);
   }
 

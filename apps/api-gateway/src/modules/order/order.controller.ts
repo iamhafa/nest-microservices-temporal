@@ -46,24 +46,22 @@ export class OrderController {
     return this.orderServiceClient.send({ cmd: 'get-order' }, id);
   }
 
-  @Patch(':id/status')
+  @Patch('status')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Update order status' })
   @ApiNoContentResponse({ description: 'Order status updated successfully' })
   @ApiNotFoundResponse({ description: 'Order not found' })
   @ApiBadRequestResponse({ description: 'Invalid status transition' })
-  updateOrderStatus(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateOrderStatusDto): Observable<any> {
-    dto.order_id = id;
-    return this.orderServiceClient.send({ cmd: 'update-order-status' }, dto);
+  updateOrderStatus(@Body() updateOrderStatusDto: UpdateOrderStatusDto): Observable<any> {
+    return this.orderServiceClient.send({ cmd: 'update-order-status' }, updateOrderStatusDto);
   }
 
-  @Post(':id/cancel')
+  @Post('cancel')
   @HttpCode(HttpStatus.ACCEPTED)
   @ApiOperation({ summary: 'Cancel an order' })
   @ApiAcceptedResponse({ description: 'Order cancelled successfully' })
   @ApiBadRequestResponse({ description: 'Invalid request' })
-  cancelOrder(@Param('id', ParseIntPipe) id: number, @Body() cancelOrderDto: CancelOrderDto): Observable<any> {
-    cancelOrderDto.order_id = id;
+  cancelOrder(@Body() cancelOrderDto: CancelOrderDto): Observable<any> {
     return this.orderServiceClient.send({ cmd: 'cancel-order' }, cancelOrderDto);
   }
 }
