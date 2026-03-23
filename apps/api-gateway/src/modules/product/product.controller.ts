@@ -28,10 +28,7 @@ import { Observable } from 'rxjs';
 @ApiTags('Product')
 @Controller('products')
 export class ProductController {
-  constructor(
-    @Inject('PRODUCT_SERVICE_CLIENT')
-    private readonly productServiceClient: ClientProxy,
-  ) {}
+  constructor(@Inject('PRODUCT_SERVICE_CLIENT') private readonly productServiceClient: ClientProxy) {}
 
   @Post()
   @HttpCode(HttpStatus.ACCEPTED)

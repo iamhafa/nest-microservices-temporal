@@ -1,0 +1,28 @@
+{
+  "mcpServers": {
+    "product-postgres": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://postgres:postgres@localhost:5432/nest-temporal-product-service"
+      ]
+    },
+    "order-postgres": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://postgres:postgres@localhost:5432/nest-temporal-order-service"
+      ]
+    },
+    "inventory-postgres": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://postgres:postgres@localhost:5432/nest-temporal-inventory-service"
+      ]
+    }
+  }
+}

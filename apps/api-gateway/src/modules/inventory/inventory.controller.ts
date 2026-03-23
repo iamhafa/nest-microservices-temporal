@@ -15,6 +15,6 @@ export class InventoryController {
   @ApiNoContentResponse({ description: 'Inventory adjustment requested' })
   @ApiBadRequestResponse({ description: 'Invalid request data' })
   adjustInventory(@Body() adjustInventoryDto: AdjustInventoryDto): Observable<void> {
-    return this.inventoryServiceClient.send<void>({ cmd: 'adjust-inventory' }, adjustInventoryDto);
+    return this.inventoryServiceClient.send({ cmd: 'adjust-inventory' }, adjustInventoryDto);
   }
 }

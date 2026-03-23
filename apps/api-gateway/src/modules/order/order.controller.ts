@@ -17,10 +17,7 @@ import { Observable } from 'rxjs';
 @ApiTags('Order')
 @Controller('orders')
 export class OrderController {
-  constructor(
-    @Inject('ORDER_SERVICE_CLIENT')
-    private readonly orderServiceClient: ClientProxy,
-  ) {}
+  constructor(@Inject('ORDER_SERVICE_CLIENT') private readonly orderServiceClient: ClientProxy) {}
 
   @Post('place')
   @HttpCode(HttpStatus.ACCEPTED)

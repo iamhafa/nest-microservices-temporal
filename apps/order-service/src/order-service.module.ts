@@ -30,6 +30,10 @@ import { OrderRepository } from './repository/order.repository';
         database: configService.getOrThrow<string>('DB_NAME'),
         autoLoadEntities: true,
         synchronize: true,
+        invalidWhereValuesBehavior: {
+          undefined: 'throw',
+          null: 'throw',
+        },
       }),
       inject: [ConfigService],
     }),

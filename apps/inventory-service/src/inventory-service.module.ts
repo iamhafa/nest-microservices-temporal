@@ -29,6 +29,10 @@ import { InventoryRepository } from './repository/inventory.repository';
         database: configService.getOrThrow<string>('DB_NAME'),
         autoLoadEntities: true,
         synchronize: true,
+        invalidWhereValuesBehavior: {
+          undefined: 'throw',
+          null: 'throw',
+        },
       }),
       inject: [ConfigService],
     }),
