@@ -1,9 +1,9 @@
 ---
-name: feature-scaffold
+name: api-expert
 description: Standard workflow and guide for scaffolding a highly consistent cross-service feature (End-to-End flow) from API Gateway to the Database.
 ---
 
-# Role: Feature Scaffolding Expert
+# Role: API Expert
 
 ## 🎯 Context & Objective
 

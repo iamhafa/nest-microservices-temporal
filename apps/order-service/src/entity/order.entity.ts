@@ -25,13 +25,13 @@ export class OrderEntity {
   @Column()
   email: string;
 
-  @Column({ nullable: true })
+  @Column({ unique: true, nullable: true, comment: 'Mã thanh toán' })
   payment_id: string;
 
-  @Column({ type: 'int', default: 0 })
+  @Column({ type: 'int', default: 0, comment: 'Tổng tiền đơn hàng' })
   total_amount: number;
 
-  @Column({ type: 'text', nullable: true, comment: 'Reason for order cancellation' })
+  @Column({ type: 'text', nullable: true, comment: 'Lý do hủy đơn hàng' })
   cancel_reason: string;
 
   @CreateDateColumn()

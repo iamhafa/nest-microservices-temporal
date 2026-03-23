@@ -3,6 +3,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -17,6 +18,9 @@ export class OrderItemEntity {
 
   @Column()
   product_id: number;
+
+  @Column()
+  order_id: number;
 
   @Column()
   quantity: number;
@@ -34,5 +38,6 @@ export class OrderItemEntity {
   deleted_at: Date;
 
   @ManyToOne(() => OrderEntity, order => order.items)
+  @JoinColumn({ name: 'order_id' })
   readonly order: Relation<OrderEntity>;
 }
