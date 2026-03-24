@@ -2,11 +2,13 @@ import { HttpExceptionFilter } from '@libs/common/filter';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { Logger } from 'nestjs-pino';
 import { ApiGatewayModule } from './api-gateway.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(ApiGatewayModule);
+  const app = await NestFactory.create(ApiGatewayModule, { bufferLogs: true });
 
+  app.useLogger(app.get(Logger));
   app.enableCors();
   app.enableShutdownHooks();
   app.setGlobalPrefix('api');

@@ -1,8 +1,9 @@
+import { SharedLoggerModule } from '@libs/common/logger/shared-logger.module';
+import { SharedTypeOrmModule } from '@libs/common/typeorm/shared-typeorm.module';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue/enum/workflow-task.queue';
-import { SharedTemporalModule } from '@libs/temporal/temporal.module';
+import { SharedTemporalModule } from '@libs/temporal/shared-temporal.module';
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
 import { join } from 'path';
 import { cwd } from 'process';
 import { ProductActivity } from './activity/product.activity';
@@ -16,27 +17,10 @@ import { ProductRepository } from './repository/product.repository';
     ConfigModule.forRoot({
       envFilePath: [join(cwd(), 'apps/product-service/.env'), join(cwd(), '.env')],
     }),
-    TypeOrmModule.forFeature([ProductEntity]),
 
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService): TypeOrmModuleOptions => ({
-        type: 'postgres',
-        host: configService.getOrThrow<string>('DB_HOST'),
-        port: configService.getOrThrow<number>('DB_PORT'),
-        username: configService.getOrThrow<string>('DB_USER'),
-        password: configService.getOrThrow<string>('DB_PASS'),
-        database: configService.getOrThrow<string>('DB_NAME'),
-        autoLoadEntities: true,
-        synchronize: true,
-        invalidWhereValuesBehavior: {
-          undefined: 'throw',
-          null: 'throw',
-        },
-      }),
-      inject: [ConfigService],
-    }),
-
+    // Custom dynamic modules
+    SharedLoggerModule,
+    SharedTypeOrmModule.forRoot([ProductEntity]),
     SharedTemporalModule.forRoot({
       taskQueue: WorkFlowTaskQueue.PRODUCT,
       worker: {

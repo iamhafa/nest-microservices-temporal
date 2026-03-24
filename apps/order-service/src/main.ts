@@ -1,6 +1,7 @@
 import { RpcExceptionFilter } from '@libs/common/filter';
 import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { Logger } from 'nestjs-pino';
 import { OrderServiceModule } from './order-service.module';
 
 async function bootstrap() {
@@ -12,6 +13,7 @@ async function bootstrap() {
       queueOptions: { durable: true },
     },
   });
+  app.useLogger(app.get(Logger));
   app.useGlobalFilters(new RpcExceptionFilter());
   app.enableShutdownHooks();
   await app.listen();

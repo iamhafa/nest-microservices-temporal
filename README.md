@@ -42,6 +42,59 @@ This project is a scalable, robust **microservices architecture** built with **N
 - **ORM:** TypeORM
 - **Package Manager:** pnpm
 
+## 🤖 MCP PostgreSQL (AI Database Context)
+
+This project includes **Model Context Protocol (MCP)** configuration for PostgreSQL, allowing AI assistants (e.g., Antigravity, Cursor) to directly query and understand the database schema of each service.
+
+### MCP Servers
+
+| Server Name          | Database                                  |
+| -------------------- | ----------------------------------------- |
+| `product-postgres`   | `nest-temporal-product-service`           |
+| `order-postgres`     | `nest-temporal-order-service`             |
+| `inventory-postgres` | `nest-temporal-inventory-service`         |
+
+Each server uses the `@modelcontextprotocol/server-postgres` package to provide read-only SQL query capabilities.
+
+### Setup for Antigravity
+
+To enable MCP in **Antigravity**, copy the following content into the global MCP config file:
+
+**File path:** `~/.gemini/antigravity/mcp_config.json`
+
+```json
+{
+  "mcpServers": {
+    "product-postgres": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://postgres:postgres@localhost:5432/nest-temporal-product-service"
+      ]
+    },
+    "order-postgres": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://postgres:postgres@localhost:5432/nest-temporal-order-service"
+      ]
+    },
+    "inventory-postgres": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://postgres:postgres@localhost:5432/nest-temporal-inventory-service"
+      ]
+    }
+  }
+}
+```
+
+> **Note:** Ensure PostgreSQL is running locally and the databases exist before using MCP queries.
+
 ## 📦 Run the Project
 
 ```bash

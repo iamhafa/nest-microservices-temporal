@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { Logger } from 'nestjs-pino';
 import { PaymentServiceModule } from './payment-service.module';
 
 async function bootstrap() {
@@ -11,6 +12,7 @@ async function bootstrap() {
       queueOptions: { durable: true },
     },
   });
+  app.useLogger(app.get(Logger));
   app.enableShutdownHooks();
   await app.listen();
 }

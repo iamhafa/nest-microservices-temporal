@@ -1,3 +1,4 @@
+import { SharedLoggerModule } from '@libs/common/logger/shared-logger.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { InventoryModule } from './modules/inventory/inventory.module';
@@ -8,6 +9,7 @@ import { ProductModule } from './modules/product/product.module';
   imports: [
     // Core Modules
     ConfigModule.forRoot(),
+    SharedLoggerModule,
 
     // Feature Modules
     InventoryModule,
