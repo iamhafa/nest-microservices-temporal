@@ -4,6 +4,7 @@ import { UpdateOrderStatusDto } from '@libs/contract/order/dto/update-order-stat
 import { WorkFlowTaskQueue } from '@libs/temporal/queue/enum/workflow-task.queue';
 import { Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
+import { ClsService } from 'nestjs-cls';
 import { TemporalService, WorkflowExecutionResult } from 'nestjs-temporal-core';
 import { OrderEntity } from './entity/order.entity';
 import { OrderRepository } from './repository/order.repository';
@@ -11,12 +12,16 @@ import { OrderRepository } from './repository/order.repository';
 @Injectable()
 export class OrderService {
   constructor(
+    private readonly clsService: ClsService,
     private readonly temporalService: TemporalService,
     private readonly orderRepository: OrderRepository,
   ) {}
 
   async createOrder(createOrderDto: CreateOrderDto): Promise<any> {
-    const workflowId: string = `place-order-${Date.now()}`;
+    // Get correlationId from CLS
+    const correlationId: string = this.clsService.get('correlationId');
+    const workflowId: string = `place-order-${correlationId}`;
+
     const workFlowResponse: WorkflowExecutionResult = await this.temporalService.startWorkflow(
       'placeOrderWorkflow',
       [createOrderDto],
@@ -59,8 +64,11 @@ export class OrderService {
       });
     }
 
-    const workflowId: string = `cancel_order_${order.id}`;
-    const response: WorkflowExecutionResult = await this.temporalService.startWorkflow(
+    // Get correlationId from CLS
+    const correlationId: string = this.clsService.get('correlationId');
+    const workflowId: string = `cancel-order-${correlationId}`;
+
+    const workFlowResponse: WorkflowExecutionResult = await this.temporalService.startWorkflow(
       'cancelOrderWorkflow',
       [cancelOrderDto],
       {
@@ -69,8 +77,8 @@ export class OrderService {
       },
     );
 
-    if (!response.success) {
-      throw response.error ?? new Error('Failed to start cancel workflow');
+    if (!workFlowResponse.success) {
+      throw workFlowResponse.error ?? new Error('Failed to start cancel workflow');
     }
 
     return {
