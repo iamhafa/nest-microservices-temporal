@@ -1,13 +1,17 @@
+import { RmqCorrelationIdInterceptor } from '@libs/common/interceptor';
 import { SharedLoggerModule } from '@libs/common/logger/shared-logger.module';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue/enum/workflow-task.queue';
 import { SharedTemporalModule } from '@libs/temporal/shared-temporal.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { ClsModule } from 'nestjs-cls';
 import { join } from 'path';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
+    ClsModule.forRoot({ global: true }),
 
     // Custom dynamic modules
     SharedLoggerModule,
@@ -23,6 +27,12 @@ import { join } from 'path';
         workflowsPath: join(__dirname, 'workflows/product'),
       },
     }),
+  ],
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: RmqCorrelationIdInterceptor,
+    },
   ],
 })
 export class OrchestratorWorkerModule {}
