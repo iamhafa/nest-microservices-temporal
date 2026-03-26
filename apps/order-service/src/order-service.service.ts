@@ -20,7 +20,7 @@ export class OrderService {
   async createOrder(createOrderDto: CreateOrderDto): Promise<any> {
     // Get correlationId from CLS
     const correlationId: string = this.clsService.get('correlationId');
-    const workflowId: string = `place-order-${correlationId}`;
+    const workflowId: string = `place-order:${correlationId}`;
 
     const workFlowResponse: WorkflowExecutionResult = await this.temporalService.startWorkflow(
       'placeOrderWorkflow',
@@ -66,7 +66,7 @@ export class OrderService {
 
     // Get correlationId from CLS
     const correlationId: string = this.clsService.get('correlationId');
-    const workflowId: string = `cancel-order-${correlationId}`;
+    const workflowId: string = `cancel-order:${correlationId}`;
 
     const workFlowResponse: WorkflowExecutionResult = await this.temporalService.startWorkflow(
       'cancelOrderWorkflow',

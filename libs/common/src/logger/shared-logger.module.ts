@@ -22,7 +22,9 @@ import { LoggerModule } from 'nestjs-pino';
         return {
           pinoHttp: {
             genReqId: (req: Request) => req.headers['x-correlation-id'] as string,
-            transport: !isProduction ? { target: 'pino-pretty', options: { colorize: true } } : undefined,
+            transport: !isProduction
+              ? { target: 'pino-pretty', options: { colorize: true, singleLine: true } }
+              : undefined,
             level: !isProduction ? 'debug' : 'info',
             customProps: addCorrelationId,
             mixin: addCorrelationId,

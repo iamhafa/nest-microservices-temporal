@@ -3,6 +3,7 @@ import { UpdateProductDto } from '@libs/contract/product/dto/update-product.dto'
 import { WorkFlowTaskQueue } from '@libs/temporal/queue/enum/workflow-task.queue';
 import { Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
+import { ClsService } from 'nestjs-cls';
 import { TemporalService, WorkflowExecutionResult } from 'nestjs-temporal-core';
 import { UpdateResult } from 'typeorm';
 import { ProductEntity } from './entity/product.entity';
@@ -11,12 +12,14 @@ import { ProductRepository } from './repository/product.repository';
 @Injectable()
 export class ProductService {
   constructor(
+    private readonly clsService: ClsService,
     private readonly temporalService: TemporalService,
     private readonly productRepository: ProductRepository,
   ) {}
 
   async createProduct(createProductDto: CreateProductDto): Promise<any> {
-    const workflowId: string = `create-product-${Date.now()}`;
+    const correlationId: string = this.clsService.get('correlationId');
+    const workflowId: string = `create-product:${correlationId}`;
     const workFlowResponse: WorkflowExecutionResult = await this.temporalService.startWorkflow(
       'createProductWorkflow',
       [createProductDto],

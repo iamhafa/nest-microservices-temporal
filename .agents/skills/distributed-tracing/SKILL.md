@@ -19,28 +19,33 @@ This NestJS Microservices project uses a **Distributed Tracing** architecture ba
 ## 🔄 The Correlation ID Flow
 
 ### 1. API Gateway (Entry Point)
+
 - When an HTTP request arrives, the API Gateway checks for an existing `x-correlation-id` header.
 - If none exists, it generates a fresh UUID.
 - It stores this ID in the CLS context: `cls.set('correlationId', id)`.
 - **Rule:** The Gateway MUST pass this ID in the message headers when publishing to RabbitMQ.
 
 ### 2. RabbitMQ (Transport Layer)
+
 - The Correlation ID cannot travel through the network via CLS. It is transported inside the RabbitMQ message properties under `headers: { 'x-correlation-id': '...' }`.
 
 ### 3. Microservice (Consumer)
+
 - When a Microservice (e.g., `order-service`, `product-service`) consumes a message, the `RmqCorrelationIdInterceptor` is triggered.
 - It extracts the `x-correlation-id` from the RabbitMQ message properties.
 - It wraps the execution context using `clsService.run()` and injects the ID: `clsService.set('correlationId', correlationId)`.
 - **Rule:** ALL async handlers and services called downstream within this message context will now share the same `correlationId`.
 
 ### 4. Logging & Operations
+
 - **Centralized Logging:** The `SharedLoggerModule` uses a `pinoHttp` customProps factory to read `cls.get('correlationId')`. Every `logger.info()` or `logger.error()` will automatically include this ID.
 - **Temporal Workflow Initialization:** When a service starts a workflow, it MUST extract the `correlationId` and append it to the `workflowId` to maintain traceability.
+
   ```typescript
   // Example rule for starting Temporal Workflows
   const correlationId = this.clsService.get('correlationId');
-  const workflowId = `place-order-${correlationId}`;
-  
+  const workflowId = `place-order:${correlationId}`;
+
   await this.temporalService.startWorkflow('placeOrderWorkflow', args, { workflowId });
   ```
 

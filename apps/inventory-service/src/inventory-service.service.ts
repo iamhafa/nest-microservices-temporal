@@ -19,8 +19,9 @@ export class InventoryService {
       .createQueryBuilder()
       .update(InventoryEntity)
       .set({
-        stock: () => `stock + ${quantity_change}`,
+        stock: () => `stock + :quantityChange`,
       })
+      .setParameter('quantityChange', quantity_change)
       .where('product_id = :productId', { productId: product_id })
       .andWhere('stock + :quantityChange >= 0', { quantityChange: quantity_change })
       .execute();

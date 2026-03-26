@@ -44,8 +44,13 @@ export async function cancelOrderWorkflow(cancelOrderDto: CancelOrderDto): Promi
   }
 
   const items: OrderItemDto[] = await orderActivities.getOrderItems(order_id);
-  // Hoàn lại số lượng sản phẩm
-  await inventoryActivities.releaseInventory(order_id, items);
+  // Nếu đã thanh toán → inventory đã confirm → cộng lại stock
+  // Nếu chưa thanh toán → inventory chỉ reserve → nhả reserved
+  if (paymentId) {
+    await inventoryActivities.restoreInventory(order_id, items);
+  } else {
+    await inventoryActivities.releaseInventory(order_id, items);
+  }
   // Cập nhật trạng thái đơn hàng
   await orderActivities.updateOrderStatus(order_id, OrderStatus.CANCELLED, cancel_reason);
 }

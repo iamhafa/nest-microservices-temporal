@@ -49,4 +49,21 @@ export class ProductActivity implements IProductActivity {
     this.logger.warn(`Compensating: Deleting product ${productId}`);
     await this.productRepository.softDelete(productId);
   }
+
+  @ActivityMethod()
+  async getProductPrices(productIds: number[]): Promise<Record<number, number>> {
+    this.logger.log(`Fetching prices for products: ${productIds.join(', ')}`);
+    const products: ProductEntity[] = await this.productRepository.find({
+      where: { id: In(productIds), is_active: true },
+      select: { id: true, price: true },
+    });
+
+    // Convert array to map
+    const productPrices: Record<number, number> = {};
+    for (const product of products) {
+      productPrices[product.id] = product.price; // key is product id, value is product price
+    }
+
+    return productPrices;
+  }
 }

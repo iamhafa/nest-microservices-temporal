@@ -15,4 +15,9 @@ export interface IProductActivity {
    * Xóa sản phẩm (Khi xóa sản phẩm thì cần phải xóa tồn kho)
    */
   deleteProduct(productId: number): Promise<void>;
+
+  /**
+   * Lấy giá sản phẩm theo danh sách ID
+   */
+  getProductPrices(productIds: number[]): Promise<Record<number, number>>;
 }

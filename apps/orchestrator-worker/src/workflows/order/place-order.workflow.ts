@@ -74,22 +74,33 @@ export async function placeOrderWorkflow(createOrderDto: CreateOrderDto) {
       throw new Error('Some products are invalid or inactive');
     }
 
-    // 1st: Create Order (Initial Persistence moved into workflow)
+    // 1st: Verify product prices match DB
+    const productPrices: Record<number, number> = await productActivities.getProductPrices(productIds);
+    // tra cứu object theo key là O(1), thay vì phải find() trong mảng mỗi lần (O(n)).
+    for (const item of items) {
+      if (productPrices[item.product_id] !== item.price) {
+        throw new Error(
+          `Price mismatch for product ${item.product_id}: client sent ${item.price}, actual is ${productPrices[item.product_id]}`,
+        );
+      }
+    }
+
+    // 2nd: Create Order (Initial Persistence moved into workflow)
     orderId = await orderActivities.createOrder(createOrderDto);
 
-    // 2nd: Reserve inventory
+    // 3rd: Reserve inventory
     await inventoryActivities.reserveInventory(orderId, items);
 
-    // 3rd: Charge payment → PAID
+    // 4th: Charge payment → PAID
     const totalAmount: number = await orderActivities.getOrderTotalAmount(orderId);
     paymentId = await paymentActivities.chargePayment(orderId, totalAmount);
     await orderActivities.savePaymentId(orderId, paymentId);
     await orderActivities.updateOrderStatus(orderId, OrderStatus.PAID);
 
-    // 4th: Confirm inventory (trừ kho vĩnh viễn)
+    // 5th: Confirm inventory (trừ kho vĩnh viễn)
     await inventoryActivities.confirmInventory(orderId, items);
 
-    // 5th: Create shipment → SHIPPING
+    // 6th: Create shipment → SHIPPING
     const shipmentId = await shippingActivities.createShipment(orderId, address);
     await orderActivities.updateOrderStatus(orderId, OrderStatus.SHIPPING);
 
@@ -102,17 +113,16 @@ export async function placeOrderWorkflow(createOrderDto: CreateOrderDto) {
   } catch (error) {
     console.log('Error:', error);
 
-    // Compensation: refund nếu đã thanh toán
+    // 1st: refund nếu đã thanh toán
     if (paymentId) {
       await paymentActivities.refundPayment(paymentId);
     }
 
+    // 2nd: hoàn lại inventory nếu đã reserve
     if (orderId) {
-      // Compensation: hoàn lại inventory nếu đã reserve
       await inventoryActivities.releaseInventory(orderId, items);
 
-      // Final step: Update status to FAILED or DELETE depending on visibility rules
-      // Here we keep it for audit but mark as FAILED
+      // 3rd: Update status to FAILED or DELETE depending on visibility rules
       await orderActivities.updateOrderStatus(orderId, OrderStatus.FAILED, error.message);
     }
 

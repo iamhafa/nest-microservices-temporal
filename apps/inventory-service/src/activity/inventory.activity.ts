@@ -21,8 +21,9 @@ export class InventoryActivity implements IInventoryActivity {
           .createQueryBuilder()
           .update(InventoryEntity)
           .set({
-            reserved_quantity: () => `reserved_quantity + ${orderItem.quantity}`,
+            reserved_quantity: () => `reserved_quantity + :quantity`,
           })
+          .setParameter('quantity', orderItem.quantity)
           .where('product_id = :productId', { productId: orderItem.product_id })
           // Kiểm tra tồn kho thực tế: stock - reserved >= quantity
           .andWhere('stock - reserved_quantity >= :quantity', { quantity: orderItem.quantity })
@@ -45,8 +46,9 @@ export class InventoryActivity implements IInventoryActivity {
           .createQueryBuilder()
           .update(InventoryEntity)
           .set({
-            reserved_quantity: () => `reserved_quantity - ${orderItem.quantity}`,
+            reserved_quantity: () => `reserved_quantity - :quantity`,
           })
+          .setParameter('quantity', orderItem.quantity)
           .where('product_id = :productId', { productId: orderItem.product_id })
           // Idempotency: Đảm bảo không trừ xuống âm
           .andWhere('reserved_quantity >= :quantity', { quantity: orderItem.quantity })
@@ -69,9 +71,10 @@ export class InventoryActivity implements IInventoryActivity {
           .createQueryBuilder()
           .update(InventoryEntity)
           .set({
-            stock: () => `stock - ${orderItem.quantity}`,
-            reserved_quantity: () => `reserved_quantity - ${orderItem.quantity}`,
+            stock: () => `stock - :quantity`,
+            reserved_quantity: () => `reserved_quantity - :quantity`,
           })
+          .setParameter('quantity', orderItem.quantity)
           .where('product_id = :productId', { productId: orderItem.product_id })
           .andWhere('reserved_quantity >= :quantity', { quantity: orderItem.quantity })
           .execute();
@@ -97,8 +100,9 @@ export class InventoryActivity implements IInventoryActivity {
           .createQueryBuilder()
           .update(InventoryEntity)
           .set({
-            stock: () => `stock + ${orderItem.quantity}`,
+            stock: () => `stock + :quantity`,
           })
+          .setParameter('quantity', orderItem.quantity)
           .where('product_id = :productId', { productId: orderItem.product_id })
           .execute();
       }
