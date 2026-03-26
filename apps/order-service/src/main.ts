@@ -1,4 +1,4 @@
-import { RpcExceptionFilter } from '@libs/common/filter';
+import { RpcExceptionFilter } from '@libs/common/filter/rpc-exception.filter';
 import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { Logger } from 'nestjs-pino';
