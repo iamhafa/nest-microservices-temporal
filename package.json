@@ -20,6 +20,7 @@
     "test:e2e": "jest --config ./apps/nest-microservices-temporal/test/jest-e2e.json"
   },
   "dependencies": {
+    "@golevelup/nestjs-stripe": "^3.0.0",
     "@nestjs/axios": "^4.0.1",
     "@nestjs/common": "^11.1.17",
     "@nestjs/config": "^4.0.3",
@@ -38,12 +39,13 @@
     "class-validator": "^0.15.1",
     "nestjs-cls": "^6.2.0",
     "nestjs-pino": "^4.6.1",
-    "nestjs-temporal-core": "^3.2.3",
+    "nestjs-temporal-core": "^3.2.6",
     "pg": "^8.20.0",
     "pino": "^10.3.1",
     "pino-http": "^11.0.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
+    "stripe": "^21.0.1",
     "typeorm": "^0.3.28"
   },
   "devDependencies": {
@@ -72,7 +74,7 @@
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.57.1"
+    "typescript-eslint": "^8.57.2"
   },
   "jest": {
     "moduleFileExtensions": [

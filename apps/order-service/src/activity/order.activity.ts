@@ -48,14 +48,16 @@ export class OrderActivity implements IOrderActivity {
     return order.items.map(item => ({
       product_id: item.product_id,
       quantity: item.quantity,
-      price: Number(item.price),
     }));
   }
 
   @ActivityMethod()
-  async createOrder(createOrderDto: CreateOrderDto): Promise<number> {
+  async createOrder(createOrderDto: CreateOrderDto, productPrices: Record<number, number>): Promise<number> {
     const { items, address, email } = createOrderDto;
-    const totalAmount: number = items.reduce((sum: number, item: OrderItemDto) => sum + item.price * item.quantity, 0);
+    const totalAmount: number = items.reduce(
+      (sum: number, item: OrderItemDto) => sum + productPrices[item.product_id] * item.quantity,
+      0,
+    );
 
     const order = this.orderRepository.create({
       status: OrderStatus.PENDING,
@@ -65,7 +67,7 @@ export class OrderActivity implements IOrderActivity {
       items: items.map(item => ({
         product_id: item.product_id,
         quantity: item.quantity,
-        price: item.price,
+        price: productPrices[item.product_id],
       })),
     });
 

@@ -5,7 +5,7 @@ export interface IOrderActivity {
   /**
    * Tạo đơn hàng
    */
-  createOrder(dto: CreateOrderDto): Promise<number>;
+  createOrder(dto: CreateOrderDto, productPrices: Record<number, number>): Promise<number>;
 
   /**
    * Xóa đơn hàng

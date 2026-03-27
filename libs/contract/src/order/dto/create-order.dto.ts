@@ -10,23 +10,17 @@ export class OrderItemDto {
 
   @ApiProperty({ example: 2 })
   @IsInt()
-  @Min(0)
+  @Min(1)
   @IsNotEmpty()
   quantity: number;
-
-  @ApiProperty({ example: 100000 })
-  @IsInt()
-  @Min(0)
-  @IsNotEmpty()
-  price: number;
 }
 
 export class CreateOrderDto {
   @ApiProperty({
     type: [OrderItemDto],
     example: [
-      { product_id: 2, quantity: 2, price: 29990000 },
-      { product_id: 4, quantity: 1, price: 5990000 },
+      { product_id: 2, quantity: 1 },
+      { product_id: 4, quantity: 1 },
     ],
   })
   @IsArray()

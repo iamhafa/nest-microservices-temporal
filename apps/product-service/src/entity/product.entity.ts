@@ -19,8 +19,11 @@ export class ProductEntity {
   @Column({ type: 'text', nullable: true, comment: 'Mô tả sản phẩm' })
   description: string;
 
-  @Column({ type: 'int', comment: 'Giá sản phẩm (VND)' })
+  @Column({ type: 'int', comment: 'Giá sản phẩm' })
   price: number;
+
+  @Column({ default: 'VND', comment: 'Đơn vị tiền tệ' })
+  currency: string;
 
   @Column({ nullable: true, comment: 'Đường dẫn ảnh sản phẩm' })
   image_url: string;

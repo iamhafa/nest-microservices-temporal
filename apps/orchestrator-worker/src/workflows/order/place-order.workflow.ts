@@ -74,19 +74,11 @@ export async function placeOrderWorkflow(createOrderDto: CreateOrderDto) {
       throw new Error('Some products are invalid or inactive');
     }
 
-    // 1st: Verify product prices match DB
+    // 1st: Fetch product prices from DB
     const productPrices: Record<number, number> = await productActivities.getProductPrices(productIds);
-    // tra cứu object theo key là O(1), thay vì phải find() trong mảng mỗi lần (O(n)).
-    for (const item of items) {
-      if (productPrices[item.product_id] !== item.price) {
-        throw new Error(
-          `Price mismatch for product ${item.product_id}: client sent ${item.price}, actual is ${productPrices[item.product_id]}`,
-        );
-      }
-    }
 
-    // 2nd: Create Order (Initial Persistence moved into workflow)
-    orderId = await orderActivities.createOrder(createOrderDto);
+    // 2nd: Create Order with real prices from DB
+    orderId = await orderActivities.createOrder(createOrderDto, productPrices);
 
     // 3rd: Reserve inventory
     await inventoryActivities.reserveInventory(orderId, items);
