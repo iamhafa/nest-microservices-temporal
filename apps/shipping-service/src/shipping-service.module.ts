@@ -1,5 +1,6 @@
 import { RmqCorrelationIdInterceptor } from '@libs/common/interceptor/rmq-correlation-id.interceptor';
 import { SharedLoggerModule } from '@libs/common/logger/shared-logger.module';
+import { SharedTypeOrmModule } from '@libs/common/typeorm/shared-typeorm.module';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue/enum/workflow-task.queue';
 import { SharedTemporalModule } from '@libs/temporal/shared-temporal.module';
 import { Module } from '@nestjs/common';
@@ -9,6 +10,8 @@ import { ClsModule } from 'nestjs-cls';
 import { join } from 'path';
 import { cwd } from 'process';
 import { ShippingActivities } from './activity/shipping.activity';
+import { ShippingEntity } from './entity/shipping.entity';
+import { ShippingRepository } from './repository/shipping.repository';
 
 @Module({
   imports: [
@@ -19,6 +22,7 @@ import { ShippingActivities } from './activity/shipping.activity';
 
     // Custom dynamic modules
     SharedLoggerModule,
+    SharedTypeOrmModule.forRoot([ShippingEntity]),
     SharedTemporalModule.forRoot({
       taskQueue: WorkFlowTaskQueue.SHIPPING,
       worker: {
@@ -32,6 +36,7 @@ import { ShippingActivities } from './activity/shipping.activity';
       useClass: RmqCorrelationIdInterceptor,
     },
     ShippingActivities,
+    ShippingRepository,
   ],
 })
 export class ShippingServiceModule {}

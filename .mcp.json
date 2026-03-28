@@ -23,6 +23,14 @@
         "@modelcontextprotocol/server-postgres",
         "postgresql://postgres:postgres@localhost:5432/nest-temporal-inventory-service"
       ]
+    },
+    "payment-postgres": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://postgres:postgres@localhost:5432/nest-temporal-payment-service"
+      ]
     }
   }
 }

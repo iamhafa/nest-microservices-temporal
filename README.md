@@ -1,22 +1,24 @@
 # NestJS Microservices with Temporal
 
 ## 🎯 Overview
+
 This project is a scalable, robust **microservices architecture** built with **NestJS** in a monorepo workspace. It leverages **RabbitMQ** for high-performance internal service-to-service communication, **Temporal.io** for orchestrating complex distributed workflows (using the Saga pattern), and **PostgreSQL** with **TypeORM** for data persistence.
 
 ## 🚀 Microservices Architecture
 
-| Service                  | Role                                                                 | Database | Temporal Activity |
-| ------------------------ | -------------------------------------------------------------------- | -------- | ----------------- |
-| `api-gateway`            | HTTP entrypoint, routes REST requests to internal services via RMQ.  | ❌       | ❌                |
-| `order-service`          | Order management (CRUD, status updates).                             | ✅       | ✅                |
-| `inventory-service`      | Inventory management (reserve, confirm, release, restore).           | ✅       | ✅                |
-| `payment-service`        | Payment processing (charge, refund).                                 | ❌       | ✅                |
-| `shipping-service`       | Shipment creation and management.                                    | ❌       | ✅                |
-| `product-service`        | Product catalog management and validation.                           | ✅       | ✅                |
-| `recommendation-service` | Product recommendations.                                             | ❌       | ❌                |
-| `orchestrator-worker`    | Executes Temporal workflows (Saga orchestrator).                     | ❌       | ❌                |
+| Service                  | Role                                                                | Database | Temporal Activity |
+| ------------------------ | ------------------------------------------------------------------- | -------- | ----------------- |
+| `api-gateway`            | HTTP entrypoint, routes REST requests to internal services via RMQ. | ❌       | ❌                |
+| `order-service`          | Order management (CRUD, status updates).                            | ✅       | ✅                |
+| `inventory-service`      | Inventory management (reserve, confirm, release, restore).          | ✅       | ✅                |
+| `payment-service`        | Payment processing (charge, refund).                                | ✅       | ✅                |
+| `shipping-service`       | Shipment creation and management.                                   | ❌       | ✅                |
+| `product-service`        | Product catalog management and validation.                          | ✅       | ✅                |
+| `recommendation-service` | Product recommendations.                                            | ❌       | ❌                |
+| `orchestrator-worker`    | Executes Temporal workflows (Saga orchestrator).                    | ❌       | ❌                |
 
 ### 📚 Shared Libraries (`libs/`)
+
 - `@libs/common`: Shared utilities, loggers, enums, etc.
 - `@libs/contract`: Shared DTOs, data interfaces, and enums for message passing.
 - `@libs/temporal`: Centralized Activity interfaces, Task Queues, and Temporal modules.
@@ -35,6 +37,7 @@ This project is a scalable, robust **microservices architecture** built with **N
 - **Database & TypeORM**: Use the **Repository Pattern** for database access. Prioritize query optimization (e.g., `select` specific fields). Use DataSources for transaction management.
 
 ## 🛠️ Tech Stack
+
 - **Framework:** NestJS (Node.js/TypeScript)
 - **Message Broker:** RabbitMQ
 - **Workflow Orchestration:** Temporal
@@ -48,11 +51,12 @@ This project includes **Model Context Protocol (MCP)** configuration for Postgre
 
 ### MCP Servers
 
-| Server Name          | Database                                  |
-| -------------------- | ----------------------------------------- |
-| `product-postgres`   | `nest-temporal-product-service`           |
-| `order-postgres`     | `nest-temporal-order-service`             |
-| `inventory-postgres` | `nest-temporal-inventory-service`         |
+| Server Name          | Database                          |
+| -------------------- | --------------------------------- |
+| `product-postgres`   | `nest-temporal-product-service`   |
+| `order-postgres`     | `nest-temporal-order-service`     |
+| `inventory-postgres` | `nest-temporal-inventory-service` |
+| `payment-postgres`   | `nest-temporal-payment-service`   |
 
 Each server uses the `@modelcontextprotocol/server-postgres` package to provide read-only SQL query capabilities.
 
@@ -87,6 +91,14 @@ To enable MCP in **Antigravity**, copy the following content into the global MCP
         "-y",
         "@modelcontextprotocol/server-postgres",
         "postgresql://postgres:postgres@localhost:5432/nest-temporal-inventory-service"
+      ]
+    },
+    "payment-postgres": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://postgres:postgres@localhost:5432/nest-temporal-payment-service"
       ]
     }
   }

@@ -24,7 +24,6 @@ import { ProductModule } from './modules/product/product.module';
           res.setHeader('x-correlation-id', id); // Set header for client
           clsService.set('correlationId', id); // Set correlationId for logger
         },
-        debug: true,
       },
     }),
 
