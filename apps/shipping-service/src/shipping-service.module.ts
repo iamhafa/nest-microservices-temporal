@@ -12,6 +12,8 @@ import { cwd } from 'process';
 import { ShippingActivities } from './activity/shipping.activity';
 import { ShippingEntity } from './entity/shipping.entity';
 import { ShippingRepository } from './repository/shipping.repository';
+import { ShippingController } from './shipping-service.controller';
+import { ShippingService } from './shipping-service.service';
 
 @Module({
   imports: [
@@ -35,8 +37,10 @@ import { ShippingRepository } from './repository/shipping.repository';
       provide: APP_INTERCEPTOR,
       useClass: RmqCorrelationIdInterceptor,
     },
+    ShippingService,
     ShippingActivities,
     ShippingRepository,
   ],
+  controllers: [ShippingController],
 })
 export class ShippingServiceModule {}

@@ -1,0 +1,7 @@
+export enum DeliveryStatus {
+  PENDING = 'PENDING',
+  PICKING_UP = 'PICKING_UP',
+  DELIVERING = 'DELIVERING',
+  DELIVERED = 'DELIVERED',
+  RETURNED = 'RETURNED',
+}

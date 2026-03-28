@@ -7,6 +7,7 @@ import { ClsModule, ClsService } from 'nestjs-cls';
 import { InventoryModule } from './modules/inventory/inventory.module';
 import { OrderModule } from './modules/order/order.module';
 import { ProductModule } from './modules/product/product.module';
+import { ShippingModule } from './modules/shipping/shipping.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { ProductModule } from './modules/product/product.module';
     InventoryModule,
     OrderModule,
     ProductModule,
+    ShippingModule,
   ],
 })
 export class ApiGatewayModule {}

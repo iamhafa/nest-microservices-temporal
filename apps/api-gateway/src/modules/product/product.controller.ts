@@ -42,7 +42,7 @@ export class ProductController {
   @Get()
   @ApiOperation({ summary: 'Get all products' })
   @ApiOkResponse({ description: 'List of products' })
-  getProducts(): Observable<any> {
+  getProducts(): Observable<any[]> {
     return this.productServiceClient.send({ cmd: 'get-products' }, {});
   }
 
