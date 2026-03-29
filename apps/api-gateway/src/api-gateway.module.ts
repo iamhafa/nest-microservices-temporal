@@ -8,6 +8,7 @@ import { InventoryModule } from './modules/inventory/inventory.module';
 import { OrderModule } from './modules/order/order.module';
 import { ProductModule } from './modules/product/product.module';
 import { ShippingModule } from './modules/shipping/shipping.module';
+import { RecommendationModule } from './modules/recommendation/recommendation.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { ShippingModule } from './modules/shipping/shipping.module';
     OrderModule,
     ProductModule,
     ShippingModule,
+    RecommendationModule,
   ],
 })
 export class ApiGatewayModule {}
