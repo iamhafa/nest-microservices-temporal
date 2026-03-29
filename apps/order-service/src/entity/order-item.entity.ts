@@ -28,13 +28,13 @@ export class OrderItemEntity {
   @Column()
   price: number;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ select: false })
   created_at: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ select: false })
   updated_at: Date;
 
-  @DeleteDateColumn()
+  @DeleteDateColumn({ select: false })
   deleted_at: Date;
 
   @ManyToOne(() => OrderEntity, order => order.items)

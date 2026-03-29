@@ -27,13 +27,13 @@ export class ProductBrandEntity {
   @Column({ nullable: true })
   logo_url: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ select: false })
   created_at: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ select: false })
   updated_at: Date;
 
-  @DeleteDateColumn()
+  @DeleteDateColumn({ select: false })
   deleted_at: Date;
 
   @OneToMany(() => ProductEntity, product => product.brand)

@@ -34,13 +34,13 @@ export class OrderEntity {
   @Column({ type: 'text', nullable: true, comment: 'Lý do hủy đơn hàng' })
   cancel_reason: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ select: false })
   created_at: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ select: false })
   updated_at: Date;
 
-  @DeleteDateColumn()
+  @DeleteDateColumn({ select: false })
   deleted_at: Date;
 
   @OneToMany(() => OrderItemEntity, item => item.order, { cascade: true })

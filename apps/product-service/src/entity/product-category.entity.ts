@@ -24,13 +24,13 @@ export class ProductCategoryEntity {
   @Column({ type: 'text', nullable: true })
   description: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ select: false })
   created_at: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ select: false })
   updated_at: Date;
 
-  @DeleteDateColumn()
+  @DeleteDateColumn({ select: false })
   deleted_at: Date;
 
   @OneToMany(() => ProductEntity, product => product.category)

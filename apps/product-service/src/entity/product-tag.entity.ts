@@ -21,15 +21,15 @@ export class ProductTagEntity {
   @Column({ unique: true })
   slug: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ select: false })
   created_at: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ select: false })
   updated_at: Date;
 
-  @DeleteDateColumn()
+  @DeleteDateColumn({ select: false })
   deleted_at: Date;
 
-  @ManyToMany(() => ProductEntity, (product) => product.tags)
+  @ManyToMany(() => ProductEntity, product => product.tags)
   readonly products: Relation<ProductEntity[]>;
 }

@@ -30,12 +30,12 @@ export class PaymentTransactionEntity {
   @Column({ type: 'text', nullable: true, comment: 'Error message if payment failed' })
   error_message: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ select: false })
   created_at: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ select: false })
   updated_at: Date;
 
-  @DeleteDateColumn()
+  @DeleteDateColumn({ select: false })
   deleted_at: Date;
 }
