@@ -10,10 +10,16 @@ import { ClsModule } from 'nestjs-cls';
 import { join } from 'path';
 import { cwd } from 'process';
 import { ProductActivity } from './activity/product.activity';
+import { ProductBrandEntity } from './entity/product-brand.entity';
+import { ProductCategoryEntity } from './entity/product-category.entity';
+import { ProductTagEntity } from './entity/product-tag.entity';
 import { ProductEntity } from './entity/product.entity';
 import { ProductController } from './product-service.controller';
 import { ProductService } from './product-service.service';
 import { ProductRepository } from './repository/product.repository';
+import { ProductCategoryRepository } from './repository/product-category.repository';
+import { ProductTagRepository } from './repository/product-tag.repository';
+import { ProductBrandRepository } from './repository/product-brand.repository';
 
 @Module({
   imports: [
@@ -24,7 +30,7 @@ import { ProductRepository } from './repository/product.repository';
 
     // Custom dynamic modules
     SharedLoggerModule,
-    SharedTypeOrmModule.forRoot([ProductEntity]),
+    SharedTypeOrmModule.forRoot([ProductEntity, ProductCategoryEntity, ProductTagEntity, ProductBrandEntity]),
 
     SharedTemporalModule.forRoot({
       taskQueue: WorkFlowTaskQueue.PRODUCT,
@@ -42,6 +48,9 @@ import { ProductRepository } from './repository/product.repository';
     ProductService,
     ProductActivity,
     ProductRepository,
+    ProductCategoryRepository,
+    ProductTagRepository,
+    ProductBrandRepository,
   ],
 })
 export class ProductServiceModule {}

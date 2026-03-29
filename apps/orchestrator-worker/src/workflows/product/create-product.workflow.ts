@@ -29,10 +29,14 @@ export async function createProductWorkflow(createProductDto: CreateProductDto) 
 
   try {
     const { quantity, ...productDto } = createProductDto;
-    // Step 1: Create Product
+
+    // Step 1: Validate Category, Brand, and Tags
+    await productActivities.validateProductMetadata(createProductDto);
+
+    // Step 2: Create Product
     productId = await productActivities.createProduct(productDto);
 
-    // Step 2: Initialize Inventory (default quantity 0 if not provided)
+    // Step 3: Initialize Inventory (default quantity 0 if not provided)
     await inventoryActivities.initializeInventory(productId, quantity);
 
     return {

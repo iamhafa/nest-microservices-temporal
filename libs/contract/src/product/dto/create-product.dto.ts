@@ -28,4 +28,23 @@ export class CreateProductDto {
   @IsString()
   @IsOptional()
   image_url: string;
+
+  @ApiProperty({ example: 1 })
+  @IsInt()
+  @IsOptional()
+  category_id: number;
+
+  @ApiProperty({ example: 1 })
+  @IsInt()
+  @IsOptional()
+  brand_id: number;
+
+  @ApiProperty({ example: [1, 2] })
+  @IsInt({ each: true })
+  @IsOptional()
+  tag_ids: number[];
+
+  @ApiProperty({ example: { color: 'black', storage: '256GB' } })
+  @IsOptional()
+  attributes: Record<string, string>;
 }

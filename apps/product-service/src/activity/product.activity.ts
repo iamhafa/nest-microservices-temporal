@@ -1,16 +1,65 @@
 import { CreateProductDto } from '@libs/contract/product/dto/create-product.dto';
+import { UpdateProductDto } from '@libs/contract/product/dto/update-product.dto';
 import { IProductActivity } from '@libs/temporal/activity';
 import { Logger } from '@nestjs/common';
+import { RpcException } from '@nestjs/microservices';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { In } from 'typeorm';
+import { ProductTagEntity } from '../entity/product-tag.entity';
 import { ProductEntity } from '../entity/product.entity';
+import { ProductBrandRepository } from '../repository/product-brand.repository';
+import { ProductCategoryRepository } from '../repository/product-category.repository';
+import { ProductTagRepository } from '../repository/product-tag.repository';
 import { ProductRepository } from '../repository/product.repository';
 
 @Activity({ name: 'product-activity' })
 export class ProductActivity implements IProductActivity {
   private readonly logger = new Logger(ProductActivity.name);
 
-  constructor(private readonly productRepository: ProductRepository) {}
+  constructor(
+    private readonly productRepository: ProductRepository,
+    private readonly productTagRepository: ProductTagRepository,
+    private readonly productCategoryRepository: ProductCategoryRepository,
+    private readonly productBrandRepository: ProductBrandRepository,
+  ) {}
+
+  @ActivityMethod()
+  async validateProductMetadata(productDto: CreateProductDto | UpdateProductDto): Promise<void> {
+    const { category_id, brand_id, tag_ids } = productDto;
+    this.logger.log(`Validating metadata for product: ${productDto.name}`);
+
+    // Validate Category
+    if (category_id) {
+      const category = await this.productCategoryRepository.findOneBy({ id: category_id });
+      if (!category) {
+        throw new RpcException(`Category #${category_id} not found`);
+      }
+    }
+
+    // Validate Brand
+    if (brand_id) {
+      const brand = await this.productBrandRepository.findOneBy({ id: brand_id });
+      if (!brand) {
+        throw new RpcException(`Brand #${brand_id} not found`);
+      }
+    }
+
+    // Validate Tags
+    if (tag_ids && tag_ids.length > 0) {
+      const tags: ProductTagEntity[] = await this.productTagRepository.find({
+        where: { id: In(tag_ids) },
+      });
+
+      const foundIds: number[] = tags.map(tag => tag.id);
+      const missingIds: number[] = tag_ids.filter(tagId => !foundIds.includes(tagId));
+
+      if (missingIds.length > 0) {
+        throw new RpcException(`Tags not found: ${missingIds.join(', ')}`);
+      }
+    }
+
+    this.logger.log('Metadata validation successful');
+  }
 
   @ActivityMethod()
   async validateProducts(productIds: number[]): Promise<boolean> {
@@ -39,7 +88,17 @@ export class ProductActivity implements IProductActivity {
   @ActivityMethod()
   async createProduct(createProductDto: Omit<CreateProductDto, 'quantity'>): Promise<number> {
     this.logger.log(`Creating product: ${createProductDto.name}`);
-    const product: ProductEntity = this.productRepository.create(createProductDto);
+
+    const { tag_ids, ...productDto } = createProductDto;
+
+    // Map tag_ids to shallow objects for relationship creation
+    const tags: Pick<ProductTagEntity, 'id'>[] = tag_ids.map((id: number) => ({ id }));
+
+    const product: ProductEntity = this.productRepository.create({
+      ...productDto,
+      tags,
+    });
+
     const savedProduct: ProductEntity = await this.productRepository.save(product);
     return savedProduct.id;
   }
