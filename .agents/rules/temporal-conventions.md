@@ -1,8 +1,3 @@
----
-name: temporal-workflow
-description: Rules and patterns for writing Temporal workflows, activities, and Saga compensation in this NestJS monorepo
----
-
 # Temporal Workflow & Activity Patterns
 
 ## 🏗 Architecture Overview
@@ -94,14 +89,3 @@ try {
   - `chargePayment` ↔ `refundPayment`
   - `confirmInventory` ↔ `restoreInventory`
 - Method parameters should be minimal: use IDs and DTOs, not full objects.
-
-## 🆕 Adding a New Workflow Checklist
-
-When creating a new workflow:
-
-1. Define activity interface(s) in `libs/temporal/src/activity/interface/`.
-2. Re-export from `libs/temporal/src/activity/index.ts`.
-3. Add task queue entry in `WorkFlowTaskQueue` enum if new service.
-4. Create workflow file in `apps/orchestrator-worker/src/workflows/<domain>/`.
-5. Export from domain `index.ts` barrel file.
-6. Implement Saga compensation in try/catch if the workflow involves multiple services.
