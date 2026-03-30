@@ -50,8 +50,8 @@ export class ProductActivity implements IProductActivity {
         where: { id: In(tag_ids) },
       });
 
-      const foundIds: number[] = tags.map(tag => tag.id);
-      const missingIds: number[] = tag_ids.filter(tagId => !foundIds.includes(tagId));
+      const foundIds = new Set(tags.map(tag => tag.id));
+      const missingIds: number[] = tag_ids.filter(tagId => !foundIds.has(tagId));
 
       if (missingIds.length > 0) {
         throw new RpcException(`Tags not found: ${missingIds.join(', ')}`);
@@ -72,8 +72,8 @@ export class ProductActivity implements IProductActivity {
       },
     });
 
-    const foundIds: number[] = products.map(product => product.id);
-    const missingIds: number[] = productIds.filter(productId => !foundIds.includes(productId));
+    const foundIds = new Set(products.map(product => product.id));
+    const missingIds: number[] = productIds.filter(productId => !foundIds.has(productId));
 
     if (missingIds.length > 0) {
       this.logger.warn(`Products not found or inactive: ${missingIds.join(', ')}`);

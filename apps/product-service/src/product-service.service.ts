@@ -93,8 +93,8 @@ export class ProductService {
         where: { id: In(tag_ids) },
       });
 
-      const foundIds = foundTags.map(t => t.id);
-      const missingIds = tag_ids.filter(id => !foundIds.includes(id));
+      const foundIds = new Set(foundTags.map(t => t.id));
+      const missingIds = tag_ids.filter(id => !foundIds.has(id));
 
       if (missingIds.length > 0) {
         throw new RpcException(`Tags not found: ${missingIds.join(', ')}`);
