@@ -1,9 +1,10 @@
 import { UpdateDeliveryStatusDto } from '@libs/contract/shipping/dto/update-delivery-status.dto';
 import { Body, Controller, Get, Inject, Patch } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Observable } from 'rxjs';
 
+@ApiBearerAuth('Authorization')
 @ApiTags('Shipping')
 @Controller('shipping')
 export class ShippingController {

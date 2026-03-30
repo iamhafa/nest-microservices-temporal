@@ -17,6 +17,7 @@ import { ClientProxy } from '@nestjs/microservices';
 import {
   ApiAcceptedResponse,
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -25,6 +26,7 @@ import {
 } from '@nestjs/swagger';
 import { Observable } from 'rxjs';
 
+@ApiBearerAuth('Authorization')
 @ApiTags('Product')
 @Controller('products')
 export class ProductController {

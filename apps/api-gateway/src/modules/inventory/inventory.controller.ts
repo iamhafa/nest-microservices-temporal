@@ -1,9 +1,10 @@
 import { AdjustInventoryDto } from '@libs/contract/inventory/dto/adjust-inventory.dto';
 import { Body, Controller, HttpCode, HttpStatus, Inject, Patch } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { ApiBadRequestResponse, ApiNoContentResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiBearerAuth, ApiNoContentResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Observable } from 'rxjs';
 
+@ApiBearerAuth('Authorization')
 @ApiTags('Inventory')
 @Controller('inventory')
 export class InventoryController {

@@ -24,7 +24,8 @@ export class HttpExceptionFilter extends BaseExceptionFilter {
       // RPC error object from microservice: { status, message }
       const rpcError = exception as any;
       if (rpcError.status && rpcError.message) {
-        status = rpcError.status;
+        const parsedStatus = parseInt(rpcError.status, 10);
+        status = isNaN(parsedStatus) ? HttpStatus.INTERNAL_SERVER_ERROR : parsedStatus;
         message = rpcError.message;
       }
     }

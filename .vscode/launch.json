@@ -81,6 +81,16 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "restart": true
+    },
+    {
+      "name": "user-service",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["start:dev", "user-service"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "restart": true
     }
   ],
 
@@ -90,7 +100,7 @@
       "stopAll": true,
       "presentation": {
         "order": 1,
-        "group": "services"
+        "group": "services",
       },
       "configurations": [
         "api-gateway",
@@ -100,7 +110,8 @@
         "inventory-service",
         "payment-service",
         "shipping-service",
-        "recommendation-service"
+        "recommendation-service",
+        "user-service"
       ]
     }
   ]

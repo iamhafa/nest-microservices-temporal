@@ -1,19 +1,25 @@
 import { SharedLoggerModule } from '@libs/common/logger/shared-logger.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 import { randomUUID } from 'crypto';
 import { Request, Response } from 'express';
 import { ClsModule, ClsService } from 'nestjs-cls';
 import { InventoryModule } from './modules/inventory/inventory.module';
 import { OrderModule } from './modules/order/order.module';
 import { ProductModule } from './modules/product/product.module';
-import { ShippingModule } from './modules/shipping/shipping.module';
 import { RecommendationModule } from './modules/recommendation/recommendation.module';
+import { ShippingModule } from './modules/shipping/shipping.module';
+import { UserModule } from './modules/user/user.module';
+
+import { JwtAuthGuard } from '@libs/common/auth';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
     // Core Modules
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({ isGlobal: true }),
+    JwtModule.register({ global: true }),
     ClsModule.forRoot({
       global: true,
       middleware: {
@@ -33,11 +39,18 @@ import { RecommendationModule } from './modules/recommendation/recommendation.mo
     SharedLoggerModule,
 
     // Feature Modules
-    InventoryModule,
-    OrderModule,
+    UserModule,
     ProductModule,
+    OrderModule,
+    InventoryModule,
     ShippingModule,
     RecommendationModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
   ],
 })
 export class ApiGatewayModule {}

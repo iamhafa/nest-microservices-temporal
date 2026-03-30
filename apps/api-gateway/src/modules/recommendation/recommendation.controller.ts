@@ -1,9 +1,10 @@
 import { RelatedProductDto } from '@libs/contract/recommendation';
 import { Controller, Get, Inject, Param, ParseIntPipe } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { ApiInternalServerErrorResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiInternalServerErrorResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Observable } from 'rxjs';
 
+@ApiBearerAuth('Authorization')
 @ApiTags('Recommendation (AI-Powered)')
 @Controller('recommendations')
 export class RecommendationController {
