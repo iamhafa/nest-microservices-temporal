@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ClsService } from 'nestjs-cls';
+import { ProductBrandController } from './product-brand.controller';
 import { ProductController } from './product.controller';
 
 @Module({
@@ -27,6 +28,6 @@ import { ProductController } from './product.controller';
       },
     ]),
   ],
-  controllers: [ProductController],
+  controllers: [ProductController, ProductBrandController],
 })
 export class ProductModule {}

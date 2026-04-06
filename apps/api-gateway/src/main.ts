@@ -1,13 +1,15 @@
 import { HttpExceptionFilter } from '@libs/common/filter/http-exception.filter';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';
 import { ApiGatewayModule } from './api-gateway.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(ApiGatewayModule, { bufferLogs: true });
+  const app = await NestFactory.create<NestExpressApplication>(ApiGatewayModule, { bufferLogs: true });
 
+  app.disable('x-powered-by');
   app.useLogger(app.get(Logger));
   app.enableCors();
   app.enableShutdownHooks();
@@ -75,4 +77,5 @@ async function bootstrap() {
 
   await app.listen(3000);
 }
-bootstrap();
+
+void bootstrap();
