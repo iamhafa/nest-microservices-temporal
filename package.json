@@ -5,7 +5,9 @@
   "author": "iamhafa",
   "private": true,
   "license": "ISC",
+  "packageManager": "pnpm@10.33.0",
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "build": "nest build",
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
     "start": "nest start",

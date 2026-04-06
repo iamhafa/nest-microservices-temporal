@@ -24,7 +24,8 @@ import { ShippingService } from './shipping-service.service';
 
     // Custom dynamic modules
     SharedLoggerModule,
-    SharedTypeOrmModule.forRoot([ShippingEntity]),
+    SharedTypeOrmModule.forFeature([ShippingEntity]),
+    SharedTypeOrmModule.forRoot(),
     SharedTemporalModule.forRoot({
       taskQueue: WorkFlowTaskQueue.SHIPPING,
       worker: {

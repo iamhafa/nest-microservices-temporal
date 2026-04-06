@@ -30,7 +30,8 @@ import { PaymentTransactionRepository } from './repository/payment-transaction.r
 
     // Custom dynamic modules
     SharedLoggerModule,
-    SharedTypeOrmModule.forRoot([PaymentTransactionEntity]),
+    SharedTypeOrmModule.forFeature([PaymentTransactionEntity]),
+    SharedTypeOrmModule.forRoot(),
     SharedTemporalModule.forRoot({
       taskQueue: WorkFlowTaskQueue.PAYMENT,
       worker: {

@@ -3,24 +3,30 @@ import { UpdateProductDto } from '@libs/contract/product/dto/update-product.dto'
 import { IProductActivity } from '@libs/temporal/activity';
 import { Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
-import { In } from 'typeorm';
-import { ProductTagEntity } from '../entity/product-tag.entity';
-import { ProductEntity } from '../entity/product.entity';
-import { ProductBrandRepository } from '../repository/product-brand.repository';
-import { ProductCategoryRepository } from '../repository/product-category.repository';
-import { ProductTagRepository } from '../repository/product-tag.repository';
-import { ProductRepository } from '../repository/product.repository';
+import { In, Repository } from 'typeorm';
+import { ProductBrandEntity } from '../modules/product-brand/entity/product-brand.entity';
+import { ProductCategoryEntity } from '../modules/product-category/entity/product-category.entity';
+import { ProductTagEntity } from '../modules/product-tag/entity/product-tag.entity';
+import { ProductEntity } from '../modules/product/entity/product.entity';
 
 @Activity({ name: 'product-activity' })
 export class ProductActivity implements IProductActivity {
   private readonly logger = new Logger(ProductActivity.name);
 
   constructor(
-    private readonly productRepository: ProductRepository,
-    private readonly productTagRepository: ProductTagRepository,
-    private readonly productCategoryRepository: ProductCategoryRepository,
-    private readonly productBrandRepository: ProductBrandRepository,
+    @InjectRepository(ProductEntity)
+    private readonly productRepository: Repository<ProductEntity>,
+
+    @InjectRepository(ProductTagEntity)
+    private readonly productTagRepository: Repository<ProductTagEntity>,
+
+    @InjectRepository(ProductCategoryEntity)
+    private readonly productCategoryRepository: Repository<ProductCategoryEntity>,
+
+    @InjectRepository(ProductBrandEntity)
+    private readonly productBrandRepository: Repository<ProductBrandEntity>,
   ) {}
 
   @ActivityMethod()

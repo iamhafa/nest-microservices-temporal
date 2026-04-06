@@ -1,6 +1,6 @@
 import { Public } from '@libs/common/auth';
 import { AuthResponseDto, LoginUserDto, RegisterUserDto, UserResponseDto } from '@libs/contract/user';
-import { Body, Controller, Get, Inject, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Inject, Post, Req } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Observable } from 'rxjs';
@@ -20,8 +20,9 @@ export class UserController {
 
   @Public()
   @Post('auth/login')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Login user and get JWT' })
-  @ApiCreatedResponse({ description: 'User logged in successfully', type: AuthResponseDto })
+  @ApiOkResponse({ description: 'User logged in successfully', type: AuthResponseDto })
   login(@Body() loginUserDto: LoginUserDto): Observable<AuthResponseDto> {
     return this.userServiceClient.send({ cmd: 'login-user' }, loginUserDto);
   }

@@ -12,9 +12,9 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { ProductBrandEntity } from './product-brand.entity';
-import { ProductCategoryEntity } from './product-category.entity';
-import { ProductTagEntity } from './product-tag.entity';
+import { ProductBrandEntity } from '../../product-brand/entity/product-brand.entity';
+import { ProductCategoryEntity } from '../../product-category/entity/product-category.entity';
+import { ProductTagEntity } from '../../product-tag/entity/product-tag.entity';
 
 @Entity('products')
 export class ProductEntity {

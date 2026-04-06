@@ -3,7 +3,7 @@ import { UpdateProductDto } from '@libs/contract/product/dto/update-product.dto'
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { ProductEntity } from './entity/product.entity';
-import { ProductService } from './product-service.service';
+import { ProductService } from './product.service';
 
 @Controller()
 export class ProductController {

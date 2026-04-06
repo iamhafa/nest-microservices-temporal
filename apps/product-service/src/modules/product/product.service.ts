@@ -3,25 +3,32 @@ import { UpdateProductDto } from '@libs/contract/product/dto/update-product.dto'
 import { WorkFlowTaskQueue } from '@libs/temporal/queue/enum/workflow-task.queue';
 import { Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
+import { InjectRepository } from '@nestjs/typeorm';
 import { ClsService } from 'nestjs-cls';
 import { TemporalService, WorkflowExecutionResult } from 'nestjs-temporal-core';
-import { In } from 'typeorm';
-import { ProductTagEntity } from './entity/product-tag.entity';
+import { In, Repository } from 'typeorm';
+import { ProductBrandEntity } from '../product-brand/entity/product-brand.entity';
+import { ProductCategoryEntity } from '../product-category/entity/product-category.entity';
+import { ProductTagEntity } from '../product-tag/entity/product-tag.entity';
 import { ProductEntity } from './entity/product.entity';
-import { ProductBrandRepository } from './repository/product-brand.repository';
-import { ProductCategoryRepository } from './repository/product-category.repository';
-import { ProductTagRepository } from './repository/product-tag.repository';
-import { ProductRepository } from './repository/product.repository';
 
 @Injectable()
 export class ProductService {
   constructor(
     private readonly clsService: ClsService,
     private readonly temporalService: TemporalService,
-    private readonly productRepository: ProductRepository,
-    private readonly categoryRepository: ProductCategoryRepository,
-    private readonly brandRepository: ProductBrandRepository,
-    private readonly tagRepository: ProductTagRepository,
+
+    @InjectRepository(ProductEntity)
+    private readonly productRepository: Repository<ProductEntity>,
+
+    @InjectRepository(ProductCategoryEntity)
+    private readonly productCategoryRepository: Repository<ProductCategoryEntity>,
+
+    @InjectRepository(ProductBrandEntity)
+    private readonly productBrandRepository: Repository<ProductBrandEntity>,
+
+    @InjectRepository(ProductTagEntity)
+    private readonly productTagRepository: Repository<ProductTagEntity>,
   ) {}
 
   async createProduct(createProductDto: CreateProductDto): Promise<any> {
@@ -72,7 +79,7 @@ export class ProductService {
 
     // 1. Validate Category if provided
     if (category_id) {
-      const category = await this.categoryRepository.findOneBy({ id: category_id });
+      const category = await this.productCategoryRepository.findOneBy({ id: category_id });
       if (!category) {
         throw new RpcException({ status: 400, message: `Category #${category_id} not found` });
       }
@@ -80,7 +87,7 @@ export class ProductService {
 
     // 2. Validate Brand if provided
     if (brand_id) {
-      const brand = await this.brandRepository.findOneBy({ id: brand_id });
+      const brand = await this.productBrandRepository.findOneBy({ id: brand_id });
       if (!brand) {
         throw new RpcException(`Brand #${brand_id} not found`);
       }
@@ -89,7 +96,7 @@ export class ProductService {
     // 3. Validate Tags if provided
     let tags: Pick<ProductTagEntity, 'id'>[] = [];
     if (tag_ids && tag_ids.length > 0) {
-      const foundTags = await this.tagRepository.find({
+      const foundTags = await this.productTagRepository.find({
         where: { id: In(tag_ids) },
       });
 

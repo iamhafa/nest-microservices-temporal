@@ -24,7 +24,8 @@ import { InventoryRepository } from './repository/inventory.repository';
 
     // Custom dynamic modules
     SharedLoggerModule,
-    SharedTypeOrmModule.forRoot([InventoryEntity]),
+    SharedTypeOrmModule.forFeature([InventoryEntity]),
+    SharedTypeOrmModule.forRoot(),
 
     SharedTemporalModule.forRoot({
       taskQueue: WorkFlowTaskQueue.INVENTORY,

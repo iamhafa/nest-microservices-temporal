@@ -3,26 +3,23 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  OneToMany,
+  ManyToMany,
   PrimaryGeneratedColumn,
   type Relation,
   UpdateDateColumn,
 } from 'typeorm';
-import { ProductEntity } from './product.entity';
+import { ProductEntity } from '../../product/entity/product.entity';
 
-@Entity('product_categories')
-export class ProductCategoryEntity {
+@Entity('product_tags')
+export class ProductTagEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ unique: true })
   name: string;
 
   @Column({ unique: true })
   slug: string;
-
-  @Column({ type: 'text', nullable: true })
-  description: string;
 
   @CreateDateColumn({ select: false })
   created_at: Date;
@@ -33,6 +30,6 @@ export class ProductCategoryEntity {
   @DeleteDateColumn({ select: false })
   deleted_at: Date;
 
-  @OneToMany(() => ProductEntity, product => product.category)
+  @ManyToMany(() => ProductEntity, product => product.tags)
   readonly products: Relation<ProductEntity[]>;
 }

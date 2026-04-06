@@ -25,7 +25,8 @@ import { OrderRepository } from './repository/order.repository';
 
     // Custom dynamic modules
     SharedLoggerModule,
-    SharedTypeOrmModule.forRoot([OrderEntity, OrderItemEntity]),
+    SharedTypeOrmModule.forFeature([OrderEntity, OrderItemEntity]),
+    SharedTypeOrmModule.forRoot(),
 
     SharedTemporalModule.forRoot({
       taskQueue: WorkFlowTaskQueue.ORDER,

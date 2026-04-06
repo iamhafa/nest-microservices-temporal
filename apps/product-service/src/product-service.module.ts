@@ -10,16 +10,10 @@ import { ClsModule } from 'nestjs-cls';
 import { join } from 'path';
 import { cwd } from 'process';
 import { ProductActivity } from './activity/product.activity';
-import { ProductBrandEntity } from './entity/product-brand.entity';
-import { ProductCategoryEntity } from './entity/product-category.entity';
-import { ProductTagEntity } from './entity/product-tag.entity';
-import { ProductEntity } from './entity/product.entity';
-import { ProductController } from './product-service.controller';
-import { ProductService } from './product-service.service';
-import { ProductRepository } from './repository/product.repository';
-import { ProductCategoryRepository } from './repository/product-category.repository';
-import { ProductTagRepository } from './repository/product-tag.repository';
-import { ProductBrandRepository } from './repository/product-brand.repository';
+import { ProductBrandModule } from './modules/product-brand/product-brand.module';
+import { ProductCategoryModule } from './modules/product-category/product-category.module';
+import { ProductTagModule } from './modules/product-tag/product-tag.module';
+import { ProductModule } from './modules/product/product.module';
 
 @Module({
   imports: [
@@ -30,7 +24,7 @@ import { ProductBrandRepository } from './repository/product-brand.repository';
 
     // Custom dynamic modules
     SharedLoggerModule,
-    SharedTypeOrmModule.forRoot([ProductEntity, ProductCategoryEntity, ProductTagEntity, ProductBrandEntity]),
+    SharedTypeOrmModule.forRoot(),
 
     SharedTemporalModule.forRoot({
       taskQueue: WorkFlowTaskQueue.PRODUCT,
@@ -38,19 +32,20 @@ import { ProductBrandRepository } from './repository/product-brand.repository';
         activityClasses: [ProductActivity],
       },
     }),
+
+    // Feature modules
+    ProductModule,
+    ProductBrandModule,
+    ProductCategoryModule,
+    ProductTagModule,
   ],
-  controllers: [ProductController],
+  controllers: [],
   providers: [
     {
       provide: APP_INTERCEPTOR,
       useClass: RmqCorrelationIdInterceptor,
     },
-    ProductService,
     ProductActivity,
-    ProductRepository,
-    ProductCategoryRepository,
-    ProductTagRepository,
-    ProductBrandRepository,
   ],
 })
 export class ProductServiceModule {}

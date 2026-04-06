@@ -6,6 +6,7 @@ import { TemporalModule, TemporalOptions } from 'nestjs-temporal-core';
 export class SharedTemporalModule {
   static forRoot(options?: TemporalOptions): DynamicModule {
     return TemporalModule.registerAsync({
+      isGlobal: true, // allow child module can use this module from parent module
       imports: [ConfigModule],
       useFactory: (config: ConfigService): TemporalOptions => ({
         ...options,

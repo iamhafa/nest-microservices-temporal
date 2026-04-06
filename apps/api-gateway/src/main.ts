@@ -43,7 +43,35 @@ async function bootstrap() {
     )
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api-docs', app, document);
+  SwaggerModule.setup('api-docs', app, document, {
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+    // Add custom js to swagger (auto login)
+    customJsStr: `
+      window.addEventListener('load', () => {
+        const observer = new MutationObserver(() => {
+          if (window.ui) {
+            observer.disconnect();
+            const originalFetch = window.fetch;
+            window.fetch = async (...args) => {
+              const response = await originalFetch(...args);
+              if (args[0].includes('/auth/login') || args[0].includes('/auth/register')) {
+                const clone = response.clone();
+                clone.json().then(data => {
+                  if (data && data.access_token) {
+                    window.ui.preauthorizeApiKey('Authorization', data.access_token);
+                  }
+                }).catch(() => {});
+              }
+              return response;
+            };
+          }
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+      });
+    `,
+  });
 
   await app.listen(3000);
 }

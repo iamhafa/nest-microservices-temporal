@@ -9,7 +9,9 @@ async function bootstrap() {
     options: {
       urls: ['amqp://admin:admin@localhost:5672'],
       queue: 'product-service-queue',
-      queueOptions: { durable: true },
+      queueOptions: {
+        durable: true,
+      },
     },
   });
   app.useLogger(app.get(Logger));

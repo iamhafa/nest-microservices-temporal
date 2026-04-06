@@ -8,14 +8,14 @@ import {
   type Relation,
   UpdateDateColumn,
 } from 'typeorm';
-import { ProductEntity } from './product.entity';
+import { ProductEntity } from '../../product/entity/product.entity';
 
-@Entity('product_brands')
-export class ProductBrandEntity {
+@Entity('product_categories')
+export class ProductCategoryEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true })
+  @Column()
   name: string;
 
   @Column({ unique: true })
@@ -23,9 +23,6 @@ export class ProductBrandEntity {
 
   @Column({ type: 'text', nullable: true })
   description: string;
-
-  @Column({ nullable: true })
-  logo_url: string;
 
   @CreateDateColumn({ select: false })
   created_at: Date;
@@ -36,6 +33,6 @@ export class ProductBrandEntity {
   @DeleteDateColumn({ select: false })
   deleted_at: Date;
 
-  @OneToMany(() => ProductEntity, product => product.brand)
+  @OneToMany(() => ProductEntity, product => product.category)
   readonly products: Relation<ProductEntity[]>;
 }

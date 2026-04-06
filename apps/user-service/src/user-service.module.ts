@@ -1,9 +1,9 @@
+import { RpcExceptionFilter } from '@libs/common/filter/rpc-exception.filter';
 import { RmqCorrelationIdInterceptor } from '@libs/common/interceptor/rmq-correlation-id.interceptor';
 import { SharedLoggerModule } from '@libs/common/logger/shared-logger.module';
 import { SharedTypeOrmModule } from '@libs/common/typeorm/shared-typeorm.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { RpcExceptionFilter } from '@libs/common/filter/rpc-exception.filter';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { ClsModule } from 'nestjs-cls';
@@ -37,7 +37,8 @@ import { UserService } from './user-service.service';
 
     // Custom dynamic modules
     SharedLoggerModule,
-    SharedTypeOrmModule.forRoot([UserEntity]),
+    SharedTypeOrmModule.forFeature([UserEntity]),
+    SharedTypeOrmModule.forRoot(),
   ],
   controllers: [UserController],
   providers: [
