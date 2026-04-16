@@ -1,17 +1,25 @@
-import { SharedTypeOrmModule } from '@libs/common/typeorm/shared-typeorm.module';
 import { Module } from '@nestjs/common';
-import { ProductBrandEntity } from '../product-brand/entity/product-brand.entity';
-import { ProductCategoryEntity } from '../product-category/entity/product-category.entity';
-import { ProductTagEntity } from '../product-tag/entity/product-tag.entity';
-import { ProductEntity } from './entity/product.entity';
+import { EmbeddingModule } from '../embedding/embedding.module';
+import { ProductBrandModule } from '../product-brand/product-brand.module';
+import { ProductBrandRepository } from '../product-brand/repository/product-brand.repository';
+import { ProductCategoryModule } from '../product-category/product-category.module';
+import { ProductCategoryRepository } from '../product-category/repository/product-category.repository';
+import { ProductTagModule } from '../product-tag/product-tag.module';
+import { ProductTagRepository } from '../product-tag/repository/product-tag.repository';
 import { ProductController } from './product.controller';
 import { ProductService } from './product.service';
+import { ProductRepository } from './repository/product.repository';
 
 @Module({
-  imports: [
-    SharedTypeOrmModule.forFeature([ProductEntity, ProductCategoryEntity, ProductBrandEntity, ProductTagEntity]),
-  ],
+  imports: [EmbeddingModule, ProductCategoryModule, ProductBrandModule, ProductTagModule],
   controllers: [ProductController],
-  providers: [ProductService],
+  providers: [
+    ProductService,
+    ProductRepository,
+    ProductBrandRepository,
+    ProductCategoryRepository,
+    ProductTagRepository,
+  ],
+  exports: [ProductService, EmbeddingModule, ProductRepository],
 })
 export class ProductModule {}

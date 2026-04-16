@@ -3,30 +3,28 @@ import { UpdateProductDto } from '@libs/contract/product/dto/update-product.dto'
 import { IProductActivity } from '@libs/temporal/activity';
 import { Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
-import { In, Repository } from 'typeorm';
-import { ProductBrandEntity } from '../modules/product-brand/entity/product-brand.entity';
-import { ProductCategoryEntity } from '../modules/product-category/entity/product-category.entity';
+import { In } from 'typeorm';
+import { EmbeddingService } from '../modules/embedding/embedding.service';
+import { ProductBrandRepository } from '../modules/product-brand/repository/product-brand.repository';
+import { ProductCategoryRepository } from '../modules/product-category/repository/product-category.repository';
 import { ProductTagEntity } from '../modules/product-tag/entity/product-tag.entity';
+import { ProductTagRepository } from '../modules/product-tag/repository/product-tag.repository';
 import { ProductEntity } from '../modules/product/entity/product.entity';
+import { ProductService } from '../modules/product/product.service';
+import { ProductRepository } from '../modules/product/repository/product.repository';
 
 @Activity({ name: 'product-activity' })
 export class ProductActivity implements IProductActivity {
   private readonly logger = new Logger(ProductActivity.name);
 
   constructor(
-    @InjectRepository(ProductEntity)
-    private readonly productRepository: Repository<ProductEntity>,
-
-    @InjectRepository(ProductTagEntity)
-    private readonly productTagRepository: Repository<ProductTagEntity>,
-
-    @InjectRepository(ProductCategoryEntity)
-    private readonly productCategoryRepository: Repository<ProductCategoryEntity>,
-
-    @InjectRepository(ProductBrandEntity)
-    private readonly productBrandRepository: Repository<ProductBrandEntity>,
+    private readonly productService: ProductService,
+    private readonly embeddingService: EmbeddingService,
+    private readonly productRepository: ProductRepository,
+    private readonly productCategoryRepository: ProductCategoryRepository,
+    private readonly productBrandRepository: ProductBrandRepository,
+    private readonly productTagRepository: ProductTagRepository,
   ) {}
 
   @ActivityMethod()
@@ -130,5 +128,29 @@ export class ProductActivity implements IProductActivity {
     }
 
     return productPrices;
+  }
+
+  @ActivityMethod()
+  async generateProductEmbedding(productId: number): Promise<void> {
+    this.logger.log(`Generating embedding for product ${productId}`);
+    const product = await this.productRepository.findOne({
+      where: { id: productId },
+      relations: {
+        category: true,
+        brand: true,
+        tags: true,
+      },
+    });
+
+    if (!product) {
+      this.logger.warn(`Product ${productId} not found for embedding generation`);
+      return;
+    }
+
+    const text = this.embeddingService.buildProductText(product);
+    const embedding = await this.embeddingService.generateEmbedding(text);
+
+    await this.productService.updateEmbedding(productId, embedding);
+    this.logger.log(`Embedding generated and saved for product ${productId}`);
   }
 }

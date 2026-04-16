@@ -3,32 +3,27 @@ import { UpdateProductDto } from '@libs/contract/product/dto/update-product.dto'
 import { WorkFlowTaskQueue } from '@libs/temporal/queue/enum/workflow-task.queue';
 import { Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
-import { InjectRepository } from '@nestjs/typeorm';
 import { ClsService } from 'nestjs-cls';
 import { TemporalService, WorkflowExecutionResult } from 'nestjs-temporal-core';
-import { In, Repository } from 'typeorm';
-import { ProductBrandEntity } from '../product-brand/entity/product-brand.entity';
-import { ProductCategoryEntity } from '../product-category/entity/product-category.entity';
+import { In, IsNull } from 'typeorm';
+import { EmbeddingService } from '../embedding/embedding.service';
+import { ProductBrandRepository } from '../product-brand/repository/product-brand.repository';
+import { ProductCategoryRepository } from '../product-category/repository/product-category.repository';
 import { ProductTagEntity } from '../product-tag/entity/product-tag.entity';
+import { ProductTagRepository } from '../product-tag/repository/product-tag.repository';
 import { ProductEntity } from './entity/product.entity';
+import { ProductRepository } from './repository/product.repository';
 
 @Injectable()
 export class ProductService {
   constructor(
     private readonly clsService: ClsService,
     private readonly temporalService: TemporalService,
-
-    @InjectRepository(ProductEntity)
-    private readonly productRepository: Repository<ProductEntity>,
-
-    @InjectRepository(ProductCategoryEntity)
-    private readonly productCategoryRepository: Repository<ProductCategoryEntity>,
-
-    @InjectRepository(ProductBrandEntity)
-    private readonly productBrandRepository: Repository<ProductBrandEntity>,
-
-    @InjectRepository(ProductTagEntity)
-    private readonly productTagRepository: Repository<ProductTagEntity>,
+    private readonly embeddingService: EmbeddingService,
+    private readonly productRepository: ProductRepository,
+    private readonly productCategoryRepository: ProductCategoryRepository,
+    private readonly productBrandRepository: ProductBrandRepository,
+    private readonly productTagRepository: ProductTagRepository,
   ) {}
 
   async createProduct(createProductDto: CreateProductDto): Promise<any> {
@@ -133,7 +128,87 @@ export class ProductService {
   }
 
   async deleteProduct(id: number): Promise<void> {
-    const product = await this.getProduct(id);
+    const product: ProductEntity = await this.getProduct(id);
     await this.productRepository.softDelete(product.id);
+  }
+
+  async updateEmbedding(productId: number, embedding: number[]): Promise<void> {
+    const vectorString: string = `[${embedding.join(',')}]`;
+    await this.productRepository
+      .createQueryBuilder()
+      .update()
+      .set({ embedding: vectorString })
+      .where('id = :productId', { productId })
+      .execute();
+  }
+
+  async findSimilarProducts(productId: number, limit: number = 10): Promise<any[]> {
+    // We select embedding explicitly using query builder since it's select: false
+    const product = await this.productRepository.findOne({
+      where: {
+        id: productId,
+      },
+      select: {
+        embedding: true,
+      },
+      relations: {
+        category: true,
+        brand: true,
+        tags: true,
+      },
+    });
+
+    if (!product) {
+      throw new RpcException({ status: 404, message: `Product #${productId} not found` });
+    }
+
+    let embeddingStr: any = product.embedding;
+
+    // Lazy evaluation if embedding does not exist yet
+    if (!embeddingStr) {
+      const text: string = this.embeddingService.buildProductText(product);
+      const embedding: number[] = await this.embeddingService.generateEmbedding(text);
+      await this.updateEmbedding(productId, embedding);
+      embeddingStr = `[${embedding.join(',')}]`;
+    } else if (Array.isArray(embeddingStr)) {
+      // TypeORM/pg driver might parse the vector column into a JS Array.
+      // We must explicitly format it back to the pgvector '[val1, val2]' string format for the raw query.
+      embeddingStr = JSON.stringify(embeddingStr);
+    }
+
+    // Perform cosine similarity search (1 - (<=> distance))
+    // We use QueryBuilder for pgvector "<=>" distance operator and mapping
+    const similarProducts = await this.productRepository.findSimilarProducts(productId, embeddingStr, limit);
+
+    return similarProducts;
+  }
+
+  async backfillEmbeddings(): Promise<any> {
+    // Find all products that do not have an embedding
+    const products: ProductEntity[] = await this.productRepository.find({
+      where: {
+        embedding: IsNull(),
+        is_active: true,
+      },
+      relations: {
+        category: true,
+        brand: true,
+        tags: true,
+      },
+    });
+
+    // Process each product to generate and update embedding
+    let processed: number = 0;
+    for (const product of products) {
+      const text: string = this.embeddingService.buildProductText(product);
+      const embedding: number[] = await this.embeddingService.generateEmbedding(text);
+      await this.updateEmbedding(product.id, embedding);
+      processed++;
+    }
+
+    return {
+      processed,
+      total: products.length,
+    };
   }
 }

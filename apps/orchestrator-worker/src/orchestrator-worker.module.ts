@@ -10,8 +10,8 @@ import { join } from 'path';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
     ClsModule.forRoot({ global: true }),
+    ConfigModule.forRoot(),
 
     // Custom dynamic modules
     SharedLoggerModule,

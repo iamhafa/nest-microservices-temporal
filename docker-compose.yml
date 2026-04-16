@@ -42,7 +42,7 @@ services:
       - "8233:8080"
 
   database:
-    image: postgres:16-alpine
+    image: pgvector/pgvector:pg16
     container_name: database
     environment:
       POSTGRES_USER: postgres

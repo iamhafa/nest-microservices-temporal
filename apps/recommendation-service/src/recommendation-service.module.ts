@@ -7,7 +7,6 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ClsModule } from 'nestjs-cls';
 import { join } from 'path';
 import { cwd } from 'process';
-import { GeminiService } from './gemini.service';
 import { RecommendationServiceController } from './recommendation-service.controller';
 import { RecommendationServiceService } from './recommendation-service.service';
 
@@ -44,7 +43,6 @@ import { RecommendationServiceService } from './recommendation-service.service';
       useClass: RmqCorrelationIdInterceptor,
     },
     RecommendationServiceService,
-    GeminiService,
   ],
 })
 export class RecommendationServiceModule {}

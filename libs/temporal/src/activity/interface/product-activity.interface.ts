@@ -26,4 +26,9 @@ export interface IProductActivity {
    * Lấy giá sản phẩm theo danh sách ID
    */
   getProductPrices(productIds: number[]): Promise<Record<number, number>>;
+
+  /**
+   * Generate an embedding vector based on product data (name, desc, tags, category, brand)
+   */
+  generateProductEmbedding(productId: number): Promise<void>;
 }

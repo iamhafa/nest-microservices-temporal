@@ -33,4 +33,14 @@ export class ProductController {
   deleteProduct(@Payload() id: number): Promise<void> {
     return this.productService.deleteProduct(id);
   }
+
+  @MessagePattern({ cmd: 'find-similar-products' })
+  findSimilarProducts(@Payload() data: { productId: number; limit?: number }): Promise<any[]> {
+    return this.productService.findSimilarProducts(data.productId, data.limit);
+  }
+
+  @MessagePattern({ cmd: 'backfill-embeddings' })
+  backfillEmbeddings(): Promise<{ processed: number; total: number }> {
+    return this.productService.backfillEmbeddings();
+  }
 }

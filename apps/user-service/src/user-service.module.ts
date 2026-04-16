@@ -1,15 +1,14 @@
 import { RpcExceptionFilter } from '@libs/common/filter/rpc-exception.filter';
 import { RmqCorrelationIdInterceptor } from '@libs/common/interceptor/rmq-correlation-id.interceptor';
 import { SharedLoggerModule } from '@libs/common/logger/shared-logger.module';
-import { SharedTypeOrmModule } from '@libs/common/typeorm/shared-typeorm.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { ClsModule } from 'nestjs-cls';
 import { join } from 'path';
 import { cwd } from 'process';
-import { UserEntity } from './entity/user.entity';
 import { UserRepository } from './repository/user.repository';
 import { UserController } from './user-service.controller';
 import { UserService } from './user-service.service';
@@ -37,8 +36,23 @@ import { UserService } from './user-service.service';
 
     // Custom dynamic modules
     SharedLoggerModule,
-    SharedTypeOrmModule.forFeature([UserEntity]),
-    SharedTypeOrmModule.forRoot(),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.getOrThrow<string>('DB_HOST'),
+        port: configService.getOrThrow<number>('DB_PORT'),
+        username: configService.getOrThrow<string>('DB_USER'),
+        password: configService.getOrThrow<string>('DB_PASS'),
+        database: configService.getOrThrow<string>('DB_NAME'),
+        synchronize: true,
+        invalidWhereValuesBehavior: {
+          undefined: 'throw',
+          null: 'throw',
+        },
+      }),
+    }),
   ],
   controllers: [UserController],
   providers: [

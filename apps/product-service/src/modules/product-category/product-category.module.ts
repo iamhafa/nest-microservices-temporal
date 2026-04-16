@@ -1,10 +1,12 @@
-import { SharedTypeOrmModule } from '@libs/common/typeorm/shared-typeorm.module';
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProductCategoryEntity } from './entity/product-category.entity';
+import { ProductCategoryRepository } from './repository/product-category.repository';
 
 @Module({
-  imports: [SharedTypeOrmModule.forFeature([ProductCategoryEntity])],
+  imports: [TypeOrmModule.forFeature([ProductCategoryEntity])],
   controllers: [],
-  providers: [],
+  providers: [ProductCategoryRepository],
+  exports: [ProductCategoryRepository],
 })
 export class ProductCategoryModule {}

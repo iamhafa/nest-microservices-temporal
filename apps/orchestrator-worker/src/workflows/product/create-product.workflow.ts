@@ -39,6 +39,9 @@ export async function createProductWorkflow(createProductDto: CreateProductDto) 
     // Step 3: Initialize Inventory (default quantity 0 if not provided)
     await inventoryActivities.initializeInventory(productId, quantity);
 
+    // Step 4: Generate Product Embedding
+    await productActivities.generateProductEmbedding(productId);
+
     return {
       success: true,
       productId,
