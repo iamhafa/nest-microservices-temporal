@@ -60,14 +60,14 @@ apps/api-gateway/src/
 | Library    | Path alias       | Mục đích                                                      |
 | ---------- | ---------------- | ------------------------------------------------------------- |
 | `common`   | `@libs/common`   | Shared enums, logger, utilities, decorators                   |
-| `contract` | `@libs/contract` | DTOs và enums dùng chung giữa services (data contracts)       |
+| `contract` | `@libs/contract` | DTOs (trong `/dto`) và enums (trong `/enum`) dùng chung giữa services |
 | `temporal` | `@libs/temporal` | Activity interfaces, task queue enums, shared Temporal module |
 
 ### Key Rules
 
 - **Strict Service Isolation**: Services are **NOT ALLOWED** to import files from other services. They may only import from shared `libs` to ensure complete independence between services.
-- **DTOs** shared giữa services → đặt trong `libs/contract/src/<domain>/dto/`.
-- **Enums** shared → đặt trong `libs/contract/src/<domain>/enum/` hoặc `libs/common/src/enum/`.
+- **DTOs** shared giữa services → đặt trong `libs/contract/src/<domain>/dto/` và import từ `@libs/contract/<domain>/dto`.
+- **Enums** shared → đặt trong `libs/contract/src/<domain>/enum/` và import từ `@libs/contract/<domain>/enum` (hoặc `libs/common/src/enum/`).
 - **Activity interfaces** → đặt trong `libs/temporal/src/activity/interface/`.
 - Code chỉ dùng bởi 1 service → giữ trong `apps/<service>/src/`, KHÔNG đưa vào `libs/`.
 

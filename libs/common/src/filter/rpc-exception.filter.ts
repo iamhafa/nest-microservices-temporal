@@ -1,5 +1,6 @@
 import { ArgumentsHost, Catch, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { BaseRpcExceptionFilter, RpcException } from '@nestjs/microservices';
+import { isObject, isString } from 'lodash';
 import { Observable, throwError } from 'rxjs';
 
 @Catch()
@@ -15,16 +16,16 @@ export class RpcExceptionFilter extends BaseRpcExceptionFilter {
 
     if (exception instanceof RpcException) {
       const error = exception.getError();
-      if (typeof error === 'object' && error !== null) {
+      if (isObject(error) && error !== null) {
         status = (error as any).status || HttpStatus.INTERNAL_SERVER_ERROR;
         message = (error as any).message || message;
-      } else if (typeof error === 'string') {
+      } else if (isString(error)) {
         message = error;
       }
     } else if (exception instanceof HttpException) {
       status = exception.getStatus();
       const response = exception.getResponse();
-      message = typeof response === 'string' ? response : (response as any).message || exception.message;
+      message = isString(response) ? response : (response as any).message || exception.message;
     } else if (exception instanceof Error) {
       message = exception.message;
     }

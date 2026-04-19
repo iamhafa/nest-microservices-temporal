@@ -10,21 +10,19 @@ import { ClsModule } from 'nestjs-cls';
 import { join } from 'path';
 import { cwd } from 'process';
 import { ShippingActivities } from './activity/shipping.activity';
+import { ShippingEntity } from './entity/shipping.entity';
 import { ShippingRepository } from './repository/shipping.repository';
 import { ShippingController } from './shipping-service.controller';
 import { ShippingService } from './shipping-service.service';
 
 @Module({
   imports: [
+    ClsModule.forRoot({ global: true }),
     ConfigModule.forRoot({
+      isGlobal: true,
       envFilePath: [join(cwd(), 'apps/shipping-service/.env'), join(cwd(), '.env')],
     }),
-    ClsModule.forRoot({ global: true }),
-
-    // Custom dynamic modules
-    SharedLoggerModule,
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
@@ -33,7 +31,7 @@ import { ShippingService } from './shipping-service.service';
         username: configService.getOrThrow<string>('DB_USER'),
         password: configService.getOrThrow<string>('DB_PASS'),
         database: configService.getOrThrow<string>('DB_NAME'),
-        autoLoadEntities: true,
+        entities: [ShippingEntity],
         synchronize: true,
         invalidWhereValuesBehavior: {
           undefined: 'throw',
@@ -41,6 +39,9 @@ import { ShippingService } from './shipping-service.service';
         },
       }),
     }),
+
+    // Custom dynamic modules
+    SharedLoggerModule,
     SharedTemporalModule.forRoot({
       taskQueue: WorkFlowTaskQueue.SHIPPING,
       worker: {

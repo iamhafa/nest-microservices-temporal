@@ -1,4 +1,4 @@
-import { OrderStatus } from '@libs/contract/order/enum/order-status.enum';
+import { OrderStatus } from '@libs/contract/order/enum';
 import {
   Column,
   CreateDateColumn,

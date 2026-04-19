@@ -1,6 +1,4 @@
-import { CancelOrderDto } from '@libs/contract/order/dto/cancel-order-request.dto';
-import { CreateOrderDto } from '@libs/contract/order/dto/create-order.dto';
-import { UpdateOrderStatusDto } from '@libs/contract/order/dto/update-order-status.dto';
+import { CancelOrderDto, CreateOrderDto, UpdateOrderStatusDto } from '@libs/contract/order/dto';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue/enum/workflow-task.queue';
 import { Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';

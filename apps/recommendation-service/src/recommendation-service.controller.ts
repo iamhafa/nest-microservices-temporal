@@ -1,7 +1,7 @@
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { RecommendationServiceService } from './recommendation-service.service';
-import { RelatedProductDto } from '@libs/contract/recommendation';
+import { RelatedProductDto } from '@libs/contract/recommendation/dto';
 
 @Controller()
 export class RecommendationServiceController {

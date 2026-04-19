@@ -18,15 +18,12 @@ import { ProductModule } from './modules/product/product.module';
 
 @Module({
   imports: [
+    ClsModule.forRoot({ global: true }),
     ConfigModule.forRoot({
+      isGlobal: true,
       envFilePath: [join(cwd(), 'apps/product-service/.env'), join(cwd(), '.env')],
     }),
-    ClsModule.forRoot({ global: true }),
-
-    // Custom dynamic modules
-    SharedLoggerModule,
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
@@ -35,6 +32,7 @@ import { ProductModule } from './modules/product/product.module';
         username: configService.getOrThrow<string>('DB_USER'),
         password: configService.getOrThrow<string>('DB_PASS'),
         database: configService.getOrThrow<string>('DB_NAME'),
+        autoLoadEntities: true, // must be true for TypeORM to find entities
         synchronize: true,
         invalidWhereValuesBehavior: {
           undefined: 'throw',
@@ -43,6 +41,8 @@ import { ProductModule } from './modules/product/product.module';
       }),
     }),
 
+    // Custom dynamic modules
+    SharedLoggerModule,
     SharedTemporalModule.forRoot({
       taskQueue: WorkFlowTaskQueue.PRODUCT,
       worker: {

@@ -1,4 +1,4 @@
-import { OrderItemDto } from '@libs/contract/order/dto/create-order.dto';
+import { OrderItemDto } from '@libs/contract/order/dto';
 
 export interface IInventoryActivity {
   /**

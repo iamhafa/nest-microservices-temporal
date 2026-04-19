@@ -11,26 +11,23 @@ import { ClsModule } from 'nestjs-cls';
 import { join } from 'path';
 import { cwd } from 'process';
 import { PaymentActivities } from './activity/payment.activity';
+import { PaymentTransactionEntity } from './entity/payment-transaction.entity';
 import { PaymentTransactionRepository } from './repository/payment-transaction.repository';
 
 @Module({
   imports: [
+    ClsModule.forRoot({ global: true }),
     ConfigModule.forRoot({
+      isGlobal: true,
       envFilePath: [join(cwd(), 'apps/payment-service/.env'), join(cwd(), '.env')],
     }),
-    ClsModule.forRoot({ global: true }),
     StripeModule.forRootAsync({
-      imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         apiKey: config.getOrThrow<string>('STRIPE_SECRET_KEY'),
       }),
     }),
-
-    // Custom dynamic modules
-    SharedLoggerModule,
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
@@ -39,7 +36,7 @@ import { PaymentTransactionRepository } from './repository/payment-transaction.r
         username: configService.getOrThrow<string>('DB_USER'),
         password: configService.getOrThrow<string>('DB_PASS'),
         database: configService.getOrThrow<string>('DB_NAME'),
-        autoLoadEntities: true,
+        entities: [PaymentTransactionEntity],
         synchronize: true,
         invalidWhereValuesBehavior: {
           undefined: 'throw',
@@ -47,6 +44,9 @@ import { PaymentTransactionRepository } from './repository/payment-transaction.r
         },
       }),
     }),
+
+    // Custom dynamic modules
+    SharedLoggerModule,
     SharedTemporalModule.forRoot({
       taskQueue: WorkFlowTaskQueue.PAYMENT,
       worker: {

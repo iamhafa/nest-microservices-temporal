@@ -1,4 +1,4 @@
-import { UserRole } from '@libs/contract/user';
+import { UserRole } from '@libs/contract/user/enum';
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';

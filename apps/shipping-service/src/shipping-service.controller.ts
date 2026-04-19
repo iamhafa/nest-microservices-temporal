@@ -1,4 +1,4 @@
-import { UpdateDeliveryStatusDto } from '@libs/contract/shipping/dto/update-delivery-status.dto';
+import { UpdateDeliveryStatusDto } from '@libs/contract/shipping/dto';
 import { Controller } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 import { ShippingEntity } from './entity/shipping.entity';

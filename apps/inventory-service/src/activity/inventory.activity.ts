@@ -1,4 +1,4 @@
-import { OrderItemDto } from '@libs/contract/order/dto/create-order.dto';
+import { OrderItemDto } from '@libs/contract/order/dto';
 import { IInventoryActivity } from '@libs/temporal/activity';
 import { Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';

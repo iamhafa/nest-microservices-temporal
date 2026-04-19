@@ -1,4 +1,4 @@
-import { AdjustInventoryDto } from '@libs/contract/inventory/dto/adjust-inventory.dto';
+import { AdjustInventoryDto } from '@libs/contract/inventory/dto';
 import { Body, Controller, HttpCode, HttpStatus, Inject, Patch } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { ApiBadRequestResponse, ApiBearerAuth, ApiNoContentResponse, ApiOperation, ApiTags } from '@nestjs/swagger';

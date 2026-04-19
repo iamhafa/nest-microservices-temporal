@@ -1,6 +1,4 @@
-import { CancelOrderDto } from '@libs/contract/order/dto/cancel-order-request.dto';
-import { CreateOrderDto } from '@libs/contract/order/dto/create-order.dto';
-import { UpdateOrderStatusDto } from '@libs/contract/order/dto/update-order-status.dto';
+import { CancelOrderDto, CreateOrderDto, UpdateOrderStatusDto } from '@libs/contract/order/dto';
 import { Body, Controller, Get, HttpCode, HttpStatus, Inject, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import {

@@ -1,4 +1,4 @@
-import { DeliveryStatus } from '@libs/contract/shipping/enum/delivery-status.enum';
+import { DeliveryStatus } from '@libs/contract/shipping/enum';
 import { Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity('shippings')

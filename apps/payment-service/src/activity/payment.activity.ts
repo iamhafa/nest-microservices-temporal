@@ -3,7 +3,7 @@ import { IPaymentActivity } from '@libs/temporal/activity';
 import { Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
-import Stripe from 'stripe';
+import { Stripe } from 'stripe';
 import { PaymentStatus, PaymentTransactionEntity } from '../entity/payment-transaction.entity';
 import { PaymentTransactionRepository } from '../repository/payment-transaction.repository';
 
@@ -34,6 +34,10 @@ export class PaymentActivities implements IPaymentActivity {
       },
     });
 
+    if (paymentIntent.status !== 'succeeded') {
+      throw new RpcException(`[Order ${orderId}] Payment failed: ${paymentIntent.status}`);
+    }
+
     const paymentTransaction: PaymentTransactionEntity = this.paymentTransactionRepository.create({
       order_id: orderId,
       stripe_payment_id: paymentIntent.id,
@@ -46,10 +50,6 @@ export class PaymentActivities implements IPaymentActivity {
     // Log the transaction
     await this.paymentTransactionRepository.save(paymentTransaction);
 
-    if (paymentIntent.status !== 'succeeded') {
-      throw new RpcException(`[Order ${orderId}] Payment failed: ${paymentIntent.status}`);
-    }
-
     this.logger.log(`[Order ${orderId}] Payment successful: ${paymentIntent.id}`);
     return paymentIntent.id;
   }
@@ -61,6 +61,10 @@ export class PaymentActivities implements IPaymentActivity {
     const refund = await this.stripeClient.refunds.create({
       payment_intent: paymentId,
     });
+
+    if (refund.status !== 'succeeded') {
+      throw new RpcException(`[Payment ${paymentId}] Refund failed: ${refund.status}`);
+    }
 
     // Update the transaction status on refund
     await this.paymentTransactionRepository.update(paymentId, { status: PaymentStatus.REFUNDED });

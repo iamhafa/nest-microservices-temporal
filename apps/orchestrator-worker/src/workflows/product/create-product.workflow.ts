@@ -1,4 +1,4 @@
-import { CreateProductDto } from '@libs/contract/product/dto/create-product.dto';
+import { CreateProductDto } from '@libs/contract/product/dto';
 import { IInventoryActivity, IProductActivity } from '@libs/temporal/activity';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue/enum/workflow-task.queue';
 import { proxyActivities } from '@temporalio/workflow';

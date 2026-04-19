@@ -1,4 +1,4 @@
-import { UpdateDeliveryStatusDto } from '@libs/contract/shipping/dto/update-delivery-status.dto';
+import { UpdateDeliveryStatusDto } from '@libs/contract/shipping/dto';
 import { Body, Controller, Get, Inject, Patch } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { ApiBearerAuth, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';

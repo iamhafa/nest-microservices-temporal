@@ -1,4 +1,4 @@
-import { AdjustInventoryDto } from '@libs/contract/inventory/dto/adjust-inventory.dto';
+import { AdjustInventoryDto } from '@libs/contract/inventory/dto';
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { InventoryEntity } from './entity/inventory.entity';

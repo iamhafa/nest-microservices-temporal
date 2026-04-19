@@ -10,6 +10,7 @@ import { ClsModule } from 'nestjs-cls';
 import { join } from 'path';
 import { cwd } from 'process';
 import { InventoryActivity } from './activity/inventory.activity';
+import { InventoryEntity } from './entity/inventory.entity';
 import { InventoryController } from './inventory-service.controller';
 import { InventoryService } from './inventory-service.service';
 import { InventoryRepository } from './repository/inventory.repository';
@@ -33,7 +34,7 @@ import { InventoryRepository } from './repository/inventory.repository';
         username: configService.getOrThrow<string>('DB_USER'),
         password: configService.getOrThrow<string>('DB_PASS'),
         database: configService.getOrThrow<string>('DB_NAME'),
-        autoLoadEntities: true,
+        entities: [InventoryEntity],
         synchronize: true,
         invalidWhereValuesBehavior: {
           undefined: 'throw',

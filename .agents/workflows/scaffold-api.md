@@ -9,6 +9,7 @@ When asked to "create a feature" or scaffold an API (e.g., "Create a Category fe
 **1. Define Data Contracts (`libs/contract`)**
 - Navigate to `libs/contract/src/<domain>/dto/`.
 - Create Request / Response DTOs.
+- Re-export them in `libs/contract/src/<domain>/dto/index.ts`.
 
 **2. Scaffold API Gateway (`apps/api-gateway`)**
 - Navigate to `apps/api-gateway/src/modules/<domain>/`.

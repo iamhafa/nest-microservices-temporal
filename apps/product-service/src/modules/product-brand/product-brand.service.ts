@@ -1,17 +1,12 @@
-import { CreateProductBrandDto } from '@libs/contract/product-brand/dto/create-product-brand.dto';
-import { UpdateProductBrandDto } from '@libs/contract/product-brand/dto/update-product-brand.dto';
+import { CreateProductBrandDto, UpdateProductBrandDto } from '@libs/contract/product/dto';
 import { Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { ProductBrandEntity } from './entity/product-brand.entity';
+import { ProductBrandRepository } from './repository/product-brand.repository';
 
 @Injectable()
 export class ProductBrandService {
-  constructor(
-    @InjectRepository(ProductBrandEntity)
-    private readonly productBrandRepository: Repository<ProductBrandEntity>,
-  ) {}
+  constructor(private readonly productBrandRepository: ProductBrandRepository) {}
 
   async createProductBrand(dto: CreateProductBrandDto): Promise<ProductBrandEntity> {
     const brand = this.productBrandRepository.create(dto);

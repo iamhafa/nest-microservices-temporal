@@ -1,6 +1,5 @@
-import { CancelOrderDto } from '@libs/contract/order/dto/cancel-order-request.dto';
-import { OrderItemDto } from '@libs/contract/order/dto/create-order.dto';
-import { OrderStatus } from '@libs/contract/order/enum/order-status.enum';
+import { CancelOrderDto, OrderItemDto } from '@libs/contract/order/dto';
+import { OrderStatus } from '@libs/contract/order/enum';
 import { IInventoryActivity, IOrderActivity, IPaymentActivity } from '@libs/temporal/activity';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue/enum/workflow-task.queue';
 import { ActivityInterfaceFor, proxyActivities } from '@temporalio/workflow';

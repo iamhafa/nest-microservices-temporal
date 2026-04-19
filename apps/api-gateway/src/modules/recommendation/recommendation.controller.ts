@@ -1,4 +1,4 @@
-import { RelatedProductDto } from '@libs/contract/recommendation';
+import { RelatedProductDto } from '@libs/contract/recommendation/dto';
 import { Controller, Get, Inject, Param, ParseIntPipe } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { ApiBearerAuth, ApiInternalServerErrorResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';

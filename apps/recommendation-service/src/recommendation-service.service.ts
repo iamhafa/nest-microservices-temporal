@@ -1,4 +1,4 @@
-import { RelatedProductDto } from '@libs/contract/recommendation';
+import { RelatedProductDto } from '@libs/contract/recommendation/dto';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';

@@ -1,5 +1,4 @@
-import { CreateProductDto } from '@libs/contract/product/dto/create-product.dto';
-import { UpdateProductDto } from '@libs/contract/product/dto/update-product.dto';
+import { CreateProductDto, UpdateProductDto } from '@libs/contract/product/dto';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue/enum/workflow-task.queue';
 import { Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';

@@ -9,6 +9,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ClsModule } from 'nestjs-cls';
 import { join } from 'path';
 import { cwd } from 'process';
+import { UserEntity } from './entity/user.entity';
 import { UserRepository } from './repository/user.repository';
 import { UserController } from './user-service.controller';
 import { UserService } from './user-service.service';
@@ -18,13 +19,30 @@ import { UserService } from './user-service.service';
     // Core Modules
     ClsModule.forRoot({ global: true }),
     ConfigModule.forRoot({
+      isGlobal: true,
       envFilePath: [join(cwd(), 'apps/user-service/.env'), join(cwd(), '.env')],
+    }),
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.getOrThrow<string>('DB_HOST'),
+        port: configService.getOrThrow<number>('DB_PORT'),
+        username: configService.getOrThrow<string>('DB_USER'),
+        password: configService.getOrThrow<string>('DB_PASS'),
+        database: configService.getOrThrow<string>('DB_NAME'),
+        entities: [UserEntity],
+        synchronize: true,
+        invalidWhereValuesBehavior: {
+          undefined: 'throw',
+          null: 'throw',
+        },
+      }),
     }),
 
     // Auth Core
     JwtModule.registerAsync({
       global: true,
-      imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService): JwtModuleOptions => ({
         secret: configService.getOrThrow<string>('JWT_SECRET'),
@@ -36,23 +54,6 @@ import { UserService } from './user-service.service';
 
     // Custom dynamic modules
     SharedLoggerModule,
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.getOrThrow<string>('DB_HOST'),
-        port: configService.getOrThrow<number>('DB_PORT'),
-        username: configService.getOrThrow<string>('DB_USER'),
-        password: configService.getOrThrow<string>('DB_PASS'),
-        database: configService.getOrThrow<string>('DB_NAME'),
-        synchronize: true,
-        invalidWhereValuesBehavior: {
-          undefined: 'throw',
-          null: 'throw',
-        },
-      }),
-    }),
   ],
   controllers: [UserController],
   providers: [

@@ -1,6 +1,7 @@
 import { ArgumentsHost, Catch, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { BaseExceptionFilter } from '@nestjs/core';
-import { Response } from 'express';
+import { type Response } from 'express';
+import { isObject, isString } from 'lodash';
 
 @Catch()
 export class HttpExceptionFilter extends BaseExceptionFilter {
@@ -16,11 +17,10 @@ export class HttpExceptionFilter extends BaseExceptionFilter {
     if (exception instanceof HttpException) {
       status = exception.getStatus();
       const exceptionResponse = exception.getResponse();
-      message =
-        typeof exceptionResponse === 'string'
-          ? exceptionResponse
-          : (exceptionResponse as any).message || exception.message;
-    } else if (typeof exception === 'object' && exception !== null) {
+      message = isString(exceptionResponse)
+        ? exceptionResponse
+        : (exceptionResponse as any).message || exception.message;
+    } else if (isObject(exception) && exception !== null) {
       // RPC error object from microservice: { status, message }
       const rpcError = exception as any;
       if (rpcError.status && rpcError.message) {

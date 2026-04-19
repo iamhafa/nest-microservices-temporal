@@ -1,4 +1,4 @@
-import { AdjustInventoryDto } from '@libs/contract/inventory/dto/adjust-inventory.dto';
+import { AdjustInventoryDto } from '@libs/contract/inventory/dto';
 import { Injectable, Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { UpdateResult } from 'typeorm';

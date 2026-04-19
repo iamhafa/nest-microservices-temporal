@@ -1,5 +1,4 @@
-import { CreateProductBrandDto } from '@libs/contract/product-brand/dto/create-product-brand.dto';
-import { UpdateProductBrandDto } from '@libs/contract/product-brand/dto/update-product-brand.dto';
+import { CreateProductBrandDto, UpdateProductBrandDto } from '@libs/contract/product/dto';
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { ProductBrandEntity } from './entity/product-brand.entity';
