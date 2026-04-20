@@ -1,4 +1,5 @@
 import { HttpExceptionFilter } from '@libs/common/filter/http-exception.filter';
+import { ResponseInterceptor } from '@libs/common/interceptor/response.interceptor';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
@@ -13,12 +14,13 @@ async function bootstrap() {
   app.useLogger(app.get(Logger));
   app.enableCors();
   app.enableShutdownHooks();
-  app.setGlobalPrefix('api');
-  app.useGlobalFilters(new HttpExceptionFilter());
   app.enableVersioning({
     type: VersioningType.URI,
     defaultVersion: '1',
   });
+  app.setGlobalPrefix('api');
+  app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalInterceptors(new ResponseInterceptor());
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -60,9 +62,10 @@ async function bootstrap() {
               const response = await originalFetch(...args);
               if (args[0].includes('/auth/login') || args[0].includes('/auth/register')) {
                 const clone = response.clone();
-                clone.json().then(data => {
-                  if (data && data.access_token) {
-                    window.ui.preauthorizeApiKey('Authorization', data.access_token);
+                clone.json().then(resData => {
+                  const token = resData?.data?.access_token || resData?.access_token;
+                  if (token) {
+                    window.ui.preauthorizeApiKey('Authorization', token);
                   }
                 }).catch(() => {});
               }

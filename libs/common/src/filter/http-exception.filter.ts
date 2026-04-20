@@ -1,7 +1,7 @@
 import { ArgumentsHost, Catch, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { BaseExceptionFilter } from '@nestjs/core';
-import { type Response } from 'express';
-import { isObject, isString } from 'lodash';
+import { Request, Response } from 'express';
+import { isArray, isObject, isString } from 'lodash';
 
 @Catch()
 export class HttpExceptionFilter extends BaseExceptionFilter {
@@ -10,14 +10,15 @@ export class HttpExceptionFilter extends BaseExceptionFilter {
   catch(exception: unknown, host: ArgumentsHost): void {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
+    const request = ctx.getRequest<Request>();
 
-    let status = HttpStatus.INTERNAL_SERVER_ERROR;
-    let message: string | string[] = 'Internal server error';
+    let httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+    let errorMessage: string | string[] = 'Internal server error';
 
     if (exception instanceof HttpException) {
-      status = exception.getStatus();
+      httpStatus = exception.getStatus();
       const exceptionResponse = exception.getResponse();
-      message = isString(exceptionResponse)
+      errorMessage = isString(exceptionResponse)
         ? exceptionResponse
         : (exceptionResponse as any).message || exception.message;
     } else if (isObject(exception) && exception !== null) {
@@ -25,16 +26,22 @@ export class HttpExceptionFilter extends BaseExceptionFilter {
       const rpcError = exception as any;
       if (rpcError.status && rpcError.message) {
         const parsedStatus = parseInt(rpcError.status, 10);
-        status = isNaN(parsedStatus) ? HttpStatus.INTERNAL_SERVER_ERROR : parsedStatus;
-        message = rpcError.message;
+        httpStatus = isNaN(parsedStatus) ? HttpStatus.INTERNAL_SERVER_ERROR : parsedStatus;
+        errorMessage = rpcError.message;
       }
     }
 
-    this.logger.error(`HTTP Exception: [${status}] ${JSON.stringify(message)}`);
+    this.logger.error(`HTTP Exception: [${httpStatus}] ${JSON.stringify(errorMessage)}`);
 
-    response.status(status).json({
-      statusCode: status,
-      message,
+    const statusEnumKey = HttpStatus[httpStatus] || 'INTERNAL_SERVER_ERROR';
+    const finalErrorMessage = isArray(errorMessage) ? errorMessage.join('; ') : errorMessage;
+
+    response.status(httpStatus).json({
+      success: false,
+      status_code: httpStatus,
+      error: statusEnumKey,
+      message: finalErrorMessage,
+      path: request.url,
       timestamp: new Date().toISOString(),
     });
   }

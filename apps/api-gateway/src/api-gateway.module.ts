@@ -1,7 +1,9 @@
+import { JwtAuthGuard } from '@libs/common/auth';
 import { SharedLoggerModule } from '@libs/common/logger/shared-logger.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
+import { JwtModule } from '@nestjs/jwt';
 import { randomUUID } from 'crypto';
 import { Request, Response } from 'express';
 import { ClsModule, ClsService } from 'nestjs-cls';
@@ -11,9 +13,6 @@ import { ProductModule } from './modules/product/product.module';
 import { RecommendationModule } from './modules/recommendation/recommendation.module';
 import { ShippingModule } from './modules/shipping/shipping.module';
 import { UserModule } from './modules/user/user.module';
-
-import { JwtAuthGuard } from '@libs/common/auth';
-import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
