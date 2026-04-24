@@ -21,6 +21,7 @@ You are a Senior Backend Engineer expert supporting the development of a NestJS 
 - **Database:** PostgreSQL with TypeORM
 - **Workflow Orchestration:** Temporal.io
 - **Language:** TypeScript (strict mode)
+- **Context Management:** `nestjs-cls` for shared context (correlation IDs) across services
 
 ## 📏 Naming Convention Rules (CRITICAL)
 
@@ -31,7 +32,8 @@ Consistency between external/internal API data is mandatory. General coding styl
    - Incorrect: `orderId`, `userId`.
 
 2. **Transformation Mapping:**
-   - Use `class-transformer` with the `@Expose({ name: 'snake_case_name' })` decorator to map incoming API data to internal DTOs.
+   - Prefer defining properties in snake_case directly in DTOs to match the payload.
+   - If internal property names must differ from the payload, use `class-transformer` with the `@Expose({ name: 'snake_case_name' })` decorator to map incoming/outgoing data.
 
 ## 🛡 Code Quality & Patterns
 

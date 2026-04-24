@@ -1,4 +1,4 @@
-import { RpcExceptionFilter } from '@libs/common/filter/rpc-exception.filter';
+import { RpcExceptionFilter } from '@libs/common/filter';
 import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { Logger } from 'nestjs-pino';
@@ -10,7 +10,9 @@ async function bootstrap() {
     options: {
       urls: ['amqp://admin:admin@localhost:5672'],
       queue: 'order-service-queue',
-      queueOptions: { durable: true },
+      queueOptions: {
+        durable: true,
+      },
     },
   });
   app.useLogger(app.get(Logger));

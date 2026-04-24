@@ -42,7 +42,6 @@ export class HttpExceptionFilter extends BaseExceptionFilter {
       error: statusEnumKey,
       message: finalErrorMessage,
       path: request.url,
-      timestamp: new Date().toISOString(),
     });
   }
 }

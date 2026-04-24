@@ -4,7 +4,8 @@ import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
 import { ClsService } from 'nestjs-cls';
-import { IS_PUBLIC_KEY } from './public.decorator';
+import { IS_PUBLIC_KEY } from '../decorator/public.decorator';
+import { IJwtPayload } from '../interface/jwt.interface';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -32,13 +33,16 @@ export class JwtAuthGuard implements CanActivate {
 
     try {
       const secret: string = this.configService.getOrThrow<string>('JWT_SECRET');
-      const payload = await this.jwtService.verifyAsync(token, { secret });
+      const payload: IJwtPayload = await this.jwtService.verifyAsync(token, {
+        secret,
+        ignoreExpiration: false,
+      });
 
       // Assign payload to request object so downstream handlers can use it
       request['user'] = payload;
 
       // Also attach to cls context for internal correlation across modules (like RabbitMQ headers)
-      this.clsService.set('userId', payload.sub);
+      this.clsService.set('userId', payload.user_id);
     } catch {
       throw new UnauthorizedException('Invalid or expired authentication token');
     }

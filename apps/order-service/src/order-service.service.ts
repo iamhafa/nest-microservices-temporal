@@ -90,7 +90,7 @@ export class OrderService {
   getOrders(): Promise<OrderEntity[]> {
     return this.orderRepository.find({
       relations: { items: true },
-      order: { created_at: 'DESC' },
+      order: { created_at_utc: 'DESC' },
     });
   }
 

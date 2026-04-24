@@ -20,7 +20,7 @@ import { RecommendationController } from './recommendation.controller';
               durable: true,
             },
             headers: {
-              ['x-correlation-id']: clsService.getId(),
+              ['X-Correlation-Id']: clsService.getId(),
             },
           },
         }),

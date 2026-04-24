@@ -1,3 +1,4 @@
+import { IJwtPayload } from '@libs/common/auth/interface/jwt.interface';
 import { AuthResponseDto, LoginUserDto, RegisterUserDto, UserResponseDto } from '@libs/contract/user/dto';
 import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -70,8 +71,12 @@ export class UserService {
   }
 
   private generateAuthResponse(user: UserEntity): AuthResponseDto {
-    const payload = { sub: user.id, email: user.email, role: user.role };
-    const accessToken = this.jwtService.sign(payload);
+    const payload: IJwtPayload = {
+      user_id: user.id,
+      email: user.email,
+      role: user.role,
+    };
+    const accessToken: string = this.jwtService.sign(payload);
 
     return {
       access_token: accessToken,

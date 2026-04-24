@@ -13,7 +13,7 @@ export class RmqCorrelationIdInterceptor implements NestInterceptor {
       const rmqContext: RmqContext = context.switchToRpc().getContext();
       // RabbitMQ message properties
       const properties = rmqContext.getMessage()?.properties;
-      const correlationId: string = properties?.headers?.['x-correlation-id'] || randomUUID();
+      const correlationId: string = properties?.headers?.['X-Correlation-Id'] || randomUUID();
 
       // Wrap the request handler in a CLS context.
       // Because NestJS interceptors are Observable-based, we must wrap it at subscription time.

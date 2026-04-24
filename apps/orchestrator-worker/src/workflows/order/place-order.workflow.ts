@@ -64,7 +64,7 @@ export async function placeOrderWorkflow(createOrderDto: CreateOrderDto) {
   console.log('Payload:', createOrderDto);
   const { items, address } = createOrderDto;
   let orderId: number | undefined;
-  let paymentId: string | undefined;
+  let paymentId: number | undefined;
 
   try {
     // 0th: Validate products exist & active

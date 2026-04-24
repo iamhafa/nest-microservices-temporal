@@ -31,11 +31,11 @@ export class PaymentTransactionEntity {
   error_message: string;
 
   @CreateDateColumn({ select: false })
-  created_at: Date;
+  created_at_utc: Date;
 
   @UpdateDateColumn({ select: false })
-  updated_at: Date;
+  updated_at_utc: Date;
 
   @DeleteDateColumn({ select: false })
-  deleted_at: Date;
+  deleted_at_utc: Date;
 }

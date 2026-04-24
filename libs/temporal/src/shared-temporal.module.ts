@@ -8,6 +8,7 @@ export class SharedTemporalModule {
     return TemporalModule.registerAsync({
       isGlobal: true, // allow child module can use this module from parent module
       imports: [ConfigModule],
+      inject: [ConfigService],
       useFactory: (config: ConfigService): TemporalOptions => ({
         ...options,
         connection: {
@@ -15,7 +16,6 @@ export class SharedTemporalModule {
           namespace: config.getOrThrow<string>('TEMPORAL_NAMESPACE'),
         },
       }),
-      inject: [ConfigService],
     });
   }
 }

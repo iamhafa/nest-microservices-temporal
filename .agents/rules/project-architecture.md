@@ -22,8 +22,8 @@ description: Monorepo layout, service responsibilities, and shared libraries str
 | `api-gateway`            | HTTP entrypoint, route requests to internal services via RabbitMQ | ❌    | ❌          |
 | `order-service`          | Quản lý đơn hàng (CRUD, status updates)                           | ✅    | ✅          |
 | `inventory-service`      | Quản lý tồn kho (reserve, confirm, release, restore)              | ✅    | ✅          |
-| `payment-service`        | Xử lý thanh toán (charge, refund)                                 | ❌    | ✅          |
-| `shipping-service`       | Tạo và quản lý vận chuyển                                         | ❌    | ✅          |
+| `payment-service`        | Xử lý thanh toán (charge, refund)                                 | ✅    | ✅          |
+| `shipping-service`       | Tạo và quản lý vận chuyển                                         | ✅    | ✅          |
 | `product-service`        | Quản lý sản phẩm (CRUD, validation)                               | ✅    | ✅          |
 | `recommendation-service` | Gợi ý sản phẩm                                                    | ❌    | ❌          |
 | `user-service`           | Quản lý/xác thực người dùng                                       | ✅    | ❌          |
@@ -38,8 +38,9 @@ apps/<service-name>/src/
 ├── <service-name>.controller.ts      ← RabbitMQ message handler (nếu có)
 ├── <service-name>.service.ts         ← Business logic (nếu có)
 ├── activity/                         ← Temporal activity implementations (nếu có)
-├── entity/                           ← TypeORM entities (nếu có DB)
-└── repository/                       ← Data access layer (nếu có DB)
+├── entity/                           ← TypeORM entities (nếu có DB - hoặc trong modules/)
+├── repository/                       ← Data access layer (nếu có DB - hoặc trong modules/)
+└── modules/                          ← Feature modules (dành cho service phức tạp như product-service)
 ```
 
 ### API Gateway Structure

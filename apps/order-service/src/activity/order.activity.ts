@@ -12,7 +12,7 @@ export class OrderActivity implements IOrderActivity {
   constructor(private readonly orderRepository: OrderRepository) {}
 
   @ActivityMethod()
-  async savePaymentId(orderId: number, paymentId: string): Promise<void> {
+  async savePaymentId(orderId: number, paymentId: number): Promise<void> {
     await this.orderRepository.update(orderId, { payment_id: paymentId });
     this.logger.log(`[Order ${orderId}] Saved paymentId: ${paymentId}`);
   }
@@ -83,10 +83,14 @@ export class OrderActivity implements IOrderActivity {
   }
 
   @ActivityMethod()
-  async getPaymentId(orderId: number): Promise<string> {
+  async getPaymentId(orderId: number): Promise<number> {
     const order = await this.orderRepository.findOneOrFail({
-      where: { id: orderId },
-      select: { payment_id: true },
+      where: {
+        id: orderId,
+      },
+      select: {
+        payment_id: true,
+      },
     });
     this.logger.log(`[Order ${orderId}] Fetched payment_id: ${order.payment_id}`);
     return order.payment_id;

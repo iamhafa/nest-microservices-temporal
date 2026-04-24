@@ -15,7 +15,7 @@ export interface IOrderActivity {
   /**
    * Lưu ID thanh toán
    */
-  savePaymentId(orderId: number, paymentId: string): Promise<void>;
+  savePaymentId(orderId: number, paymentId: number): Promise<void>;
 
   /**
    * Cập nhật trạng thái đơn hàng
@@ -35,5 +35,5 @@ export interface IOrderActivity {
   /**
    * Lấy ID thanh toán
    */
-  getPaymentId(orderId: number): Promise<string | null>;
+  getPaymentId(orderId: number): Promise<number>;
 }

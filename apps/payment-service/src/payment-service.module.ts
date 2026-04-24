@@ -1,5 +1,5 @@
-import { StripeModule } from '@golevelup/nestjs-stripe';
-import { RmqCorrelationIdInterceptor } from '@libs/common/interceptor/rmq-correlation-id.interceptor';
+import { StripeModule, StripeModuleConfig } from '@golevelup/nestjs-stripe';
+import { RmqCorrelationIdInterceptor } from '@libs/common/interceptor';
 import { SharedLoggerModule } from '@libs/common/logger/shared-logger.module';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue/enum/workflow-task.queue';
 import { SharedTemporalModule } from '@libs/temporal/shared-temporal.module';
@@ -23,8 +23,13 @@ import { PaymentTransactionRepository } from './repository/payment-transaction.r
     }),
     StripeModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        apiKey: config.getOrThrow<string>('STRIPE_SECRET_KEY'),
+      useFactory: (configService: ConfigService): StripeModuleConfig => ({
+        apiKey: configService.getOrThrow<string>('STRIPE_SECRET_KEY'),
+        timeout: configService.get<number>('STRIPE_TIMEOUT', 30000),
+        appInfo: {
+          name: 'nest-microservices-temporal',
+          version: '0.0.1',
+        },
       }),
     }),
     TypeOrmModule.forRootAsync({

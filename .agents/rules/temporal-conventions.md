@@ -5,7 +5,7 @@
 - **Orchestrator Worker** (`apps/orchestrator-worker`): Hosts and runs Temporal workflows.
 - **Activity Interfaces** (`libs/temporal/src/activity/interface/`): Define contracts for each service's activities.
 - **Task Queues** (`libs/temporal/src/queue/enum/workflow-task.queue.ts`): Each microservice has its own dedicated task queue.
-- **Shared Module** (`libs/temporal/src/temporal.module.ts`): `SharedTemporalModule.forRoot()` wraps `nestjs-temporal-core` with config-driven connection.
+- **Shared Module** (`libs/temporal/src/shared-temporal.module.ts`): `SharedTemporalModule.forRoot()` wraps `nestjs-temporal-core` with config-driven connection.
 
 ## 📂 File Organization Rules
 
@@ -89,3 +89,13 @@ try {
   - `chargePayment` ↔ `refundPayment`
   - `confirmInventory` ↔ `restoreInventory`
 - Method parameters should be minimal: use IDs and DTOs, not full objects.
+
+## 🔒 Activity Idempotency (CRITICAL)
+
+Because Temporal automatically retries Activities upon failures or network timeouts, **every state-mutating Activity MUST be idempotent**.
+
+**Rules:**
+
+1. **Check Database First**: Before performing any external API call (e.g., charging a payment), query the database to verify if the operation was already completed successfully in a previous attempt.
+2. **Deterministic Keys**: For external APIs that support idempotency (like Stripe), ALWAYS pass a deterministically generated `idempotencyKey` (e.g., `charge_order_${orderId}`). Do NOT store this key in the database if it is purely deterministic and you are acting as the API client.
+3. **Graceful Skips**: If an Activity detects that its work is already done (e.g., payment is already refunded), it should log a message and return success immediately instead of throwing an error.

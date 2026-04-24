@@ -90,8 +90,10 @@ export class ProductService {
     // 3. Validate Tags if provided
     let tags: Pick<ProductTagEntity, 'id'>[] = [];
     if (tag_ids && tag_ids.length > 0) {
-      const foundTags = await this.productTagRepository.find({
-        where: { id: In(tag_ids) },
+      const foundTags: ProductTagEntity[] = await this.productTagRepository.find({
+        where: {
+          id: In(tag_ids),
+        },
       });
 
       const foundIds = new Set(foundTags.map(t => t.id));
@@ -102,7 +104,7 @@ export class ProductService {
       }
 
       // Prepare shorthand objects for relation update
-      tags = tag_ids.map(id => ({ id }));
+      tags = tag_ids.map((id: number) => ({ id }));
     }
 
     // 4. Preload and Save (Handle partial updates and relationships)

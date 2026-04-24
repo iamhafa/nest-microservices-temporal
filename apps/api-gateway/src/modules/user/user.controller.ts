@@ -1,4 +1,4 @@
-import { Public } from '@libs/common/auth';
+import { type IAuthRequest, Public } from '@libs/common/auth';
 import { AuthResponseDto, LoginUserDto, RegisterUserDto, UserResponseDto } from '@libs/contract/user/dto';
 import { Body, Controller, Get, HttpCode, HttpStatus, Inject, Post, Req } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
@@ -31,8 +31,7 @@ export class UserController {
   @Get('users/me')
   @ApiOperation({ summary: 'Get current user profile' })
   @ApiOkResponse({ description: 'Current user profile', type: UserResponseDto })
-  getMe(@Req() request: any): Observable<UserResponseDto> {
-    const userId = request.user.sub;
-    return this.userServiceClient.send({ cmd: 'get-user' }, userId);
+  getMe(@Req() { user }: IAuthRequest): Observable<UserResponseDto> {
+    return this.userServiceClient.send({ cmd: 'get-user' }, user.user_id);
   }
 }

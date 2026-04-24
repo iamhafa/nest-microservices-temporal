@@ -26,7 +26,7 @@ export class OrderEntity {
   email: string;
 
   @Column({ unique: true, nullable: true, comment: 'Mã thanh toán' })
-  payment_id: string;
+  payment_id: number;
 
   @Column({ type: 'int', default: 0, comment: 'Tổng tiền đơn hàng' })
   total_amount: number;
@@ -35,13 +35,13 @@ export class OrderEntity {
   cancel_reason: string;
 
   @CreateDateColumn({ select: false })
-  created_at: Date;
+  created_at_utc: Date;
 
   @UpdateDateColumn({ select: false })
-  updated_at: Date;
+  updated_at_utc: Date;
 
   @DeleteDateColumn({ select: false })
-  deleted_at: Date;
+  deleted_at_utc: Date;
 
   @OneToMany(() => OrderItemEntity, item => item.order, { cascade: true })
   readonly items: Relation<OrderItemEntity[]>;

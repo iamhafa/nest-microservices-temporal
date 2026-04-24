@@ -110,7 +110,7 @@
         "inventory-service",
         "payment-service",
         "shipping-service",
-        "recommendation-service",
+        // "recommendation-service",
         "user-service"
       ]
     }

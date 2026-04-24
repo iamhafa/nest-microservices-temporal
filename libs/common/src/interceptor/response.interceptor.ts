@@ -22,7 +22,6 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, any> {
           message: hasCustomShape && objResult.message ? objResult.message : 'Successful',
           data: hasCustomShape && objResult.data !== undefined ? objResult.data : result,
           ...(hasCustomShape && objResult.meta ? { meta: objResult.meta } : {}),
-          timestamp: new Date().toISOString(),
         };
       }),
     );

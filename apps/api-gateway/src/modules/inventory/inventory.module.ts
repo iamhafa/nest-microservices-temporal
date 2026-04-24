@@ -20,7 +20,7 @@ import { InventoryController } from './inventory.controller';
               durable: true, // if false, queue will be deleted when rabbitmq restart
             },
             headers: {
-              ['x-correlation-id']: clsService.getId(),
+              ['X-Correlation-Id']: clsService.getId(),
             },
           },
         }),

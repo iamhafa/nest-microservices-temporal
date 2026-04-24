@@ -1,44 +1,51 @@
 {
-  "mcpServers": {
-    "product-postgres": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-postgres",
-        "postgresql://postgres:postgres@localhost:5432/nest-temporal-product-service"
-      ]
-    },
-    "order-postgres": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-postgres",
-        "postgresql://postgres:postgres@localhost:5432/nest-temporal-order-service"
-      ]
-    },
-    "inventory-postgres": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-postgres",
-        "postgresql://postgres:postgres@localhost:5432/nest-temporal-inventory-service"
-      ]
-    },
-    "payment-postgres": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-postgres",
-        "postgresql://postgres:postgres@localhost:5432/nest-temporal-payment-service"
-      ]
-    },
-    "user-postgres": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-postgres",
-        "postgresql://postgres:postgres@localhost:5432/nest-temporal-user-service"
-      ]
-    }
-  }
+	"mcpServers": {
+		"mcp-product-service-db": {
+			"command": "npx",
+			"args": [
+				"-y",
+				"@modelcontextprotocol/server-postgres",
+				"postgresql://postgres:postgres@localhost:5432/nest-temporal-product-service"
+			]
+		},
+		"mcp-order-service-db": {
+			"command": "npx",
+			"args": [
+				"-y",
+				"@modelcontextprotocol/server-postgres",
+				"postgresql://postgres:postgres@localhost:5432/nest-temporal-order-service"
+			]
+		},
+		"mcp-inventory-service-db": {
+			"command": "npx",
+			"args": [
+				"-y",
+				"@modelcontextprotocol/server-postgres",
+				"postgresql://postgres:postgres@localhost:5432/nest-temporal-inventory-service"
+			]
+		},
+		"mcp-payment-service-db": {
+			"command": "npx",
+			"args": [
+				"-y",
+				"@modelcontextprotocol/server-postgres",
+				"postgresql://postgres:postgres@localhost:5432/nest-temporal-payment-service"
+			]
+		},
+		"mcp-user-service-db": {
+			"command": "npx",
+			"args": [
+				"-y",
+				"@modelcontextprotocol/server-postgres",
+				"postgresql://postgres:postgres@localhost:5432/nest-temporal-user-service"
+			]
+		},
+		"mcp-stripe": {
+			"command": "npx",
+			"args": ["-y", "@stripe/mcp"],
+			"env": {
+				"STRIPE_SECRET_KEY": ""
+			}
+		}
+	}
 }

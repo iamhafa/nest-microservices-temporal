@@ -10,5 +10,5 @@ When creating a new Temporal workflow, perform these steps sequentially:
 2. Re-export from `libs/temporal/src/activity/index.ts`.
 3. Add task queue entry in `WorkFlowTaskQueue` enum if new service.
 4. Create workflow file in `apps/orchestrator-worker/src/workflows/<domain>/`.
-5. Export from domain subfolder index files (e.g., `libs/contract/src/<domain>/dto/index.ts`).
+5. Export from the domain subfolder's `index.ts` (e.g., `apps/orchestrator-worker/src/workflows/<domain>/index.ts`).
 6. Implement Saga compensation in try/catch if the workflow involves multiple services.

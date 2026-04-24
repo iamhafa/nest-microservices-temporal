@@ -1,17 +1,17 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Request, Response } from 'express';
 import { ClsService } from 'nestjs-cls';
 import { LoggerModule } from 'nestjs-pino';
+import { EnvModule } from '../env/env.module';
+import { EnvService } from '../env/env.service';
 
 @Module({
   imports: [
     LoggerModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ClsService, ConfigService],
-      useFactory: (clsService: ClsService, config: ConfigService) => {
-        const isProduction: boolean = config.get<string>('NODE_ENV') === 'production';
-        const addCorrelationId = () => {
+      imports: [EnvModule],
+      inject: [ClsService, EnvService],
+      useFactory: (clsService: ClsService, envService: EnvService) => {
+        const addCorrelationId = (): Record<string, string> => {
           if (clsService.isActive()) {
             const correlationId = clsService.get('correlationId');
             return correlationId ? { correlationId } : {};
@@ -20,12 +20,13 @@ import { LoggerModule } from 'nestjs-pino';
         };
 
         return {
+          forRoutes: ['/api/*path'],
           pinoHttp: {
-            genReqId: (req: Request) => req.headers['x-correlation-id'] as string,
-            transport: !isProduction ? { target: 'pino-pretty' } : undefined,
-            level: !isProduction ? 'debug' : 'info',
-            customProps: addCorrelationId,
-            mixin: addCorrelationId,
+            genReqId: (req: Request) => req.headers['X-Correlation-Id'] as string,
+            transport: !envService.isProduction() ? { target: 'pino-pretty' } : undefined,
+            level: !envService.isProduction() ? 'debug' : 'info',
+            customProps: () => addCorrelationId(),
+            mixin: () => addCorrelationId(),
             serializers: {
               req: (req: Request) => ({
                 id: req.id,

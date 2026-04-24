@@ -1,15 +1,20 @@
-import { HttpExceptionFilter } from '@libs/common/filter/http-exception.filter';
-import { ResponseInterceptor } from '@libs/common/interceptor/response.interceptor';
+import { EnvService } from '@libs/common/env/env.service';
+import { HttpExceptionFilter } from '@libs/common/filter';
+import { ResponseInterceptor } from '@libs/common/interceptor';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import helmet from 'helmet';
 import { Logger } from 'nestjs-pino';
 import { ApiGatewayModule } from './api-gateway.module';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(ApiGatewayModule, { bufferLogs: true });
 
+  // Trust 1 layer of proxies (e.g., Nginx, Load Balancer) to get the correct client IP for rate limiting
+  app.set('trust proxy', 1);
+  app.use(helmet());
   app.disable('x-powered-by');
   app.useLogger(app.get(Logger));
   app.enableCors();
@@ -46,11 +51,13 @@ async function bootstrap() {
       'Authorization',
     )
     .build();
+  const envService: EnvService = app.get(EnvService);
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api-docs', app, document, {
     swaggerOptions: {
       persistAuthorization: true,
     },
+    swaggerUiEnabled: envService.isDevelopment(),
     // Add custom js to swagger (auto login)
     customJsStr: `
       window.addEventListener('load', () => {

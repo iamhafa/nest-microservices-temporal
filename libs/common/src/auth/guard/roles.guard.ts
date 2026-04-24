@@ -1,8 +1,8 @@
 import { UserRole } from '@libs/contract/user/enum';
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Request } from 'express';
-import { ROLES_KEY } from './roles.decorator';
+import { ROLES_KEY } from '../decorator/roles.decorator';
+import { IAuthRequest } from '../interface/jwt.interface';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -18,9 +18,7 @@ export class RolesGuard implements CanActivate {
     if (!requiredRoles) return true;
 
     // The user payload is injected by JwtAuthGuard
-    const request: Request = context.switchToHttp().getRequest();
-    // Use type casting to "any" to tell TS not to check the strict Express.User type
-    const user: any = request.user;
+    const { user }: IAuthRequest = context.switchToHttp().getRequest();
 
     if (!user || !user.role) {
       throw new ForbiddenException('User role not found');

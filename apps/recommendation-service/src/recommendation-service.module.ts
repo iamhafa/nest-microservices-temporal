@@ -1,4 +1,4 @@
-import { RmqCorrelationIdInterceptor } from '@libs/common/interceptor/rmq-correlation-id.interceptor';
+import { RmqCorrelationIdInterceptor } from '@libs/common/interceptor';
 import { SharedLoggerModule } from '@libs/common/logger/shared-logger.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';

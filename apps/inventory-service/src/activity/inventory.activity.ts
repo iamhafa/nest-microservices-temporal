@@ -42,7 +42,7 @@ export class InventoryActivity implements IInventoryActivity {
 
     return this.entityManager.transaction(async (manager: EntityManager) => {
       for (const orderItem of orderItems) {
-        await manager
+        const result: UpdateResult = await manager
           .createQueryBuilder()
           .update(InventoryEntity)
           .set({
@@ -53,6 +53,10 @@ export class InventoryActivity implements IInventoryActivity {
           // Idempotency: Đảm bảo không trừ xuống âm
           .andWhere('reserved_quantity >= :quantity', { quantity: orderItem.quantity })
           .execute();
+
+        if (result.affected === 0) {
+          throw new Error(`Product ${orderItem.product_id} out of stock.`);
+        }
       }
     });
   }
