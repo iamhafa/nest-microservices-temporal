@@ -1,10 +1,14 @@
+---
+trigger: always_on
+---
+
 # Temporal Workflow & Activity Patterns
 
 ## 🏗 Architecture Overview
 
 - **Orchestrator Worker** (`apps/orchestrator-worker`): Hosts and runs Temporal workflows.
 - **Activity Interfaces** (`libs/temporal/src/activity/interface/`): Define contracts for each service's activities.
-- **Task Queues** (`libs/temporal/src/queue/enum/workflow-task.queue.ts`): Each microservice has its own dedicated task queue.
+- **Task Queues** (`libs/temporal/src/queue.ts`): Each microservice has its own dedicated task queue.
 - **Shared Module** (`libs/temporal/src/shared-temporal.module.ts`): `SharedTemporalModule.forRoot()` wraps `nestjs-temporal-core` with config-driven connection.
 
 ## 📂 File Organization Rules

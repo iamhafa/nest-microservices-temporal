@@ -1,7 +1,8 @@
 import { InjectStripeClient } from '@golevelup/nestjs-stripe';
+import { AppException } from '@libs/common/exception/app-exception';
+import { PaymentErrorCode } from '@libs/contract/payment/error';
 import { IPaymentActivity } from '@libs/temporal/activity';
 import { Logger } from '@nestjs/common';
-import { RpcException } from '@nestjs/microservices';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { Stripe } from 'stripe';
 import { PaymentStatus, PaymentTransactionEntity } from '../entity/payment-transaction.entity';
@@ -55,7 +56,10 @@ export class PaymentActivities implements IPaymentActivity {
     );
 
     if (paymentIntent.status !== 'succeeded') {
-      throw new RpcException(`[Order ${orderId}] Payment failed: ${paymentIntent.status}`);
+      throw new AppException({
+        code: PaymentErrorCode.PROCESSING_FAILED,
+        message: `[Order ${orderId}] Payment failed: ${paymentIntent.status}`,
+      });
     }
 
     const paymentTransaction: PaymentTransactionEntity = this.paymentTransactionRepository.create({
@@ -113,7 +117,10 @@ export class PaymentActivities implements IPaymentActivity {
     );
 
     if (refund.status !== 'succeeded') {
-      throw new RpcException(`[Payment ${paymentId}] Refund failed: ${refund.status}`);
+      throw new AppException({
+        code: PaymentErrorCode.PROCESSING_FAILED,
+        message: `[Payment ${paymentId}] Refund failed: ${refund.status}`,
+      });
     }
 
     // Update the transaction status on refund

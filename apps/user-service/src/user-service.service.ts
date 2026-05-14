@@ -1,8 +1,10 @@
 import { IJwtPayload } from '@libs/common/auth/interface/jwt.interface';
+import { AppException } from '@libs/common/exception/app-exception';
 import { AuthResponseDto, LoginUserDto, RegisterUserDto, UserResponseDto } from '@libs/contract/user/dto';
-import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { UserErrorCode } from '@libs/contract/user/error';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
+import { compare, hash } from 'bcrypt';
 import { UserEntity } from './entity/user.entity';
 import { UserRepository } from './repository/user.repository';
 
@@ -18,11 +20,15 @@ export class UserService {
 
     const existingUser: boolean = await this.userRepository.existsBy({ email });
     if (existingUser) {
-      throw new ConflictException('Email already exists');
+      throw new AppException({
+        code: UserErrorCode.EMAIL_EXISTS,
+        message: 'Email already exists',
+        status: HttpStatus.CONFLICT,
+      });
     }
 
     const saltRounds: number = 10;
-    const passwordHash: string = await bcrypt.hash(password, saltRounds);
+    const passwordHash: string = await hash(password, saltRounds);
 
     const user: UserEntity = this.userRepository.create({
       email,
@@ -31,9 +37,9 @@ export class UserService {
       last_name,
     });
 
-    await this.userRepository.save(user);
+    const savedUser: UserEntity = await this.userRepository.save(user);
 
-    return this.generateAuthResponse(user);
+    return this.generateAuthResponse(savedUser);
   }
 
   async loginUser(loginUserDto: LoginUserDto): Promise<AuthResponseDto> {
@@ -48,12 +54,20 @@ export class UserService {
     });
 
     if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new AppException({
+        code: UserErrorCode.INVALID_CREDENTIALS,
+        message: 'Invalid credentials',
+        status: HttpStatus.UNAUTHORIZED,
+      });
     }
 
-    const isPasswordValid: boolean = await bcrypt.compare(password, user.password_hash);
+    const isPasswordValid: boolean = await compare(password, user.password_hash);
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new AppException({
+        code: UserErrorCode.INVALID_CREDENTIALS,
+        message: 'Invalid credentials',
+        status: HttpStatus.UNAUTHORIZED,
+      });
     }
 
     return this.generateAuthResponse(user);
@@ -65,7 +79,11 @@ export class UserService {
       is_active: true,
     });
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new AppException({
+        code: UserErrorCode.NOT_FOUND,
+        message: 'User not found',
+        status: HttpStatus.NOT_FOUND,
+      });
     }
     return user;
   }

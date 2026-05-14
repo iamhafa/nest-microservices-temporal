@@ -1,7 +1,8 @@
+import { AppException } from '@libs/common/exception/app-exception';
 import { CreateProductDto, UpdateProductDto } from '@libs/contract/product/dto';
+import { ProductErrorCode } from '@libs/contract/product/error';
 import { IProductActivity } from '@libs/temporal/activity';
-import { Logger } from '@nestjs/common';
-import { RpcException } from '@nestjs/microservices';
+import { HttpStatus, Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { In } from 'typeorm';
 import { EmbeddingService } from '../modules/embedding/embedding.service';
@@ -35,7 +36,11 @@ export class ProductActivity implements IProductActivity {
     if (category_id) {
       const category = await this.productCategoryRepository.findOneBy({ id: category_id });
       if (!category) {
-        throw new RpcException(`Category #${category_id} not found`);
+        throw new AppException({
+          code: ProductErrorCode.CATEGORY_NOT_FOUND,
+          message: `Category #${category_id} not found`,
+          status: HttpStatus.NOT_FOUND,
+        });
       }
     }
 
@@ -43,7 +48,11 @@ export class ProductActivity implements IProductActivity {
     if (brand_id) {
       const brand = await this.productBrandRepository.findOneBy({ id: brand_id });
       if (!brand) {
-        throw new RpcException(`Brand #${brand_id} not found`);
+        throw new AppException({
+          code: ProductErrorCode.BRAND_NOT_FOUND,
+          message: `Brand #${brand_id} not found`,
+          status: HttpStatus.NOT_FOUND,
+        });
       }
     }
 
@@ -57,7 +66,11 @@ export class ProductActivity implements IProductActivity {
       const missingIds: number[] = tag_ids.filter(tagId => !foundIds.has(tagId));
 
       if (missingIds.length > 0) {
-        throw new RpcException(`Tags not found: ${missingIds.join(', ')}`);
+        throw new AppException({
+          code: ProductErrorCode.TAG_NOT_FOUND,
+          message: `Tags not found: ${missingIds.join(', ')}`,
+          status: HttpStatus.NOT_FOUND,
+        });
       }
     }
 
@@ -133,7 +146,9 @@ export class ProductActivity implements IProductActivity {
   async generateProductEmbedding(productId: number): Promise<void> {
     this.logger.log(`Generating embedding for product ${productId}`);
     const product = await this.productRepository.findOne({
-      where: { id: productId },
+      where: {
+        id: productId,
+      },
       relations: {
         category: true,
         brand: true,
@@ -146,8 +161,8 @@ export class ProductActivity implements IProductActivity {
       return;
     }
 
-    const text = this.embeddingService.buildProductText(product);
-    const embedding = await this.embeddingService.generateEmbedding(text);
+    const text: string = this.embeddingService.buildProductText(product);
+    const embedding: number[] = await this.embeddingService.generateEmbedding(text);
 
     await this.productService.updateEmbedding(productId, embedding);
     this.logger.log(`Embedding generated and saved for product ${productId}`);

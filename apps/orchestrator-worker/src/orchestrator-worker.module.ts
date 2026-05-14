@@ -1,6 +1,6 @@
 import { RmqCorrelationIdInterceptor } from '@libs/common/interceptor';
 import { SharedLoggerModule } from '@libs/common/logger/shared-logger.module';
-import { WorkFlowTaskQueue } from '@libs/temporal/queue/enum/workflow-task.queue';
+import { WorkFlowTaskQueue } from '@libs/temporal/queue';
 import { SharedTemporalModule } from '@libs/temporal/shared-temporal.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';

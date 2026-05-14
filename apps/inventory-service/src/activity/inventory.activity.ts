@@ -1,6 +1,8 @@
+import { AppException } from '@libs/common/exception/app-exception';
+import { InventoryErrorCode } from '@libs/contract/inventory/error';
 import { OrderItemDto } from '@libs/contract/order/dto';
 import { IInventoryActivity } from '@libs/temporal/activity';
-import { Logger } from '@nestjs/common';
+import { HttpStatus, Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { EntityManager, UpdateResult } from 'typeorm';
 import { InventoryEntity } from '../entity/inventory.entity';
@@ -30,7 +32,10 @@ export class InventoryActivity implements IInventoryActivity {
           .execute();
 
         if (result.affected === 0) {
-          throw new Error(`Product ${orderItem.product_id} out of stock.`);
+          throw new AppException({
+            code: InventoryErrorCode.ADJUSTMENT_FAILED,
+            message: `Product ${orderItem.product_id} out of stock.`,
+          });
         }
       }
     });
@@ -55,7 +60,10 @@ export class InventoryActivity implements IInventoryActivity {
           .execute();
 
         if (result.affected === 0) {
-          throw new Error(`Product ${orderItem.product_id} out of stock.`);
+          throw new AppException({
+            code: InventoryErrorCode.ADJUSTMENT_FAILED,
+            message: `Product ${orderItem.product_id} out of stock.`,
+          });
         }
       }
     });
@@ -84,7 +92,11 @@ export class InventoryActivity implements IInventoryActivity {
           .execute();
 
         if (result.affected === 0) {
-          throw new Error(`Inventory reconciliation error for product ${orderItem.product_id}`);
+          throw new AppException({
+            code: InventoryErrorCode.ADJUSTMENT_FAILED,
+            message: `Inventory reconciliation error for product ${orderItem.product_id}`,
+            status: HttpStatus.INTERNAL_SERVER_ERROR,
+          });
         }
       }
     });

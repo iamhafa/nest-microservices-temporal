@@ -1,7 +1,8 @@
+import { AppException } from '@libs/common/exception/app-exception';
 import { CreateProductDto, UpdateProductDto } from '@libs/contract/product/dto';
-import { WorkFlowTaskQueue } from '@libs/temporal/queue/enum/workflow-task.queue';
-import { Injectable } from '@nestjs/common';
-import { RpcException } from '@nestjs/microservices';
+import { ProductErrorCode } from '@libs/contract/product/error';
+import { WorkFlowTaskQueue } from '@libs/temporal/queue';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { ClsService } from 'nestjs-cls';
 import { TemporalService, WorkflowExecutionResult } from 'nestjs-temporal-core';
 import { In, IsNull } from 'typeorm';
@@ -39,7 +40,14 @@ export class ProductService {
     );
 
     if (!workFlowResponse.success) {
-      throw workFlowResponse.error ?? new Error('Failed to start workflow');
+      throw (
+        workFlowResponse.error ??
+        new AppException({
+          code: ProductErrorCode.NOT_FOUND,
+          message: 'Failed to start workflow',
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+        })
+      );
     }
 
     return {
@@ -62,7 +70,11 @@ export class ProductService {
     });
 
     if (!product) {
-      throw new RpcException({ status: 404, message: `Product #${id} not found` });
+      throw new AppException({
+        code: ProductErrorCode.NOT_FOUND,
+        message: `Product #${id} not found`,
+        status: HttpStatus.NOT_FOUND,
+      });
     }
 
     return product;
@@ -75,7 +87,10 @@ export class ProductService {
     if (category_id) {
       const category = await this.productCategoryRepository.findOneBy({ id: category_id });
       if (!category) {
-        throw new RpcException({ status: 400, message: `Category #${category_id} not found` });
+        throw new AppException({
+          code: ProductErrorCode.CATEGORY_NOT_FOUND,
+          message: `Category #${category_id} not found`,
+        });
       }
     }
 
@@ -83,7 +98,10 @@ export class ProductService {
     if (brand_id) {
       const brand = await this.productBrandRepository.findOneBy({ id: brand_id });
       if (!brand) {
-        throw new RpcException(`Brand #${brand_id} not found`);
+        throw new AppException({
+          code: ProductErrorCode.BRAND_NOT_FOUND,
+          message: `Brand #${brand_id} not found`,
+        });
       }
     }
 
@@ -100,7 +118,10 @@ export class ProductService {
       const missingIds = tag_ids.filter(id => !foundIds.has(id));
 
       if (missingIds.length > 0) {
-        throw new RpcException(`Tags not found: ${missingIds.join(', ')}`);
+        throw new AppException({
+          code: ProductErrorCode.TAG_NOT_FOUND,
+          message: `Tags not found: ${missingIds.join(', ')}`,
+        });
       }
 
       // Prepare shorthand objects for relation update
@@ -117,7 +138,11 @@ export class ProductService {
     });
 
     if (!productToUpdate) {
-      throw new RpcException(`Product #${id} not found`);
+      throw new AppException({
+        code: ProductErrorCode.NOT_FOUND,
+        message: `Product #${id} not found`,
+        status: HttpStatus.NOT_FOUND,
+      });
     }
 
     await this.productRepository.save(productToUpdate);
@@ -160,7 +185,11 @@ export class ProductService {
     });
 
     if (!product) {
-      throw new RpcException({ status: 404, message: `Product #${productId} not found` });
+      throw new AppException({
+        code: ProductErrorCode.NOT_FOUND,
+        message: `Product #${productId} not found`,
+        status: HttpStatus.NOT_FOUND,
+      });
     }
 
     let embeddingStr: any = product.embedding;

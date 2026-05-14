@@ -1,7 +1,8 @@
+import { AppException } from '@libs/common/exception/app-exception';
 import { CancelOrderDto, CreateOrderDto, UpdateOrderStatusDto } from '@libs/contract/order/dto';
-import { WorkFlowTaskQueue } from '@libs/temporal/queue/enum/workflow-task.queue';
-import { Injectable } from '@nestjs/common';
-import { RpcException } from '@nestjs/microservices';
+import { OrderErrorCode } from '@libs/contract/order/error';
+import { WorkFlowTaskQueue } from '@libs/temporal/queue';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { ClsService } from 'nestjs-cls';
 import { TemporalService, WorkflowExecutionResult } from 'nestjs-temporal-core';
 import { OrderEntity } from './entity/order.entity';
@@ -30,7 +31,14 @@ export class OrderService {
     );
 
     if (!workFlowResponse.success) {
-      throw workFlowResponse.error ?? new Error('Failed to start workflow');
+      throw (
+        workFlowResponse.error ??
+        new AppException({
+          code: OrderErrorCode.WORKFLOW_FAILED,
+          message: 'Failed to start workflow',
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+        })
+      );
     }
 
     return {
@@ -46,7 +54,11 @@ export class OrderService {
     });
 
     if (!order) {
-      throw new RpcException({ status: 404, message: `Order #${orderId} not found` });
+      throw new AppException({
+        code: OrderErrorCode.NOT_FOUND,
+        message: `Order #${orderId} not found`,
+        status: HttpStatus.NOT_FOUND,
+      });
     }
 
     return order;
@@ -56,8 +68,8 @@ export class OrderService {
     const order: OrderEntity = await this.getOrder(cancelOrderDto.order_id);
 
     if (!order.isCancelable) {
-      throw new RpcException({
-        status: 400,
+      throw new AppException({
+        code: OrderErrorCode.NOT_CANCELABLE,
         message: `Order ${order.id} cannot be cancelled because it is in ${order.status} status.`,
       });
     }
@@ -95,7 +107,7 @@ export class OrderService {
   }
 
   async updateOrderStatus(updateOrderStatusDto: UpdateOrderStatusDto): Promise<OrderEntity> {
-    const order = await this.getOrder(updateOrderStatusDto.order_id);
+    const order: OrderEntity = await this.getOrder(updateOrderStatusDto.order_id);
     order.status = updateOrderStatusDto.status;
     return this.orderRepository.save(order);
   }

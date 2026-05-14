@@ -1,50 +1,47 @@
-import { ArgumentsHost, Catch, HttpException, HttpStatus, Logger } from '@nestjs/common';
+import { Catch, HttpException, HttpStatus } from '@nestjs/common';
 import { BaseRpcExceptionFilter, RpcException } from '@nestjs/microservices';
-import { isObject, isString } from 'lodash';
 import { Observable, throwError } from 'rxjs';
+import { AppException, AppExceptionOptions } from '../exception/app-exception';
 
-/**
- * RpcExceptionFilter: Chạy ở cấp Microservices.
- * 
- * Flow:
- * 1. Bắt tất cả các lỗi được throw ra từ bên trong 1 Microservice.
- * 2. Trích xuất thông tin status code và nội dung message lỗi.
- * 3. Bọc chúng lại thành một object thuần { status, message }.
- * 4. Ném (throw) object này thông qua RabbitMQ ngược về lại cho người gọi (thường là API Gateway).
- * 
- * Lưu ý: Chúng ta KHÔNG format JSON ({ success, status_code... }) ở đây. Việc định dạng 
- * response cuối cùng để gửi cho Client sẽ do HttpExceptionFilter ở API Gateway đảm nhận.
- */
 @Catch()
 export class RpcExceptionFilter extends BaseRpcExceptionFilter {
-  private readonly logger = new Logger(RpcExceptionFilter.name);
+  catch(exception: unknown): Observable<never> {
+    let payload: AppExceptionOptions = {
+      code: 'SYS_999',
+      message: 'Internal server error',
+      status: HttpStatus.INTERNAL_SERVER_ERROR,
+    };
 
-  catch(exception: unknown, host: ArgumentsHost): Observable<never> {
-    const rpcContext = host.switchToRpc();
-    const data = rpcContext.getData();
-
-    let status = HttpStatus.INTERNAL_SERVER_ERROR;
-    let message = 'Internal server error';
-
-    if (exception instanceof RpcException) {
-      const error = exception.getError();
-      if (isObject(error) && error !== null) {
-        status = (error as any).status || HttpStatus.INTERNAL_SERVER_ERROR;
-        message = (error as any).message || message;
-      } else if (isString(error)) {
-        message = error;
-      }
+    if (exception instanceof AppException) {
+      payload = {
+        code: exception.code,
+        message: exception.message,
+        status: exception.getStatus(),
+        ...(exception.details ? { details: exception.details } : {}),
+      };
     } else if (exception instanceof HttpException) {
-      status = exception.getStatus();
-      const response = exception.getResponse();
-      message = isString(response) ? response : (response as any).message || exception.message;
+      payload = {
+        code: 'SYS_999',
+        message: exception.message,
+        status: exception.getStatus(),
+      };
+    } else if (exception instanceof RpcException) {
+      const error = exception.getError();
+      if (typeof error === 'object' && error !== null) {
+        const obj = error as Record<string, unknown>;
+        payload = {
+          code: (obj.code as string) || 'SYS_999',
+          message: (obj.message as string) || 'Internal server error',
+          status: (obj.status as number) || HttpStatus.INTERNAL_SERVER_ERROR,
+          ...(obj.details ? { details: obj.details as any } : {}),
+        };
+      } else if (typeof error === 'string') {
+        payload.message = error;
+      }
     } else if (exception instanceof Error) {
-      message = exception.message;
+      payload.message = exception.message;
     }
 
-    this.logger.error(`RPC Exception: [${status}] ${message}`, JSON.stringify({ data }));
-
-    // Gửi payload tối giản { status, message } qua RabbitMQ về lại API Gateway
-    return throwError(() => ({ status, message }));
+    return throwError(() => payload);
   }
 }

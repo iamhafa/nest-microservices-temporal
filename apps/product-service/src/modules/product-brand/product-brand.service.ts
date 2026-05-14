@@ -1,6 +1,7 @@
+import { AppException } from '@libs/common/exception/app-exception';
 import { CreateProductBrandDto, UpdateProductBrandDto } from '@libs/contract/product/dto';
-import { Injectable } from '@nestjs/common';
-import { RpcException } from '@nestjs/microservices';
+import { ProductErrorCode } from '@libs/contract/product/error';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { ProductBrandEntity } from './entity/product-brand.entity';
 import { ProductBrandRepository } from './repository/product-brand.repository';
 
@@ -20,7 +21,11 @@ export class ProductBrandService {
   async getProductBrand(id: number): Promise<ProductBrandEntity> {
     const brand = await this.productBrandRepository.findOne({ where: { id } });
     if (!brand) {
-      throw new RpcException({ status: 404, message: `Product brand #${id} not found` });
+      throw new AppException({
+        code: ProductErrorCode.BRAND_NOT_FOUND,
+        message: `Product brand #${id} not found`,
+        status: HttpStatus.NOT_FOUND,
+      });
     }
     return brand;
   }
@@ -29,7 +34,11 @@ export class ProductBrandService {
     const { id, ...updateData } = dto;
     const result = await this.productBrandRepository.update(id, updateData);
     if (result.affected === 0) {
-      throw new RpcException({ status: 404, message: `Product brand #${id} not found` });
+      throw new AppException({
+        code: ProductErrorCode.BRAND_NOT_FOUND,
+        message: `Product brand #${id} not found`,
+        status: HttpStatus.NOT_FOUND,
+      });
     }
   }
 

@@ -7,7 +7,7 @@ import type {
   IProductActivity,
   IShippingActivity,
 } from '@libs/temporal/activity';
-import { WorkFlowTaskQueue } from '@libs/temporal/queue/enum/workflow-task.queue';
+import { WorkFlowTaskQueue } from '@libs/temporal/queue';
 import { ActivityInterfaceFor, proxyActivities } from '@temporalio/workflow';
 
 const productActivities: ActivityInterfaceFor<IProductActivity> = proxyActivities({

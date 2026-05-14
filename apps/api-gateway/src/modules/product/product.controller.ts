@@ -15,13 +15,13 @@ import {
 import { ClientProxy } from '@nestjs/microservices';
 import {
   ApiAcceptedResponse,
-  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
+  ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
 import { Observable } from 'rxjs';
 
@@ -35,7 +35,7 @@ export class ProductController {
   @HttpCode(HttpStatus.ACCEPTED)
   @ApiOperation({ summary: 'Create a product' })
   @ApiAcceptedResponse({ description: 'Product creation initiated' })
-  @ApiBadRequestResponse({ description: 'Invalid request' })
+  @ApiUnprocessableEntityResponse({ description: 'Invalid request' })
   createProduct(@Body() createProductDto: CreateProductDto): Observable<any> {
     return this.productServiceClient.send({ cmd: 'create-product' }, createProductDto);
   }
@@ -60,7 +60,7 @@ export class ProductController {
   @ApiOperation({ summary: 'Update a product' })
   @ApiNoContentResponse({ description: 'Product updated successfully' })
   @ApiNotFoundResponse({ description: 'Product not found' })
-  @ApiBadRequestResponse({ description: 'Invalid request' })
+  @ApiUnprocessableEntityResponse({ description: 'Invalid request' })
   updateProduct(@Body() updateProductDto: UpdateProductDto): Observable<any> {
     return this.productServiceClient.send({ cmd: 'update-product' }, updateProductDto);
   }

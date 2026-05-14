@@ -1,47 +1,78 @@
-import { ArgumentsHost, Catch, HttpException, HttpStatus, Logger } from '@nestjs/common';
+import { SystemErrorCode } from '@libs/contract/base/error';
+import { ArgumentsHost, Catch, HttpException, HttpStatus } from '@nestjs/common';
+import { HttpArgumentsHost } from '@nestjs/common/interfaces';
 import { BaseExceptionFilter } from '@nestjs/core';
-import { Request, Response } from 'express';
-import { isArray, isObject, isString } from 'lodash';
+import { RpcException } from '@nestjs/microservices';
+import { Response } from 'express';
+import { AppException, AppExceptionOptions } from '../exception/app-exception';
 
 @Catch()
 export class HttpExceptionFilter extends BaseExceptionFilter {
-  private readonly logger = new Logger(HttpExceptionFilter.name);
-
   catch(exception: unknown, host: ArgumentsHost): void {
-    const ctx = host.switchToHttp();
-    const response = ctx.getResponse<Response>();
-    const request = ctx.getRequest<Request>();
+    const context: HttpArgumentsHost = host.switchToHttp();
+    const response: Response = context.getResponse();
 
-    let httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-    let errorMessage: string | string[] = 'Internal server error';
+    const { status, body } = this.buildResponse(exception);
 
-    if (exception instanceof HttpException) {
-      httpStatus = exception.getStatus();
-      const exceptionResponse = exception.getResponse();
-      errorMessage = isString(exceptionResponse)
-        ? exceptionResponse
-        : (exceptionResponse as any).message || exception.message;
-    } else if (isObject(exception) && exception !== null) {
-      // RPC error object from microservice: { status, message }
-      const rpcError = exception as any;
-      if (rpcError.status && rpcError.message) {
-        const parsedStatus = parseInt(rpcError.status, 10);
-        httpStatus = isNaN(parsedStatus) ? HttpStatus.INTERNAL_SERVER_ERROR : parsedStatus;
-        errorMessage = rpcError.message;
-      }
+    response.status(status).json(body);
+  }
+
+  private buildResponse(exception: unknown) {
+    // Priority 1: AppException
+    if (exception instanceof AppException) {
+      return {
+        status: exception.getStatus(),
+        body: {
+          success: false,
+          error: {
+            code: exception.code,
+            message: exception.message,
+            ...(exception.details ? { details: exception.details } : {}),
+          },
+        },
+      };
     }
 
-    this.logger.error(`HTTP Exception: [${httpStatus}] ${JSON.stringify(errorMessage)}`);
+    // Priority 2: RPC error từ microservice (có { code, message })
+    if (exception instanceof RpcException) {
+      const rpcError = exception.getError() as AppExceptionOptions;
+      return {
+        status: rpcError.status || HttpStatus.INTERNAL_SERVER_ERROR,
+        body: {
+          success: false,
+          error: {
+            code: rpcError.code || SystemErrorCode.UNCAUGHT_EXCEPTION,
+            message: rpcError.message || 'Internal server error',
+            ...(rpcError.details ? { details: rpcError.details } : {}),
+          },
+        },
+      };
+    }
 
-    const statusEnumKey = HttpStatus[httpStatus] || 'INTERNAL_SERVER_ERROR';
-    const finalErrorMessage = isArray(errorMessage) ? errorMessage.join('; ') : errorMessage;
+    // Priority 3: HttpException thông thường
+    if (exception instanceof HttpException) {
+      return {
+        status: exception.getStatus(),
+        body: {
+          success: false,
+          error: {
+            code: SystemErrorCode.UNCAUGHT_EXCEPTION,
+            message: 'Uncaught exception',
+          },
+        },
+      };
+    }
 
-    response.status(httpStatus).json({
-      success: false,
-      status_code: httpStatus,
-      error: statusEnumKey,
-      message: finalErrorMessage,
-      path: request.url,
-    });
+    // Fallback: Error không xác định
+    return {
+      status: HttpStatus.INTERNAL_SERVER_ERROR,
+      body: {
+        success: false,
+        error: {
+          code: SystemErrorCode.UNCAUGHT_EXCEPTION,
+          message: 'Uncaught exception',
+        },
+      },
+    };
   }
 }

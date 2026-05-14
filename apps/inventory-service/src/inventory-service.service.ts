@@ -1,6 +1,7 @@
+import { AppException } from '@libs/common/exception/app-exception';
 import { AdjustInventoryDto } from '@libs/contract/inventory/dto';
+import { InventoryErrorCode } from '@libs/contract/inventory/error';
 import { Injectable, Logger } from '@nestjs/common';
-import { RpcException } from '@nestjs/microservices';
 import { UpdateResult } from 'typeorm';
 import { InventoryEntity } from './entity/inventory.entity';
 import { InventoryRepository } from './repository/inventory.repository';
@@ -27,9 +28,10 @@ export class InventoryService {
       .execute();
 
     if (result.affected === 0) {
-      throw new RpcException(
-        `Cannot adjust stock for product ${product_id}. It may not exist or the adjustment results in negative stock.`,
-      );
+      throw new AppException({
+        code: InventoryErrorCode.ADJUSTMENT_FAILED,
+        message: `Cannot adjust stock for product ${product_id}. It may not exist or the adjustment results in negative stock.`,
+      });
     } else {
       return this.inventoryRepository.findOneByOrFail({ product_id });
     }

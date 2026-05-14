@@ -1,20 +1,22 @@
 import { EnvService } from '@libs/common/env/env.service';
+import { AppException, AppExceptionOptions } from '@libs/common/exception/app-exception';
 import { HttpExceptionFilter } from '@libs/common/filter';
 import { ResponseInterceptor } from '@libs/common/interceptor';
-import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { SystemErrorCode } from '@libs/contract/base/error';
+import { HttpStatus, ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import helmet from 'helmet';
+import { ValidationError } from 'class-validator';
 import { Logger } from 'nestjs-pino';
 import { ApiGatewayModule } from './api-gateway.module';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(ApiGatewayModule, { bufferLogs: true });
+  const envService: EnvService = app.get(EnvService);
 
   // Trust 1 layer of proxies (e.g., Nginx, Load Balancer) to get the correct client IP for rate limiting
   app.set('trust proxy', 1);
-  app.use(helmet());
   app.disable('x-powered-by');
   app.useLogger(app.get(Logger));
   app.enableCors();
@@ -31,6 +33,17 @@ async function bootstrap() {
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
+      exceptionFactory(errors: ValidationError[]): AppExceptionOptions {
+        throw new AppException({
+          status: HttpStatus.UNPROCESSABLE_ENTITY,
+          code: SystemErrorCode.VALIDATION_FAILED,
+          message: 'Validation error',
+          details: errors.map((err: ValidationError) => ({
+            field: err.property,
+            message: Object.values(err.constraints ?? {})[0] as string,
+          })),
+        });
+      },
     }),
   );
 
@@ -51,7 +64,6 @@ async function bootstrap() {
       'Authorization',
     )
     .build();
-  const envService: EnvService = app.get(EnvService);
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api-docs', app, document, {
     swaggerOptions: {
@@ -70,7 +82,7 @@ async function bootstrap() {
               if (args[0].includes('/auth/login') || args[0].includes('/auth/register')) {
                 const clone = response.clone();
                 clone.json().then(resData => {
-                  const token = resData?.data?.access_token || resData?.access_token;
+                  const token = resData?.data?.access_token;
                   if (token) {
                     window.ui.preauthorizeApiKey('Authorization', token);
                   }

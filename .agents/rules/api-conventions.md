@@ -12,7 +12,7 @@ When writing or modifying code in this workspace, ALWAYS adhere to the following
    - Use specific response decorators for ALL endpoints:
      - `@ApiOkResponse()` or `@ApiCreatedResponse()` for success.
      - `@ApiAcceptedResponse()` for async operations (like starting a workflow).
-     - `@ApiBadRequestResponse({ description: 'Validation failed' })` for endpoints using DTO validation.
+     - `@ApiUnprocessableEntityResponse({ description: 'Validation failed' })` for endpoints using DTO validation.
      - `@ApiNotFoundResponse({ description: 'Resource not found' })` where applicable.
      - `@ApiInternalServerErrorResponse({ description: 'Internal server error' })` for unexpected failures.
 
