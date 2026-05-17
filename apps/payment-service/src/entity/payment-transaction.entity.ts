@@ -18,10 +18,10 @@ export class PaymentTransactionEntity {
   @Column({ unique: true, comment: 'Stripe Payment Intent ID' })
   stripe_payment_id: string;
 
-  @Column({ comment: 'Amount in smallest currency unit (e.g. VND)' })
+  @Column({ comment: 'Amount in smallest currency unit (e.g. USD)' })
   amount: number;
 
-  @Column({ default: 'vnd' })
+  @Column({ default: 'usd' })
   currency: string;
 
   @Column({ type: 'enum', enum: PaymentStatus, default: PaymentStatus.PENDING })

@@ -12,6 +12,7 @@ import { ProductCategoryRepository } from '../product-category/repository/produc
 import { ProductTagEntity } from '../product-tag/entity/product-tag.entity';
 import { ProductTagRepository } from '../product-tag/repository/product-tag.repository';
 import { ProductEntity } from './entity/product.entity';
+import { ProductImageRepository } from './repository/product-image.repository';
 import { ProductRepository } from './repository/product.repository';
 
 @Injectable()
@@ -21,6 +22,7 @@ export class ProductService {
     private readonly temporalService: TemporalService,
     private readonly embeddingService: EmbeddingService,
     private readonly productRepository: ProductRepository,
+    private readonly productImageRepository: ProductImageRepository,
     private readonly productCategoryRepository: ProductCategoryRepository,
     private readonly productBrandRepository: ProductBrandRepository,
     private readonly productTagRepository: ProductTagRepository,
@@ -59,14 +61,28 @@ export class ProductService {
   getProducts(): Promise<ProductEntity[]> {
     return this.productRepository.find({
       where: { is_active: true },
-      relations: { category: true, brand: true, tags: true },
+      relations: { category: true, brand: true, tags: true, images: true },
     });
   }
 
   async getProduct(id: number): Promise<ProductEntity> {
     const product = await this.productRepository.findOne({
-      where: { id, is_active: true },
-      relations: { category: true, brand: true, tags: true },
+      where: {
+        id,
+        is_active: true,
+      },
+      relations: {
+        category: true,
+        brand: true,
+        tags: true,
+        images: true,
+      },
+      select: {
+        category: { id: true, name: true, slug: true },
+        brand: { id: true, name: true },
+        tags: { id: true, name: true },
+        images: { id: true, image_url: true, is_thumbnail: true },
+      },
     });
 
     if (!product) {
@@ -81,7 +97,13 @@ export class ProductService {
   }
 
   async updateProduct(updateProductDto: UpdateProductDto): Promise<any> {
-    const { id, category_id, brand_id, tag_ids, ...productData } = updateProductDto;
+    const { id, category_id, brand_id, tag_ids, image_urls, ...productData } = updateProductDto;
+
+    // 1. Map image_urls to ProductImageEntity objects if provided
+    const images = image_urls?.map((url: string, index: number) => ({
+      image_url: url,
+      is_thumbnail: index === 0,
+    }));
 
     // 1. Validate Category if provided
     if (category_id) {
@@ -134,6 +156,7 @@ export class ProductService {
       category_id,
       brand_id,
       tags,
+      images,
       ...productData,
     });
 

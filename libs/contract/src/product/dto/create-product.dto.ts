@@ -24,10 +24,13 @@ export class CreateProductDto {
   @IsOptional()
   quantity: number;
 
-  @ApiProperty({ example: 'https://example.com/iphone.jpg' })
-  @IsString()
+  @ApiProperty({
+    example: ['https://example.com/iphone-1.jpg', 'https://example.com/iphone-2.jpg'],
+    description: 'Danh sách URL ảnh từ S3',
+  })
+  @IsString({ each: true })
   @IsOptional()
-  image_url: string;
+  image_urls: string[];
 
   @ApiProperty({ example: 1 })
   @IsInt()

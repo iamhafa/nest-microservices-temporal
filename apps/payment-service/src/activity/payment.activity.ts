@@ -35,7 +35,7 @@ export class PaymentActivities implements IPaymentActivity {
 
   @ActivityMethod()
   async chargePayment(orderId: number, totalAmount: number): Promise<number> {
-    this.logger.log(`[Order ${orderId}] Charging payment: ${totalAmount} VND`);
+    this.logger.log(`[Order ${orderId}] Charging payment: ${totalAmount} USD`);
 
     const existingTransaction = await this.paymentTransactionRepository.findOne({
       where: {
@@ -57,7 +57,7 @@ export class PaymentActivities implements IPaymentActivity {
         return this.stripeClient.paymentIntents.create(
           {
             amount: totalAmount,
-            currency: 'vnd',
+            currency: 'usd',
             payment_method: 'pm_card_visa',
             confirm: true,
             automatic_payment_methods: {

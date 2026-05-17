@@ -10,8 +10,10 @@ import { ProductBrandRepository } from '../modules/product-brand/repository/prod
 import { ProductCategoryRepository } from '../modules/product-category/repository/product-category.repository';
 import { ProductTagEntity } from '../modules/product-tag/entity/product-tag.entity';
 import { ProductTagRepository } from '../modules/product-tag/repository/product-tag.repository';
+import { ProductImageEntity } from '../modules/product/entity/product-image.entity';
 import { ProductEntity } from '../modules/product/entity/product.entity';
 import { ProductService } from '../modules/product/product.service';
+import { ProductImageRepository } from '../modules/product/repository/product-image.repository';
 import { ProductRepository } from '../modules/product/repository/product.repository';
 
 @Activity({ name: 'product-activity' })
@@ -22,6 +24,7 @@ export class ProductActivity implements IProductActivity {
     private readonly productService: ProductService,
     private readonly embeddingService: EmbeddingService,
     private readonly productRepository: ProductRepository,
+    private readonly productImageRepository: ProductImageRepository,
     private readonly productCategoryRepository: ProductCategoryRepository,
     private readonly productBrandRepository: ProductBrandRepository,
     private readonly productTagRepository: ProductTagRepository,
@@ -105,14 +108,24 @@ export class ProductActivity implements IProductActivity {
   async createProduct(createProductDto: Omit<CreateProductDto, 'quantity'>): Promise<number> {
     this.logger.log(`Creating product: ${createProductDto.name}`);
 
-    const { tag_ids, ...productDto } = createProductDto;
+    const { tag_ids, image_urls, ...productDto } = createProductDto;
 
     // Map tag_ids to shallow objects for relationship creation
-    const tags: Pick<ProductTagEntity, 'id'>[] = tag_ids.map((id: number) => ({ id }));
+    const tags = tag_ids?.map((id: number) => ({ id }));
+
+    // Map image_urls to ProductImageEntity objects
+    // Default the first image as the thumbnail
+    const images: ProductImageEntity[] = this.productImageRepository.create(
+      image_urls?.map((url: string, index: number) => ({
+        image_url: url,
+        is_thumbnail: index === 0,
+      })),
+    );
 
     const product: ProductEntity = this.productRepository.create({
       ...productDto,
       tags,
+      images,
     });
 
     const savedProduct: ProductEntity = await this.productRepository.save(product);

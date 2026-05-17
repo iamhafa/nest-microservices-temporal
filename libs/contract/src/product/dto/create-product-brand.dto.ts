@@ -7,11 +7,6 @@ export class CreateProductBrandDto {
   @IsNotEmpty()
   name: string;
 
-  @ApiProperty({ example: 'apple' })
-  @IsString()
-  @IsNotEmpty()
-  slug: string;
-
   @ApiProperty({ example: 'Apple Inc.', required: false })
   @IsString()
   @IsOptional()
