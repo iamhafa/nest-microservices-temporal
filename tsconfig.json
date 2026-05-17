@@ -18,28 +18,19 @@
     "skipLibCheck": true,
     "strictNullChecks": true,
     "forceConsistentCasingInFileNames": true,
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
+    "strict": true, // Bật chế độ kiểm tra kiểu nghiêm ngặt toàn diện (bao gồm strictNullChecks, noImplicitAny, v.v.)
+    "strictPropertyInitialization": false, // Tắt cảnh báo khởi tạo thuộc tính trong constructor (cần thiết cho các Entity của TypeORM)
+    "strictFunctionTypes": false, // Tắt kiểm tra tham số hàm nghiêm ngặt (cho phép gán Express Request vào IncomingMessage của pino-http)
     "paths": {
-      "@libs/common": [
-        "libs/common/src"
-      ],
-      "@libs/common/*": [
-        "libs/common/src/*"
-      ],
-      "@libs/contract": [
-        "libs/contract/src"
-      ],
-      "@libs/contract/*": [
-        "libs/contract/src/*"
-      ],
-      "@libs/temporal": [
-        "libs/temporal/src"
-      ],
-      "@libs/temporal/*": [
-        "libs/temporal/src/*"
-      ]
+      "@libs/common": ["libs/common/src"],
+      "@libs/common/*": ["libs/common/src/*"],
+      "@libs/contract": ["libs/contract/src"],
+      "@libs/contract/*": ["libs/contract/src/*"],
+      "@libs/temporal": ["libs/temporal/src"],
+      "@libs/temporal/*": ["libs/temporal/src/*"]
     }
   }
 }

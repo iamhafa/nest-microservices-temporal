@@ -115,7 +115,11 @@ export async function placeOrderWorkflow(createOrderDto: CreateOrderDto) {
       await inventoryActivities.releaseInventory(orderId, items);
 
       // 3rd: Update status to FAILED or DELETE depending on visibility rules
-      await orderActivities.updateOrderStatus(orderId, OrderStatus.FAILED, error.message);
+      await orderActivities.updateOrderStatus(
+        orderId,
+        OrderStatus.FAILED,
+        error instanceof Error ? error.message : 'Unknown error',
+      );
     }
 
     throw error;
