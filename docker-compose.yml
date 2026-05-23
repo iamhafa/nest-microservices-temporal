@@ -73,6 +73,42 @@ services:
       timeout: 5s
       retries: 10
 
+  loki:
+    image: grafana/loki:3.5.0
+    container_name: loki
+    command: -config.file=/etc/loki/loki-config.yml
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./.infrastructure/loki/loki-config.yml:/etc/loki/loki-config.yml:ro
+      - loki-data:/loki
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget --quiet --tries=1 --output-document=- http://localhost:3100/ready | grep -q ready || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  grafana:
+    image: grafana/grafana:12.0.0
+    container_name: grafana
+    depends_on:
+      loki:
+        condition: service_started
+    ports:
+      - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_AUTH_ANONYMOUS_ENABLED: true
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+    volumes:
+      - ./.infrastructure/grafana/grafana-config.yml:/etc/grafana/provisioning/datasources/datasource.yaml:ro
+
 volumes:
   temporal-postgres-data:
   database-data:
+  loki-data:

@@ -40,7 +40,7 @@ import { UserModule } from './modules/user/user.module';
         throttlers: [
           {
             ttl: config.get<number>('RATE_LIMIT_TTL', 60000), // 60s
-            limit: config.get<number>('RATE_LIMIT_REQUESTS', 30), // 30 requests per 60s
+            limit: config.get<number>('RATE_LIMIT_MAX_REQUESTS_PER_IP', 30), // 30 requests per 60s
           },
         ],
         skipIf: (context: ExecutionContext): boolean => {
