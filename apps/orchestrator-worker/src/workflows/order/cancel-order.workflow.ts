@@ -1,10 +1,21 @@
 import { CancelOrderDto, OrderItemDto } from '@libs/contract/order/dto';
 import { OrderStatus } from '@libs/contract/order/enum';
-import { IInventoryActivity, IOrderActivity, IPaymentActivity } from '@libs/temporal/activity';
+import {
+  IRestoreInventory,
+  IGetPaymentId,
+  IGetOrderItems,
+  IUpdateOrderStatus,
+  IRefundPayment,
+  IReleaseInventory,
+} from '@libs/temporal/activity';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue';
 import { ActivityInterfaceFor, proxyActivities } from '@temporalio/workflow';
 
-const orderActivities: ActivityInterfaceFor<IOrderActivity> = proxyActivities({
+const orderActivities: ActivityInterfaceFor<{
+  getPaymentId: IGetPaymentId['execute'];
+  getOrderItems: IGetOrderItems['execute'];
+  updateOrderStatus: IUpdateOrderStatus['execute'];
+}> = proxyActivities({
   startToCloseTimeout: '30 seconds',
   taskQueue: WorkFlowTaskQueue.ORDER,
   retry: {
@@ -14,7 +25,9 @@ const orderActivities: ActivityInterfaceFor<IOrderActivity> = proxyActivities({
   },
 });
 
-const paymentActivities: ActivityInterfaceFor<IPaymentActivity> = proxyActivities({
+const paymentActivities: ActivityInterfaceFor<{
+  refundPayment: IRefundPayment['execute'];
+}> = proxyActivities({
   startToCloseTimeout: '30 seconds',
   taskQueue: WorkFlowTaskQueue.PAYMENT,
   retry: {
@@ -24,7 +37,10 @@ const paymentActivities: ActivityInterfaceFor<IPaymentActivity> = proxyActivitie
   },
 });
 
-const inventoryActivities: ActivityInterfaceFor<IInventoryActivity> = proxyActivities({
+const inventoryProxyActivities: ActivityInterfaceFor<{
+  restoreInventory: IRestoreInventory['execute'];
+  releaseInventory: IReleaseInventory['execute'];
+}> = proxyActivities({
   startToCloseTimeout: '30 seconds',
   taskQueue: WorkFlowTaskQueue.INVENTORY,
   retry: {
@@ -46,9 +62,9 @@ export async function cancelOrderWorkflow(cancelOrderDto: CancelOrderDto): Promi
   // Nếu đã thanh toán → inventory đã confirm → cộng lại stock
   // Nếu chưa thanh toán → inventory chỉ reserve → nhả reserved
   if (paymentId) {
-    await inventoryActivities.restoreInventory(order_id, items);
+    await inventoryProxyActivities.restoreInventory(order_id, items);
   } else {
-    await inventoryActivities.releaseInventory(order_id, items);
+    await inventoryProxyActivities.releaseInventory(order_id, items);
   }
   // Cập nhật trạng thái đơn hàng
   await orderActivities.updateOrderStatus(order_id, OrderStatus.CANCELLED, cancel_reason);

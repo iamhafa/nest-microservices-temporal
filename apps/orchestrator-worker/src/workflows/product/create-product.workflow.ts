@@ -1,9 +1,20 @@
 import { CreateProductDto } from '@libs/contract/product/dto';
-import { IInventoryActivity, IProductActivity } from '@libs/temporal/activity';
+import {
+  IInitializeInventory,
+  IValidateProductMetadata,
+  ICreateProduct,
+  IDeleteProduct,
+  IGenerateProductEmbedding,
+} from '@libs/temporal/activity';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue';
 import { proxyActivities } from '@temporalio/workflow';
 
-const productActivities = proxyActivities<IProductActivity>({
+const productActivities = proxyActivities<{
+  validateProductMetadata: IValidateProductMetadata['execute'];
+  createProduct: ICreateProduct['execute'];
+  deleteProduct: IDeleteProduct['execute'];
+  generateProductEmbedding: IGenerateProductEmbedding['execute'];
+}>({
   startToCloseTimeout: '30 seconds',
   taskQueue: WorkFlowTaskQueue.PRODUCT,
   retry: {
@@ -13,7 +24,9 @@ const productActivities = proxyActivities<IProductActivity>({
   },
 });
 
-const inventoryActivities = proxyActivities<IInventoryActivity>({
+const inventoryActivities = proxyActivities<{
+  initializeInventory: IInitializeInventory['execute'];
+}>({
   startToCloseTimeout: '30 seconds',
   taskQueue: WorkFlowTaskQueue.INVENTORY,
   retry: {

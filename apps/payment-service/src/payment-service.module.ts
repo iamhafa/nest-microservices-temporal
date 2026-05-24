@@ -10,9 +10,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ClsModule } from 'nestjs-cls';
 import { join } from 'path';
 import { cwd } from 'process';
-import { PaymentActivities } from './activity/payment.activity';
 import { PaymentTransactionEntity } from './entity/payment-transaction.entity';
 import { PaymentTransactionRepository } from './repository/payment-transaction.repository';
+import { ChargePaymentActivity } from './activity/charge-payment.activity';
+import { RefundPaymentActivity } from './activity/refund-payment.activity';
 
 @Module({
   imports: [
@@ -55,7 +56,7 @@ import { PaymentTransactionRepository } from './repository/payment-transaction.r
     SharedTemporalModule.forRoot({
       taskQueue: WorkFlowTaskQueue.PAYMENT,
       worker: {
-        activityClasses: [PaymentActivities],
+        activityClasses: [ChargePaymentActivity, RefundPaymentActivity],
       },
     }),
   ],
@@ -64,7 +65,8 @@ import { PaymentTransactionRepository } from './repository/payment-transaction.r
       provide: APP_INTERCEPTOR,
       useClass: RmqCorrelationIdInterceptor,
     },
-    PaymentActivities,
+    ChargePaymentActivity,
+    RefundPaymentActivity,
     PaymentTransactionRepository,
   ],
 })

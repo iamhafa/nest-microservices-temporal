@@ -9,11 +9,15 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ClsModule } from 'nestjs-cls';
 import { join } from 'path';
 import { cwd } from 'process';
-import { InventoryActivity } from './activity/inventory.activity';
 import { InventoryEntity } from './entity/inventory.entity';
 import { InventoryController } from './inventory-service.controller';
 import { InventoryService } from './inventory-service.service';
 import { InventoryRepository } from './repository/inventory.repository';
+import { ReserveInventoryActity } from './activity/reserve-inventory.actity';
+import { ReleaseInventoryActivity } from './activity/release-inventory.activity';
+import { ConfirmInventoryActivity } from './activity/confirm-inventory.activity';
+import { RestoreInventoryActivity } from './activity/restore-inventory.activity';
+import { InitializeInventoryActivity } from './activity/initialize-inventory.activity';
 
 @Module({
   imports: [
@@ -46,7 +50,13 @@ import { InventoryRepository } from './repository/inventory.repository';
     SharedTemporalModule.forRoot({
       taskQueue: WorkFlowTaskQueue.INVENTORY,
       worker: {
-        activityClasses: [InventoryActivity],
+        activityClasses: [
+          ReserveInventoryActity,
+          ReleaseInventoryActivity,
+          ConfirmInventoryActivity,
+          RestoreInventoryActivity,
+          InitializeInventoryActivity,
+        ],
       },
     }),
   ],
@@ -56,7 +66,11 @@ import { InventoryRepository } from './repository/inventory.repository';
       provide: APP_INTERCEPTOR,
       useClass: RmqCorrelationIdInterceptor,
     },
-    InventoryActivity,
+    ReserveInventoryActity,
+    ReleaseInventoryActivity,
+    ConfirmInventoryActivity,
+    RestoreInventoryActivity,
+    InitializeInventoryActivity,
     InventoryRepository,
     InventoryService,
   ],

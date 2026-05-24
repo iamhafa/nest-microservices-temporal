@@ -9,12 +9,18 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ClsModule } from 'nestjs-cls';
 import { join } from 'path';
 import { cwd } from 'process';
-import { OrderActivity } from './activity/order.activity';
 import { OrderItemEntity } from './entity/order-item.entity';
 import { OrderEntity } from './entity/order.entity';
 import { OrderController } from './order-service.controller';
 import { OrderService } from './order-service.service';
 import { OrderRepository } from './repository/order.repository';
+import { CreateOrderActivity } from './activity/create-order.activity';
+import { DeleteOrderActivity } from './activity/delete-order.activity';
+import { SavePaymentIdActivity } from './activity/save-payment-id.activity';
+import { UpdateOrderStatusActivity } from './activity/update-order-status.activity';
+import { GetOrderTotalAmountActivity } from './activity/get-order-total-amount.activity';
+import { GetOrderItemsActivity } from './activity/get-order-items.activity';
+import { GetPaymentIdActivity } from './activity/get-payment-id.activity';
 
 @Module({
   imports: [
@@ -46,7 +52,15 @@ import { OrderRepository } from './repository/order.repository';
     SharedTemporalModule.forRoot({
       taskQueue: WorkFlowTaskQueue.ORDER,
       worker: {
-        activityClasses: [OrderActivity],
+        activityClasses: [
+          CreateOrderActivity,
+          DeleteOrderActivity,
+          SavePaymentIdActivity,
+          UpdateOrderStatusActivity,
+          GetOrderTotalAmountActivity,
+          GetOrderItemsActivity,
+          GetPaymentIdActivity,
+        ],
       },
     }),
   ],
@@ -57,7 +71,13 @@ import { OrderRepository } from './repository/order.repository';
       useClass: RmqCorrelationIdInterceptor,
     },
     OrderService,
-    OrderActivity,
+    CreateOrderActivity,
+    DeleteOrderActivity,
+    SavePaymentIdActivity,
+    UpdateOrderStatusActivity,
+    GetOrderTotalAmountActivity,
+    GetOrderItemsActivity,
+    GetPaymentIdActivity,
     OrderRepository,
   ],
 })

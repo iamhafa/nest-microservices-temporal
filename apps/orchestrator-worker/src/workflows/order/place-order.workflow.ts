@@ -1,16 +1,26 @@
 import { CreateOrderDto, OrderItemDto } from '@libs/contract/order/dto';
 import { OrderStatus } from '@libs/contract/order/enum';
 import type {
-  IInventoryActivity,
-  IOrderActivity,
-  IPaymentActivity,
-  IProductActivity,
-  IShippingActivity,
+  IReserveInventory,
+  IReleaseInventory,
+  IConfirmInventory,
+  ICreateOrder,
+  ISavePaymentId,
+  IUpdateOrderStatus,
+  IGetOrderTotalAmount,
+  IChargePayment,
+  IRefundPayment,
+  IValidateProducts,
+  IGetProductPrices,
+  ICreateShipment,
 } from '@libs/temporal/activity';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue';
 import { ActivityInterfaceFor, proxyActivities } from '@temporalio/workflow';
 
-const productActivities: ActivityInterfaceFor<IProductActivity> = proxyActivities({
+const productActivities: ActivityInterfaceFor<{
+  validateProducts: IValidateProducts['execute'];
+  getProductPrices: IGetProductPrices['execute'];
+}> = proxyActivities({
   startToCloseTimeout: '30 seconds',
   taskQueue: WorkFlowTaskQueue.PRODUCT,
   retry: {
@@ -20,7 +30,11 @@ const productActivities: ActivityInterfaceFor<IProductActivity> = proxyActivitie
   },
 });
 
-const inventoryActivities: ActivityInterfaceFor<IInventoryActivity> = proxyActivities({
+const inventoryProxyActivities: ActivityInterfaceFor<{
+  reserveInventory: IReserveInventory['execute'];
+  releaseInventory: IReleaseInventory['execute'];
+  confirmInventory: IConfirmInventory['execute'];
+}> = proxyActivities({
   startToCloseTimeout: '30 seconds',
   taskQueue: WorkFlowTaskQueue.INVENTORY,
   retry: {
@@ -30,7 +44,10 @@ const inventoryActivities: ActivityInterfaceFor<IInventoryActivity> = proxyActiv
   },
 });
 
-const paymentActivities: ActivityInterfaceFor<IPaymentActivity> = proxyActivities({
+const paymentActivities: ActivityInterfaceFor<{
+  chargePayment: IChargePayment['execute'];
+  refundPayment: IRefundPayment['execute'];
+}> = proxyActivities({
   startToCloseTimeout: '30 seconds',
   taskQueue: WorkFlowTaskQueue.PAYMENT,
   retry: {
@@ -40,7 +57,9 @@ const paymentActivities: ActivityInterfaceFor<IPaymentActivity> = proxyActivitie
   },
 });
 
-const shippingActivities: ActivityInterfaceFor<IShippingActivity> = proxyActivities({
+const shippingActivities: ActivityInterfaceFor<{
+  createShipment: ICreateShipment['execute'];
+}> = proxyActivities({
   startToCloseTimeout: '30 seconds',
   taskQueue: WorkFlowTaskQueue.SHIPPING,
   retry: {
@@ -50,7 +69,12 @@ const shippingActivities: ActivityInterfaceFor<IShippingActivity> = proxyActivit
   },
 });
 
-const orderActivities: ActivityInterfaceFor<IOrderActivity> = proxyActivities({
+const orderActivities: ActivityInterfaceFor<{
+  createOrder: ICreateOrder['execute'];
+  getOrderTotalAmount: IGetOrderTotalAmount['execute'];
+  savePaymentId: ISavePaymentId['execute'];
+  updateOrderStatus: IUpdateOrderStatus['execute'];
+}> = proxyActivities({
   startToCloseTimeout: '30 seconds',
   taskQueue: WorkFlowTaskQueue.ORDER,
   retry: {
@@ -81,7 +105,7 @@ export async function placeOrderWorkflow(createOrderDto: CreateOrderDto) {
     orderId = await orderActivities.createOrder(createOrderDto, productPrices);
 
     // 3rd: Reserve inventory
-    await inventoryActivities.reserveInventory(orderId, items);
+    await inventoryProxyActivities.reserveInventory(orderId, items);
 
     // 4th: Charge payment → PAID
     const totalAmount: number = await orderActivities.getOrderTotalAmount(orderId);
@@ -90,7 +114,7 @@ export async function placeOrderWorkflow(createOrderDto: CreateOrderDto) {
     await orderActivities.updateOrderStatus(orderId, OrderStatus.PAID);
 
     // 5th: Confirm inventory (trừ kho vĩnh viễn)
-    await inventoryActivities.confirmInventory(orderId, items);
+    await inventoryProxyActivities.confirmInventory(orderId, items);
 
     // 6th: Create shipment → SHIPPING
     const shipmentId = await shippingActivities.createShipment(orderId, address);
@@ -112,7 +136,7 @@ export async function placeOrderWorkflow(createOrderDto: CreateOrderDto) {
 
     // 2nd: hoàn lại inventory nếu đã reserve
     if (orderId) {
-      await inventoryActivities.releaseInventory(orderId, items);
+      await inventoryProxyActivities.releaseInventory(orderId, items);
 
       // 3rd: Update status to FAILED or DELETE depending on visibility rules
       await orderActivities.updateOrderStatus(

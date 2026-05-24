@@ -9,11 +9,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ClsModule } from 'nestjs-cls';
 import { join } from 'path';
 import { cwd } from 'process';
-import { ShippingActivities } from './activity/shipping.activity';
 import { ShippingEntity } from './entity/shipping.entity';
 import { ShippingRepository } from './repository/shipping.repository';
 import { ShippingController } from './shipping-service.controller';
 import { ShippingService } from './shipping-service.service';
+import { CreateShipmentActivity } from './activity/create-shipment.activity';
 
 @Module({
   imports: [
@@ -45,7 +45,7 @@ import { ShippingService } from './shipping-service.service';
     SharedTemporalModule.forRoot({
       taskQueue: WorkFlowTaskQueue.SHIPPING,
       worker: {
-        activityClasses: [ShippingActivities],
+        activityClasses: [CreateShipmentActivity],
       },
     }),
   ],
@@ -55,7 +55,7 @@ import { ShippingService } from './shipping-service.service';
       useClass: RmqCorrelationIdInterceptor,
     },
     ShippingService,
-    ShippingActivities,
+    CreateShipmentActivity,
     ShippingRepository,
   ],
   controllers: [ShippingController],

@@ -1,21 +1,21 @@
 import { DeliveryStatus } from '@libs/contract/shipping/enum';
-import { IShippingActivity } from '@libs/temporal/activity';
+import { ICreateShipment } from '@libs/temporal/activity';
 import { Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { ShippingEntity } from '../entity/shipping.entity';
 import { ShippingRepository } from '../repository/shipping.repository';
 
-@Activity({ name: 'shipping-activities' })
-export class ShippingActivities implements IShippingActivity {
-  private readonly logger = new Logger(ShippingActivities.name);
+@Activity({ name: 'create-shipment-activity' })
+export class CreateShipmentActivity implements ICreateShipment {
+  private readonly logger = new Logger(CreateShipmentActivity.name);
 
   constructor(private readonly shippingRepository: ShippingRepository) {}
 
-  @ActivityMethod()
-  async createShipment(orderId: number, address: string): Promise<number> {
+  @ActivityMethod({ name: 'createShipment' })
+  async execute(orderId: number, address: string): Promise<number> {
     this.logger.log(`[Order ${orderId}] Creating internal shipping record to: ${address}`);
 
-    const newShipping = this.shippingRepository.create({
+    const newShipping: ShippingEntity = this.shippingRepository.create({
       order_id: orderId,
       address,
       status: DeliveryStatus.PENDING,
