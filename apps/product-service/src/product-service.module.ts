@@ -9,7 +9,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ClsModule } from 'nestjs-cls';
 import { join } from 'path';
 import { cwd } from 'process';
-import { EmbeddingModule } from './modules/embedding/embedding.module';
 import { ProductBrandModule } from './modules/product-brand/product-brand.module';
 import { ProductCategoryModule } from './modules/product-category/product-category.module';
 import { ProductTagModule } from './modules/product-tag/product-tag.module';
@@ -19,7 +18,6 @@ import { ValidateProductsActivity } from './activity/validate-products.activity'
 import { CreateProductActivity } from './activity/create-product.activity';
 import { DeleteProductActivity } from './activity/delete-product.activity';
 import { GetProductPricesActivity } from './activity/get-product-prices.activity';
-import { GenerateProductEmbeddingActivity } from './activity/generate-product-embedding.activity';
 
 @Module({
   imports: [
@@ -57,13 +55,11 @@ import { GenerateProductEmbeddingActivity } from './activity/generate-product-em
           CreateProductActivity,
           DeleteProductActivity,
           GetProductPricesActivity,
-          GenerateProductEmbeddingActivity,
         ],
       },
     }),
 
     // Feature modules
-    EmbeddingModule,
     ProductModule,
     ProductBrandModule,
     ProductCategoryModule,
@@ -80,7 +76,6 @@ import { GenerateProductEmbeddingActivity } from './activity/generate-product-em
     CreateProductActivity,
     DeleteProductActivity,
     GetProductPricesActivity,
-    GenerateProductEmbeddingActivity,
   ],
 })
 export class ProductServiceModule {}

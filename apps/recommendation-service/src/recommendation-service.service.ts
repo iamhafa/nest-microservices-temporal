@@ -1,29 +1,12 @@
 import { RelatedProductDto } from '@libs/contract/recommendation/dto';
-import { Inject, Injectable, Logger } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
-import { firstValueFrom } from 'rxjs';
+import { Injectable, Logger } from '@nestjs/common';
 
 @Injectable()
 export class RecommendationServiceService {
   private readonly logger = new Logger(RecommendationServiceService.name);
 
-  constructor(@Inject('PRODUCT_SERVICE_CLIENT') private readonly productServiceClient: ClientProxy) {}
-
   async getRelatedProducts(productId: number): Promise<RelatedProductDto[]> {
-    this.logger.log(`Fetching similar products for product ID: ${productId} via product-service directly`);
-
-    const similarProducts: RelatedProductDto[] = await firstValueFrom(
-      this.productServiceClient.send(
-        {
-          cmd: 'find-similar-products',
-        },
-        {
-          productId,
-          limit: 10,
-        },
-      ),
-    );
-
-    return similarProducts;
+    this.logger.warn(`getRelatedProducts for ID ${productId} requested: Vector embedding and similarity features have been disabled.`);
+    return [];
   }
 }

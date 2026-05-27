@@ -25,7 +25,3 @@ export interface IGetProductPrices {
   execute(productIds: number[]): Promise<Record<number, number>>;
 }
 
-// Tạo embedding cho sản phẩm
-export interface IGenerateProductEmbedding {
-  execute(productId: number): Promise<void>;
-}

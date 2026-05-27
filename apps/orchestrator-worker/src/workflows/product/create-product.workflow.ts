@@ -4,7 +4,6 @@ import {
   IValidateProductMetadata,
   ICreateProduct,
   IDeleteProduct,
-  IGenerateProductEmbedding,
 } from '@libs/temporal/activity';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue';
 import { proxyActivities } from '@temporalio/workflow';
@@ -13,7 +12,6 @@ const productActivities = proxyActivities<{
   validateProductMetadata: IValidateProductMetadata['execute'];
   createProduct: ICreateProduct['execute'];
   deleteProduct: IDeleteProduct['execute'];
-  generateProductEmbedding: IGenerateProductEmbedding['execute'];
 }>({
   startToCloseTimeout: '30 seconds',
   taskQueue: WorkFlowTaskQueue.PRODUCT,
@@ -51,9 +49,6 @@ export async function createProductWorkflow(createProductDto: CreateProductDto) 
 
     // Step 3: Initialize Inventory (default quantity 0 if not provided)
     await inventoryActivities.initializeInventory(productId, quantity);
-
-    // Step 4: Generate Product Embedding
-    await productActivities.generateProductEmbedding(productId);
 
     return {
       success: true,
