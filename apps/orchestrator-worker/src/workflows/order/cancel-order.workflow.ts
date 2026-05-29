@@ -55,7 +55,7 @@ export async function cancelOrderWorkflow(cancelOrderDto: CancelOrderDto): Promi
 
   const paymentId = await orderActivities.getPaymentId(order_id);
   if (paymentId) {
-    await paymentActivities.refundPayment(paymentId);
+    await paymentActivities.refundPayment(order_id);
   }
 
   const items: OrderItemDto[] = await orderActivities.getOrderItems(order_id);

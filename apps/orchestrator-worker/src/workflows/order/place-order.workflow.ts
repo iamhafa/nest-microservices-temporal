@@ -89,6 +89,7 @@ export async function placeOrderWorkflow(createOrderDto: CreateOrderDto) {
   const { items, address } = createOrderDto;
   let orderId: number | undefined;
   let paymentId: number | undefined;
+  let totalAmount: number | undefined;
 
   try {
     // 0th: Validate products exist & active
@@ -108,7 +109,7 @@ export async function placeOrderWorkflow(createOrderDto: CreateOrderDto) {
     await inventoryProxyActivities.reserveInventory(orderId, items);
 
     // 4th: Charge payment → PAID
-    const totalAmount: number = await orderActivities.getOrderTotalAmount(orderId);
+    totalAmount = await orderActivities.getOrderTotalAmount(orderId);
     paymentId = await paymentActivities.chargePayment(orderId, totalAmount);
     await orderActivities.savePaymentId(orderId, paymentId);
     await orderActivities.updateOrderStatus(orderId, OrderStatus.PAID);
@@ -117,7 +118,7 @@ export async function placeOrderWorkflow(createOrderDto: CreateOrderDto) {
     await inventoryProxyActivities.confirmInventory(orderId, items);
 
     // 6th: Create shipment → SHIPPING
-    const shipmentId = await shippingActivities.createShipment(orderId, address);
+    const shipmentId: number = await shippingActivities.createShipment(orderId, address);
     await orderActivities.updateOrderStatus(orderId, OrderStatus.SHIPPING);
 
     return {
@@ -129,13 +130,11 @@ export async function placeOrderWorkflow(createOrderDto: CreateOrderDto) {
   } catch (error) {
     console.log('Error:', error);
 
-    // 1st: refund nếu đã thanh toán
-    if (paymentId) {
-      await paymentActivities.refundPayment(paymentId);
-    }
-
-    // 2nd: hoàn lại inventory nếu đã reserve
     if (orderId) {
+      // 1st: refund nếu đã thanh toán (dùng orderId và totalAmount để bảo vệ chống lặp và xử lý các giao dịch chưa kịp lưu DB)
+      await paymentActivities.refundPayment(orderId, totalAmount);
+
+      // 2nd: hoàn lại inventory nếu đã reserve
       await inventoryProxyActivities.releaseInventory(orderId, items);
 
       // 3rd: Update status to FAILED or DELETE depending on visibility rules

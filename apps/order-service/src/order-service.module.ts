@@ -21,6 +21,7 @@ import { UpdateOrderStatusActivity } from './activity/update-order-status.activi
 import { GetOrderTotalAmountActivity } from './activity/get-order-total-amount.activity';
 import { GetOrderItemsActivity } from './activity/get-order-items.activity';
 import { GetPaymentIdActivity } from './activity/get-payment-id.activity';
+import { OrderItemRepository } from './repository/order-item.repository';
 
 @Module({
   imports: [
@@ -79,6 +80,7 @@ import { GetPaymentIdActivity } from './activity/get-payment-id.activity';
     GetOrderItemsActivity,
     GetPaymentIdActivity,
     OrderRepository,
+    OrderItemRepository,
   ],
 })
 export class OrderServiceModule {}

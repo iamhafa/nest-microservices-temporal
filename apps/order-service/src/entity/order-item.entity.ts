@@ -3,6 +3,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -12,6 +13,7 @@ import {
 import { OrderEntity } from './order.entity';
 
 @Entity('order_items')
+@Index('idx_order_item_product_id', ['product_id'])
 export class OrderItemEntity {
   @PrimaryGeneratedColumn()
   id: number;

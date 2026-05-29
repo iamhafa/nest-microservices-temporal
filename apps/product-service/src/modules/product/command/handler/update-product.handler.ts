@@ -7,7 +7,7 @@ import { ProductCategoryRepository } from '../../../product-category/repository/
 import { ProductTagEntity } from '../../../product-tag/entity/product-tag.entity';
 import { ProductTagRepository } from '../../../product-tag/repository/product-tag.repository';
 import { ProductRepository } from '../../repository/product.repository';
-import { UpdateProductCommand } from '../implements/update-product.command';
+import { UpdateProductCommand } from '../implement/update-product.command';
 import { ProductBrandRepository } from '../../../product-brand/repository/product-brand.repository';
 
 @CommandHandler(UpdateProductCommand)

@@ -3,11 +3,11 @@ import { Controller } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { ProductEntity } from './entity/product.entity';
-import { CreateProductCommand } from './commands/implements/create-product.command';
-import { UpdateProductCommand } from './commands/implements/update-product.command';
-import { DeleteProductCommand } from './commands/implements/delete-product.command';
-import { GetProductsQuery } from './queries/implements/get-products.query';
-import { GetProductQuery } from './queries/implements/get-product.query';
+import { CreateProductCommand } from './command/implement/create-product.command';
+import { UpdateProductCommand } from './command/implement/update-product.command';
+import { DeleteProductCommand } from './command/implement/delete-product.command';
+import { GetProductsQuery } from './query/implement/get-products.query';
+import { GetProductQuery } from './query/implement/get-product.query';
 
 @Controller()
 export class ProductController {

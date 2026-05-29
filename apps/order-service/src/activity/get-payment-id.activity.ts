@@ -20,6 +20,7 @@ export class GetPaymentIdActivity implements IGetPaymentId {
       },
     });
     this.logger.log(`[Order ${orderId}] Fetched payment_id: ${order.payment_id}`);
+
     return order.payment_id;
   }
 }

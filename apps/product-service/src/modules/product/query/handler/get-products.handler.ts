@@ -1,7 +1,7 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { ProductEntity } from '../../entity/product.entity';
 import { ProductRepository } from '../../repository/product.repository';
-import { GetProductsQuery } from '../implements/get-products.query';
+import { GetProductsQuery } from '../implement/get-products.query';
 
 @QueryHandler(GetProductsQuery)
 export class GetProductsHandler implements IQueryHandler<GetProductsQuery> {

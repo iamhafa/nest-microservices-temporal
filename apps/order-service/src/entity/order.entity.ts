@@ -4,6 +4,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  Index,
   OneToMany,
   PrimaryGeneratedColumn,
   type Relation,
@@ -12,6 +13,8 @@ import {
 import { OrderItemEntity } from './order-item.entity';
 
 @Entity('orders')
+@Index('idx_order_payment_id', ['payment_id'])
+@Index('idx_order_status', ['status'])
 export class OrderEntity {
   @PrimaryGeneratedColumn()
   id: number;

@@ -9,11 +9,11 @@ import { ProductEntity } from './entity/product.entity';
 import { ProductController } from './product.controller';
 import { ProductImageRepository } from './repository/product-image.repository';
 import { ProductRepository } from './repository/product.repository';
-import { CreateProductHandler } from './commands/handlers/create-product.handler';
-import { UpdateProductHandler } from './commands/handlers/update-product.handler';
-import { DeleteProductHandler } from './commands/handlers/delete-product.handler';
-import { GetProductsHandler } from './queries/handlers/get-products.handler';
-import { GetProductHandler } from './queries/handlers/get-product.handler';
+import { CreateProductHandler } from './command/handler/create-product.handler';
+import { UpdateProductHandler } from './command/handler/update-product.handler';
+import { DeleteProductHandler } from './command/handler/delete-product.handler';
+import { GetProductsHandler } from './query/handler/get-products.handler';
+import { GetProductHandler } from './query/handler/get-product.handler';
 
 @Module({
   imports: [

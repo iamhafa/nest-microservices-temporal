@@ -4,7 +4,7 @@ import { HttpStatus } from '@nestjs/common';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { ProductEntity } from '../../entity/product.entity';
 import { ProductRepository } from '../../repository/product.repository';
-import { GetProductQuery } from '../implements/get-product.query';
+import { GetProductQuery } from '../implement/get-product.query';
 
 @QueryHandler(GetProductQuery)
 export class GetProductHandler implements IQueryHandler<GetProductQuery> {

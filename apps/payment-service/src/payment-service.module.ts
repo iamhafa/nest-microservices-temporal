@@ -57,6 +57,10 @@ import { RefundPaymentActivity } from './activity/refund-payment.activity';
       taskQueue: WorkFlowTaskQueue.PAYMENT,
       worker: {
         activityClasses: [ChargePaymentActivity, RefundPaymentActivity],
+        workerOptions: {
+          maxConcurrentActivityTaskExecutions: 10, // Giới hạn tối đa 10 activity xử lý đồng thời trên worker này (Bulkhead ở cấp độ Worker)
+          maxActivitiesPerSecond: 5, // Giới hạn tần suất xử lý tối đa 5 activity/giây để bảo vệ Stripe API khỏi Rate Limit
+        },
       },
     }),
   ],

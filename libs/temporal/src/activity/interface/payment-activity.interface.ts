@@ -5,5 +5,6 @@ export interface IChargePayment {
 
 // Hoàn tiền đơn hàng
 export interface IRefundPayment {
-  execute(paymentId: number): Promise<void>;
+  execute(orderId: number, totalAmount?: number): Promise<void>;
 }
+

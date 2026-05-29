@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler, QueryBus } from '@nestjs/cqrs';
 import { ProductRepository } from '../../repository/product.repository';
-import { DeleteProductCommand } from '../implements/delete-product.command';
-import { GetProductQuery } from '../../queries/implements/get-product.query';
+import { DeleteProductCommand } from '../implement/delete-product.command';
+import { GetProductQuery } from '../../query/implement/get-product.query';
 
 @CommandHandler(DeleteProductCommand)
 export class DeleteProductHandler implements ICommandHandler<DeleteProductCommand> {
