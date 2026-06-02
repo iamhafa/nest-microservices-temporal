@@ -14,6 +14,7 @@ import { PaymentTransactionEntity } from './entity/payment-transaction.entity';
 import { PaymentTransactionRepository } from './repository/payment-transaction.repository';
 import { ChargePaymentActivity } from './activity/charge-payment.activity';
 import { RefundPaymentActivity } from './activity/refund-payment.activity';
+import { SharedRabbitMQModule } from '@libs/common/rabbitmq';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { RefundPaymentActivity } from './activity/refund-payment.activity';
     }),
 
     // Custom dynamic modules
+    SharedRabbitMQModule,
     SharedLoggerModule,
     SharedTemporalModule.forRoot({
       taskQueue: WorkFlowTaskQueue.PAYMENT,

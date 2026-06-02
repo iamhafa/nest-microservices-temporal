@@ -6,7 +6,7 @@ import { ProductCategoryModule } from '../product-category/product-category.modu
 import { ProductTagModule } from '../product-tag/product-tag.module';
 import { ProductImageEntity } from './entity/product-image.entity';
 import { ProductEntity } from './entity/product.entity';
-import { ProductController } from './product.controller';
+import { ProductService } from './product.service';
 import { ProductImageRepository } from './repository/product-image.repository';
 import { ProductRepository } from './repository/product.repository';
 import { CreateProductHandler } from './command/handler/create-product.handler';
@@ -23,8 +23,8 @@ import { GetProductHandler } from './query/handler/get-product.handler';
     ProductBrandModule,
     ProductTagModule,
   ],
-  controllers: [ProductController],
   providers: [
+    ProductService,
     ProductRepository,
     ProductImageRepository,
 

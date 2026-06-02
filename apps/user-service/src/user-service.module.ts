@@ -11,8 +11,8 @@ import { join } from 'path';
 import { cwd } from 'process';
 import { UserEntity } from './entity/user.entity';
 import { UserRepository } from './repository/user.repository';
-import { UserController } from './user-service.controller';
 import { UserService } from './user-service.service';
+import { SharedRabbitMQModule } from '@libs/common/rabbitmq';
 
 @Module({
   imports: [
@@ -54,9 +54,9 @@ import { UserService } from './user-service.service';
     }),
 
     // Custom dynamic modules
+    SharedRabbitMQModule,
     SharedLoggerModule,
   ],
-  controllers: [UserController],
   providers: [
     {
       provide: APP_INTERCEPTOR,

@@ -1,21 +1,20 @@
 import { AdjustInventoryDto } from '@libs/contract/inventory/dto';
-import { Body, Controller, HttpCode, HttpStatus, Inject, Patch } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { Body, Controller, HttpCode, HttpStatus, Patch } from '@nestjs/common';
+import { RmqPublisherService } from '@libs/common/rabbitmq';
 import { ApiBadRequestResponse, ApiBearerAuth, ApiNoContentResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Observable } from 'rxjs';
 
 @ApiBearerAuth('Authorization')
 @ApiTags('Inventory')
 @Controller('inventory')
 export class InventoryController {
-  constructor(@Inject('INVENTORY_SERVICE_CLIENT') private readonly inventoryServiceClient: ClientProxy) {}
+  constructor(private readonly rmqPublisher: RmqPublisherService) {}
 
   @Patch('adjust')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Adjust product inventory stock safely' })
   @ApiNoContentResponse({ description: 'Inventory adjustment requested' })
   @ApiBadRequestResponse({ description: 'Invalid request data' })
-  adjustInventory(@Body() adjustInventoryDto: AdjustInventoryDto): Observable<void> {
-    return this.inventoryServiceClient.send({ cmd: 'adjust-inventory' }, adjustInventoryDto);
+  adjustInventory(@Body() adjustInventoryDto: AdjustInventoryDto): Promise<void> {
+    return this.rmqPublisher.request('inventory.adjust', adjustInventoryDto);
   }
 }

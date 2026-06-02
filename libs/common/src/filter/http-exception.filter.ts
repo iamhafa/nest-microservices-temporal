@@ -2,9 +2,8 @@ import { SystemErrorCode } from '@libs/contract/base/error';
 import { ArgumentsHost, Catch, HttpException, HttpStatus } from '@nestjs/common';
 import { HttpArgumentsHost } from '@nestjs/common/interfaces';
 import { BaseExceptionFilter } from '@nestjs/core';
-import { RpcException } from '@nestjs/microservices';
 import { Response } from 'express';
-import { AppException, AppExceptionOptions } from '../exception/app-exception';
+import { AppException } from '../exception/app-exception';
 
 @Catch()
 export class HttpExceptionFilter extends BaseExceptionFilter {
@@ -28,22 +27,6 @@ export class HttpExceptionFilter extends BaseExceptionFilter {
             code: exception.code,
             message: exception.message,
             ...(exception.details ? { details: exception.details } : {}),
-          },
-        },
-      };
-    }
-
-    // Priority 2: RPC error từ microservice (có { code, message })
-    if (exception instanceof RpcException) {
-      const rpcError = exception.getError() as AppExceptionOptions;
-      return {
-        status: rpcError.status || HttpStatus.INTERNAL_SERVER_ERROR,
-        body: {
-          success: false,
-          error: {
-            code: rpcError.code || SystemErrorCode.UNCAUGHT_EXCEPTION,
-            message: rpcError.message || 'Internal server error',
-            ...(rpcError.details ? { details: rpcError.details } : {}),
           },
         },
       };

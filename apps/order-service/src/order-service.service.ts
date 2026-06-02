@@ -1,4 +1,6 @@
 import { AppException } from '@libs/common/exception/app-exception';
+import { RabbitRPC, RabbitPayload } from '@golevelup/nestjs-rabbitmq';
+import { RmqExchange, RmqRoutingKey, RmqQueue } from '@libs/contract/rabbitmq/constants';
 import { CancelOrderDto, CreateOrderDto, UpdateOrderStatusDto } from '@libs/contract/order/dto';
 import { OrderErrorCode } from '@libs/contract/order/error';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue';
@@ -16,7 +18,12 @@ export class OrderService {
     private readonly orderRepository: OrderRepository,
   ) {}
 
-  async createOrder(createOrderDto: CreateOrderDto): Promise<any> {
+  @RabbitRPC({
+    exchange: RmqExchange.ECOMMERCE,
+    routingKey: RmqRoutingKey.ORDER_CREATE,
+    queue: RmqQueue.ORDER_QUEUE,
+  })
+  async createOrder(@RabbitPayload() createOrderDto: CreateOrderDto): Promise<any> {
     // Get correlationId from CLS
     const correlationId: string = this.clsService.get('correlationId');
     const workflowId: string = `place-order:${correlationId}`;
@@ -47,7 +54,12 @@ export class OrderService {
     };
   }
 
-  async getOrder(orderId: number): Promise<OrderEntity> {
+  @RabbitRPC({
+    exchange: RmqExchange.ECOMMERCE,
+    routingKey: 'order.get',
+    queue: RmqQueue.ORDER_QUEUE,
+  })
+  async getOrder(@RabbitPayload() orderId: number): Promise<OrderEntity> {
     const order = await this.orderRepository.findOne({
       where: { id: orderId },
       relations: { items: true },
@@ -64,7 +76,12 @@ export class OrderService {
     return order;
   }
 
-  async cancelOrder(cancelOrderDto: CancelOrderDto): Promise<any> {
+  @RabbitRPC({
+    exchange: RmqExchange.ECOMMERCE,
+    routingKey: RmqRoutingKey.ORDER_CANCEL,
+    queue: RmqQueue.ORDER_QUEUE,
+  })
+  async cancelOrder(@RabbitPayload() cancelOrderDto: CancelOrderDto): Promise<any> {
     const order: OrderEntity = await this.getOrder(cancelOrderDto.order_id);
 
     if (!order.isCancelable) {
@@ -99,6 +116,11 @@ export class OrderService {
     };
   }
 
+  @RabbitRPC({
+    exchange: RmqExchange.ECOMMERCE,
+    routingKey: 'order.getAll',
+    queue: RmqQueue.ORDER_QUEUE,
+  })
   getOrders(): Promise<OrderEntity[]> {
     return this.orderRepository.find({
       relations: { items: true },
@@ -106,7 +128,12 @@ export class OrderService {
     });
   }
 
-  async updateOrderStatus(updateOrderStatusDto: UpdateOrderStatusDto): Promise<OrderEntity> {
+  @RabbitRPC({
+    exchange: RmqExchange.ECOMMERCE,
+    routingKey: 'order.updateStatus',
+    queue: RmqQueue.ORDER_QUEUE,
+  })
+  async updateOrderStatus(@RabbitPayload() updateOrderStatusDto: UpdateOrderStatusDto): Promise<OrderEntity> {
     const order: OrderEntity = await this.getOrder(updateOrderStatusDto.order_id);
     order.status = updateOrderStatusDto.status;
     return this.orderRepository.save(order);

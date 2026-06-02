@@ -1,21 +1,20 @@
 import { type IAuthRequest, Public } from '@libs/common/auth';
 import { AuthResponseDto, LoginUserDto, RegisterUserDto, UserResponseDto } from '@libs/contract/user/dto';
-import { Body, Controller, Get, HttpCode, HttpStatus, Inject, Post, Req } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req } from '@nestjs/common';
+import { RmqPublisherService } from '@libs/common/rabbitmq';
 import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { Observable } from 'rxjs';
 
 @ApiTags('Auth & User')
 @Controller()
 export class UserController {
-  constructor(@Inject('USER_SERVICE_CLIENT') private readonly userServiceClient: ClientProxy) {}
+  constructor(private readonly rmqPublisher: RmqPublisherService) {}
 
   @Public()
   @Post('auth/register')
   @ApiOperation({ summary: 'Register a new user' })
   @ApiCreatedResponse({ description: 'User registered successfully', type: AuthResponseDto })
-  register(@Body() registerUserDto: RegisterUserDto): Observable<AuthResponseDto> {
-    return this.userServiceClient.send({ cmd: 'register-user' }, registerUserDto);
+  register(@Body() registerUserDto: RegisterUserDto): Promise<AuthResponseDto> {
+    return this.rmqPublisher.request('user.register', registerUserDto);
   }
 
   @Public()
@@ -23,15 +22,15 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Login user and get JWT' })
   @ApiOkResponse({ description: 'User logged in successfully', type: AuthResponseDto })
-  login(@Body() loginUserDto: LoginUserDto): Observable<AuthResponseDto> {
-    return this.userServiceClient.send({ cmd: 'login-user' }, loginUserDto);
+  login(@Body() loginUserDto: LoginUserDto): Promise<AuthResponseDto> {
+    return this.rmqPublisher.request('user.login', loginUserDto);
   }
 
   @ApiBearerAuth('Authorization')
   @Get('users/me')
   @ApiOperation({ summary: 'Get current user profile' })
   @ApiOkResponse({ description: 'Current user profile', type: UserResponseDto })
-  getMe(@Req() { user }: IAuthRequest): Observable<UserResponseDto> {
-    return this.userServiceClient.send({ cmd: 'get-user' }, user.user_id);
+  getMe(@Req() { user }: IAuthRequest): Promise<UserResponseDto> {
+    return this.rmqPublisher.request('user.get', user.user_id);
   }
 }

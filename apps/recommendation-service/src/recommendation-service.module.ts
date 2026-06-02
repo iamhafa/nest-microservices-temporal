@@ -1,12 +1,12 @@
 import { RmqCorrelationIdInterceptor } from '@libs/common/interceptor';
 import { SharedLoggerModule } from '@libs/common/logger/shared-logger.module';
 import { Module } from '@nestjs/common';
+import { SharedRabbitMQModule } from '@libs/common/rabbitmq';
 import { ConfigModule } from '@nestjs/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ClsModule } from 'nestjs-cls';
 import { join } from 'path';
 import { cwd } from 'process';
-import { RecommendationServiceController } from './recommendation-service.controller';
 import { RecommendationServiceService } from './recommendation-service.service';
 
 @Module({
@@ -18,9 +18,9 @@ import { RecommendationServiceService } from './recommendation-service.service';
     }),
 
     // Custom dynamic modules
+    SharedRabbitMQModule,
     SharedLoggerModule,
   ],
-  controllers: [RecommendationServiceController],
   providers: [
     {
       provide: APP_INTERCEPTOR,

@@ -1,18 +1,6 @@
 import { CreateProductBrandDto, UpdateProductBrandDto } from '@libs/contract/product/dto';
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Inject,
-  Param,
-  ParseIntPipe,
-  Post,
-  Put,
-} from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
+import { RmqPublisherService } from '@libs/common/rabbitmq';
 import {
   ApiAcceptedResponse,
   ApiBadRequestResponse,
@@ -23,36 +11,35 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { Observable } from 'rxjs';
 
 @ApiBearerAuth('Authorization')
 @ApiTags('Product Brand')
 @Controller('product-brands')
 export class ProductBrandController {
-  constructor(@Inject('PRODUCT_SERVICE_CLIENT') private readonly productServiceClient: ClientProxy) {}
+  constructor(private readonly rmqPublisher: RmqPublisherService) {}
 
   @Post()
   @HttpCode(HttpStatus.ACCEPTED)
   @ApiOperation({ summary: 'Create a product brand' })
   @ApiAcceptedResponse({ description: 'Product brand creation initiated' })
   @ApiBadRequestResponse({ description: 'Invalid request' })
-  createProductBrand(@Body() createProductBrandDto: CreateProductBrandDto): Observable<any> {
-    return this.productServiceClient.send({ cmd: 'create-product-brand' }, createProductBrandDto);
+  createProductBrand(@Body() createProductBrandDto: CreateProductBrandDto): Promise<any> {
+    return this.rmqPublisher.request('productBrand.create', createProductBrandDto);
   }
 
   @Get()
   @ApiOperation({ summary: 'Get all product brands' })
   @ApiOkResponse({ description: 'List of product brands' })
-  getProductBrands(): Observable<any[]> {
-    return this.productServiceClient.send({ cmd: 'get-product-brands' }, {});
+  getProductBrands(): Promise<any[]> {
+    return this.rmqPublisher.request('productBrand.getAll', {});
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get product brand by ID' })
   @ApiOkResponse({ description: 'Product brand details' })
   @ApiNotFoundResponse({ description: 'Product brand not found' })
-  getProductBrand(@Param('id', ParseIntPipe) id: number): Observable<any> {
-    return this.productServiceClient.send({ cmd: 'get-product-brand' }, id);
+  getProductBrand(@Param('id', ParseIntPipe) id: number): Promise<any> {
+    return this.rmqPublisher.request('productBrand.get', id);
   }
 
   @Put()
@@ -61,8 +48,8 @@ export class ProductBrandController {
   @ApiNoContentResponse({ description: 'Product brand updated successfully' })
   @ApiNotFoundResponse({ description: 'Product brand not found' })
   @ApiBadRequestResponse({ description: 'Invalid request' })
-  updateProductBrand(@Body() updateProductBrandDto: UpdateProductBrandDto): Observable<any> {
-    return this.productServiceClient.send({ cmd: 'update-product-brand' }, updateProductBrandDto);
+  updateProductBrand(@Body() updateProductBrandDto: UpdateProductBrandDto): Promise<any> {
+    return this.rmqPublisher.request('productBrand.update', updateProductBrandDto);
   }
 
   @Delete(':id')
@@ -70,7 +57,7 @@ export class ProductBrandController {
   @ApiOperation({ summary: 'Delete a product brand' })
   @ApiNoContentResponse({ description: 'Product brand deleted successfully' })
   @ApiNotFoundResponse({ description: 'Product brand not found' })
-  deleteProductBrand(@Param('id', ParseIntPipe) id: number): Observable<any> {
-    return this.productServiceClient.send({ cmd: 'delete-product-brand' }, id);
+  deleteProductBrand(@Param('id', ParseIntPipe) id: number): Promise<any> {
+    return this.rmqPublisher.request('productBrand.delete', id);
   }
 }

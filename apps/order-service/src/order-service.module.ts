@@ -1,5 +1,6 @@
 import { RmqCorrelationIdInterceptor } from '@libs/common/interceptor';
 import { SharedLoggerModule } from '@libs/common/logger/shared-logger.module';
+import { SharedRabbitMQModule } from '@libs/common/rabbitmq';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue';
 import { SharedTemporalModule } from '@libs/temporal/shared-temporal.module';
 import { Module } from '@nestjs/common';
@@ -11,7 +12,6 @@ import { join } from 'path';
 import { cwd } from 'process';
 import { OrderItemEntity } from './entity/order-item.entity';
 import { OrderEntity } from './entity/order.entity';
-import { OrderController } from './order-service.controller';
 import { OrderService } from './order-service.service';
 import { OrderRepository } from './repository/order.repository';
 import { CreateOrderActivity } from './activity/create-order.activity';
@@ -49,6 +49,7 @@ import { OrderItemRepository } from './repository/order-item.repository';
     }),
 
     // Custom dynamic modules
+    SharedRabbitMQModule,
     SharedLoggerModule,
     SharedTemporalModule.forRoot({
       taskQueue: WorkFlowTaskQueue.ORDER,
@@ -65,7 +66,6 @@ import { OrderItemRepository } from './repository/order-item.repository';
       },
     }),
   ],
-  controllers: [OrderController],
   providers: [
     {
       provide: APP_INTERCEPTOR,

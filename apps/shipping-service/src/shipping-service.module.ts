@@ -3,6 +3,7 @@ import { SharedLoggerModule } from '@libs/common/logger/shared-logger.module';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue';
 import { SharedTemporalModule } from '@libs/temporal/shared-temporal.module';
 import { Module } from '@nestjs/common';
+import { SharedRabbitMQModule } from '@libs/common/rabbitmq';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -11,7 +12,6 @@ import { join } from 'path';
 import { cwd } from 'process';
 import { ShippingEntity } from './entity/shipping.entity';
 import { ShippingRepository } from './repository/shipping.repository';
-import { ShippingController } from './shipping-service.controller';
 import { ShippingService } from './shipping-service.service';
 import { CreateShipmentActivity } from './activity/create-shipment.activity';
 
@@ -41,6 +41,7 @@ import { CreateShipmentActivity } from './activity/create-shipment.activity';
     }),
 
     // Custom dynamic modules
+    SharedRabbitMQModule,
     SharedLoggerModule,
     SharedTemporalModule.forRoot({
       taskQueue: WorkFlowTaskQueue.SHIPPING,
@@ -58,6 +59,5 @@ import { CreateShipmentActivity } from './activity/create-shipment.activity';
     CreateShipmentActivity,
     ShippingRepository,
   ],
-  controllers: [ShippingController],
 })
 export class ShippingServiceModule {}

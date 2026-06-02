@@ -1,21 +1,13 @@
+import { RpcExceptionFilter } from '@libs/common/filter';
 import { NestFactory } from '@nestjs/core';
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { Logger } from 'nestjs-pino';
 import { UserServiceModule } from './user-service.module';
 
 async function bootstrap() {
-  const app = await NestFactory.createMicroservice<MicroserviceOptions>(UserServiceModule, {
-    transport: Transport.RMQ,
-    options: {
-      urls: ['amqp://admin:admin@localhost:5672'],
-      queue: 'user-service-queue',
-      queueOptions: {
-        durable: true,
-      },
-    },
-  });
+  const app = await NestFactory.create(UserServiceModule);
   app.useLogger(app.get(Logger));
+  app.useGlobalFilters(new RpcExceptionFilter());
   app.enableShutdownHooks();
-  await app.listen();
+  await app.init();
 }
 bootstrap();

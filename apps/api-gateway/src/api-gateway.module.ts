@@ -28,7 +28,6 @@ import { UserModule } from './modules/user/user.module';
         idGenerator: () => randomUUID(),
         setup: (clsService: ClsService, req: Request, res: Response): void => {
           const id: string = clsService.getId();
-          req.headers['X-Correlation-Id'] = id; // Set header for downstream services
           res.setHeader('X-Correlation-Id', id); // Set header for client
           clsService.set('correlationId', id); // Set correlationId for logger
         },

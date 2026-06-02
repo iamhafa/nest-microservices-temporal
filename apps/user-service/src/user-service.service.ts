@@ -1,5 +1,7 @@
 import { IJwtPayload } from '@libs/common/auth/interface/jwt.interface';
 import { AppException } from '@libs/common/exception/app-exception';
+import { RabbitRPC, RabbitPayload } from '@golevelup/nestjs-rabbitmq';
+import { RmqExchange, RmqQueue } from '@libs/contract/rabbitmq/constants';
 import { AuthResponseDto, LoginUserDto, RegisterUserDto, UserResponseDto } from '@libs/contract/user/dto';
 import { UserErrorCode } from '@libs/contract/user/error';
 import { HttpStatus, Injectable } from '@nestjs/common';
@@ -15,7 +17,12 @@ export class UserService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async registerUser(registerUserDto: RegisterUserDto): Promise<AuthResponseDto> {
+  @RabbitRPC({
+    exchange: RmqExchange.ECOMMERCE,
+    routingKey: 'user.register',
+    queue: RmqQueue.USER_QUEUE,
+  })
+  async registerUser(@RabbitPayload() registerUserDto: RegisterUserDto): Promise<AuthResponseDto> {
     const { email, password, first_name, last_name } = registerUserDto;
 
     const existingUser: boolean = await this.userRepository.existsBy({ email });
@@ -42,7 +49,12 @@ export class UserService {
     return this.generateAuthResponse(savedUser);
   }
 
-  async loginUser(loginUserDto: LoginUserDto): Promise<AuthResponseDto> {
+  @RabbitRPC({
+    exchange: RmqExchange.ECOMMERCE,
+    routingKey: 'user.login',
+    queue: RmqQueue.USER_QUEUE,
+  })
+  async loginUser(@RabbitPayload() loginUserDto: LoginUserDto): Promise<AuthResponseDto> {
     const { email, password } = loginUserDto;
 
     const user = await this.userRepository.findOne({
@@ -73,7 +85,12 @@ export class UserService {
     return this.generateAuthResponse(user);
   }
 
-  async getUserById(id: number): Promise<UserResponseDto> {
+  @RabbitRPC({
+    exchange: RmqExchange.ECOMMERCE,
+    routingKey: 'user.get',
+    queue: RmqQueue.USER_QUEUE,
+  })
+  async getUserById(@RabbitPayload() id: number): Promise<UserResponseDto> {
     const user = await this.userRepository.findOneBy({
       id,
       is_active: true,

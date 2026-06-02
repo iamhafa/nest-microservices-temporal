@@ -1,4 +1,6 @@
 import { AppException } from '@libs/common/exception/app-exception';
+import { RabbitRPC, RabbitPayload } from '@golevelup/nestjs-rabbitmq';
+import { RmqExchange, RmqQueue } from '@libs/contract/rabbitmq/constants';
 import { UpdateDeliveryStatusDto } from '@libs/contract/shipping/dto';
 import { ShippingErrorCode } from '@libs/contract/shipping/error';
 import { HttpStatus, Injectable } from '@nestjs/common';
@@ -9,11 +11,21 @@ import { ShippingRepository } from './repository/shipping.repository';
 export class ShippingService {
   constructor(private readonly shippingRepository: ShippingRepository) {}
 
+  @RabbitRPC({
+    exchange: RmqExchange.ECOMMERCE,
+    routingKey: 'shipping.getAll',
+    queue: RmqQueue.SHIPPING_QUEUE,
+  })
   getShippings(): Promise<ShippingEntity[]> {
     return this.shippingRepository.find();
   }
 
-  async updateDeliveryStatus(updateDeliveryStatusDto: UpdateDeliveryStatusDto): Promise<ShippingEntity> {
+  @RabbitRPC({
+    exchange: RmqExchange.ECOMMERCE,
+    routingKey: 'shipping.updateStatus',
+    queue: RmqQueue.SHIPPING_QUEUE,
+  })
+  async updateDeliveryStatus(@RabbitPayload() updateDeliveryStatusDto: UpdateDeliveryStatusDto): Promise<ShippingEntity> {
     const { id, status } = updateDeliveryStatusDto;
     const shipping = await this.shippingRepository.findOneBy({ id });
     if (!shipping) {

@@ -1,5 +1,6 @@
 import { RmqCorrelationIdInterceptor } from '@libs/common/interceptor';
 import { SharedLoggerModule } from '@libs/common/logger/shared-logger.module';
+import { SharedRabbitMQModule } from '@libs/common/rabbitmq';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue';
 import { SharedTemporalModule } from '@libs/temporal/shared-temporal.module';
 import { Module } from '@nestjs/common';
@@ -10,7 +11,6 @@ import { ClsModule } from 'nestjs-cls';
 import { join } from 'path';
 import { cwd } from 'process';
 import { InventoryEntity } from './entity/inventory.entity';
-import { InventoryController } from './inventory-service.controller';
 import { InventoryService } from './inventory-service.service';
 import { InventoryRepository } from './repository/inventory.repository';
 import { ReserveInventoryActity } from './activity/reserve-inventory.actity';
@@ -27,6 +27,7 @@ import { InitializeInventoryActivity } from './activity/initialize-inventory.act
     }),
 
     // Custom dynamic modules
+    SharedRabbitMQModule,
     SharedLoggerModule,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -60,7 +61,6 @@ import { InitializeInventoryActivity } from './activity/initialize-inventory.act
       },
     }),
   ],
-  controllers: [InventoryController],
   providers: [
     {
       provide: APP_INTERCEPTOR,

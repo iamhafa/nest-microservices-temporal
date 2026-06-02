@@ -1,4 +1,6 @@
 import { AppException } from '@libs/common/exception/app-exception';
+import { RabbitRPC, RabbitPayload } from '@golevelup/nestjs-rabbitmq';
+import { RmqExchange, RmqQueue } from '@libs/contract/rabbitmq/constants';
 import { AdjustInventoryDto } from '@libs/contract/inventory/dto';
 import { InventoryErrorCode } from '@libs/contract/inventory/error';
 import { Injectable, Logger } from '@nestjs/common';
@@ -12,7 +14,12 @@ export class InventoryService {
 
   constructor(private readonly inventoryRepository: InventoryRepository) {}
 
-  async adjustInventory(adjustInventoryDto: AdjustInventoryDto): Promise<InventoryEntity> {
+  @RabbitRPC({
+    exchange: RmqExchange.ECOMMERCE,
+    routingKey: 'inventory.adjust',
+    queue: RmqQueue.INVENTORY_QUEUE,
+  })
+  async adjustInventory(@RabbitPayload() adjustInventoryDto: AdjustInventoryDto): Promise<InventoryEntity> {
     this.logger.log(`Adjusting inventory for product ${adjustInventoryDto.product_id}`);
     const { product_id, quantity_change } = adjustInventoryDto;
 
