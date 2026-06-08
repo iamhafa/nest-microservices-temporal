@@ -18,6 +18,10 @@ export class InventoryService {
     exchange: RmqExchange.ECOMMERCE,
     routingKey: 'inventory.adjust',
     queue: RmqQueue.INVENTORY_QUEUE,
+    queueOptions: {
+      deadLetterExchange: RmqExchange.ECOMMERCE_DLX,
+      deadLetterRoutingKey: 'inventory.failed',
+    },
   })
   async adjustInventory(@RabbitPayload() adjustInventoryDto: AdjustInventoryDto): Promise<InventoryEntity> {
     this.logger.log(`Adjusting inventory for product ${adjustInventoryDto.product_id}`);
@@ -42,5 +46,18 @@ export class InventoryService {
     } else {
       return this.inventoryRepository.findOneByOrFail({ product_id });
     }
+  }
+
+  @RabbitRPC({
+    exchange: RmqExchange.ECOMMERCE,
+    routingKey: 'inventory.getAll',
+    queue: RmqQueue.INVENTORY_QUEUE,
+    queueOptions: {
+      deadLetterExchange: RmqExchange.ECOMMERCE_DLX,
+      deadLetterRoutingKey: 'inventory.failed',
+    },
+  })
+  getAllInventories(): Promise<InventoryEntity[]> {
+    return this.inventoryRepository.find();
   }
 }
