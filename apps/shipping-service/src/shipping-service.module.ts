@@ -1,19 +1,18 @@
-import { RmqCorrelationIdInterceptor } from '@libs/common/interceptor';
+import { RmqCorrelationIdInterceptor, SharedRabbitMQModule } from '@libs/common';
 import { SharedLoggerModule } from '@libs/common/logger/shared-logger.module';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue';
 import { SharedTemporalModule } from '@libs/temporal/shared-temporal.module';
 import { Module } from '@nestjs/common';
-import { SharedRabbitMQModule } from '@libs/common/rabbitmq';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ClsModule } from 'nestjs-cls';
 import { join } from 'path';
 import { cwd } from 'process';
+import { CreateShipmentActivity } from './activity/create-shipment.activity';
 import { ShippingEntity } from './entity/shipping.entity';
 import { ShippingRepository } from './repository/shipping.repository';
 import { ShippingService } from './shipping-service.service';
-import { CreateShipmentActivity } from './activity/create-shipment.activity';
 
 @Module({
   imports: [

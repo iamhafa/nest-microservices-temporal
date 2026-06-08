@@ -1,6 +1,9 @@
-import { RpcExceptionFilter } from '@libs/common/filter/rpc-exception.filter';
-import { RmqCorrelationIdInterceptor } from '@libs/common/interceptor';
-import { SharedLoggerModule } from '@libs/common/logger/shared-logger.module';
+import {
+  RmqCorrelationIdInterceptor,
+  RpcExceptionFilter,
+  SharedLoggerModule,
+  SharedRabbitMQModule,
+} from '@libs/common';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
@@ -12,7 +15,6 @@ import { cwd } from 'process';
 import { UserEntity } from './entity/user.entity';
 import { UserRepository } from './repository/user.repository';
 import { UserService } from './user-service.service';
-import { SharedRabbitMQModule } from '@libs/common/rabbitmq';
 
 @Module({
   imports: [

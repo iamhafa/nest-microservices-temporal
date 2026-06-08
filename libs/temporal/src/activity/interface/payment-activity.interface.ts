@@ -7,4 +7,3 @@ export interface IChargePayment {
 export interface IRefundPayment {
   execute(orderId: number, totalAmount?: number): Promise<void>;
 }
-

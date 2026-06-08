@@ -1,24 +1,23 @@
-import { RmqCorrelationIdInterceptor } from '@libs/common/interceptor';
+import { RmqCorrelationIdInterceptor, SharedRabbitMQModule } from '@libs/common';
 import { SharedLoggerModule } from '@libs/common/logger/shared-logger.module';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue';
 import { SharedTemporalModule } from '@libs/temporal/shared-temporal.module';
 import { Module } from '@nestjs/common';
-import { SharedRabbitMQModule } from '@libs/common/rabbitmq';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ClsModule } from 'nestjs-cls';
 import { join } from 'path';
 import { cwd } from 'process';
+import { CreateProductActivity } from './activity/create-product.activity';
+import { DeleteProductActivity } from './activity/delete-product.activity';
+import { GetProductPricesActivity } from './activity/get-product-prices.activity';
+import { ValidateProductMetadataActivity } from './activity/validate-product-metadata.activity';
+import { ValidateProductsActivity } from './activity/validate-products.activity';
 import { ProductBrandModule } from './modules/product-brand/product-brand.module';
 import { ProductCategoryModule } from './modules/product-category/product-category.module';
 import { ProductTagModule } from './modules/product-tag/product-tag.module';
 import { ProductModule } from './modules/product/product.module';
-import { ValidateProductMetadataActivity } from './activity/validate-product-metadata.activity';
-import { ValidateProductsActivity } from './activity/validate-products.activity';
-import { CreateProductActivity } from './activity/create-product.activity';
-import { DeleteProductActivity } from './activity/delete-product.activity';
-import { GetProductPricesActivity } from './activity/get-product-prices.activity';
 
 @Module({
   imports: [

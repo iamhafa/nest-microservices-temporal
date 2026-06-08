@@ -1,6 +1,6 @@
-import { UpdateDeliveryStatusDto } from '@libs/contract/shipping/dto';
+import { RmqPublisherService } from '@libs/common';
+import { UpdateDeliveryStatusDto } from '@libs/contract/shipping/dto/update-delivery-status.dto';
 import { Body, Controller, Get, Patch } from '@nestjs/common';
-import { RmqPublisherService } from '@libs/common/rabbitmq';
 import { ApiBearerAuth, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 @ApiBearerAuth('Authorization')

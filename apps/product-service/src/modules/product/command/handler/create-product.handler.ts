@@ -1,4 +1,4 @@
-import { AppException } from '@libs/common/exception/app-exception';
+import { AppException } from '@libs/common';
 import { ProductErrorCode } from '@libs/contract/product/error';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue';
 import { HttpStatus } from '@nestjs/common';

@@ -1,4 +1,4 @@
-import { UserRole } from '@libs/contract/user/enum';
+import { UserRole } from '@libs/contract/user/enum/user-role.enum';
 import { Request } from 'express';
 
 export interface IAuthRequest extends Request {

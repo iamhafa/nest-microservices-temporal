@@ -1,11 +1,12 @@
+import { SystemErrorCode } from '@libs/contract/base/error';
 import { Catch, ExceptionFilter, HttpException, HttpStatus } from '@nestjs/common';
-import { AppException, AppExceptionOptions } from '../exception/app-exception';
+import { AppException, AppExceptionOptions } from './exception/app-exception';
 
 @Catch()
 export class RpcExceptionFilter implements ExceptionFilter {
   catch(exception: unknown) {
     let payload: AppExceptionOptions = {
-      code: 'SYS_999',
+      code: SystemErrorCode.UNCAUGHT_EXCEPTION,
       message: 'Internal server error',
       status: HttpStatus.INTERNAL_SERVER_ERROR,
     };
@@ -19,7 +20,7 @@ export class RpcExceptionFilter implements ExceptionFilter {
       };
     } else if (exception instanceof HttpException) {
       payload = {
-        code: 'SYS_999',
+        code: SystemErrorCode.UNCAUGHT_EXCEPTION,
         message: exception.message,
         status: exception.getStatus(),
       };

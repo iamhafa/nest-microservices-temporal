@@ -1,7 +1,4 @@
-import { EnvService } from '@libs/common/env/env.service';
-import { AppException, AppExceptionOptions } from '@libs/common/exception/app-exception';
-import { HttpExceptionFilter } from '@libs/common/filter';
-import { ResponseInterceptor } from '@libs/common/interceptor';
+import { AppException, AppExceptionOptions, EnvService, HttpExceptionFilter, ResponseInterceptor } from '@libs/common';
 import { SystemErrorCode } from '@libs/contract/base/error';
 import { HttpStatus, ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
@@ -12,13 +9,16 @@ import { Logger } from 'nestjs-pino';
 import { ApiGatewayModule } from './api-gateway.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(ApiGatewayModule, { bufferLogs: true });
+  // Kìm các log khởi tạo vào buffer để chờ custom logger (Pino) format
+  const app: NestExpressApplication = await NestFactory.create(ApiGatewayModule, { bufferLogs: true });
   const envService: EnvService = app.get(EnvService);
 
   // Trust 1 layer of proxies (e.g., Nginx, Load Balancer) to get the correct client IP for rate limiting
   app.set('trust proxy', 1);
   app.disable('x-powered-by');
-  app.useLogger(app.get(Logger));
+  const logger = app.get(Logger);
+  app.useLogger(logger);
+  app.flushLogs(); // Xả toàn bộ log trong buffer ra màn hình bằng custom logger
   app.enableCors();
   app.enableShutdownHooks();
   app.enableVersioning({

@@ -39,7 +39,7 @@ export class OrderItemEntity {
   @DeleteDateColumn({ select: false })
   deleted_at_utc: Date;
 
-  @ManyToOne(() => OrderEntity, order => order.items)
+  @ManyToOne(() => OrderEntity, (order) => order.items)
   @JoinColumn({ name: 'order_id' })
   readonly order: Relation<OrderEntity>;
 }

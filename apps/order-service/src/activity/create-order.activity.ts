@@ -1,13 +1,12 @@
-import { CreateOrderDto } from '@libs/contract/order/dto';
+import { CreateOrderDto, OrderItemDto } from '@libs/contract/order/dto/create-order.dto';
+import { OrderStatus } from '@libs/contract/order/enum/order-status.enum';
 import { ICreateOrder } from '@libs/temporal/activity';
 import { Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
-import { OrderRepository } from '../repository/order.repository';
-import { OrderStatus } from '@libs/contract/order/enum';
-import { OrderItemDto } from '@libs/contract/order/dto';
-import { OrderEntity } from '../entity/order.entity';
 import { OrderItemEntity } from '../entity/order-item.entity';
+import { OrderEntity } from '../entity/order.entity';
 import { OrderItemRepository } from '../repository/order-item.repository';
+import { OrderRepository } from '../repository/order.repository';
 
 @Activity({ name: 'create-order-activity' })
 export class CreateOrderActivity implements ICreateOrder {

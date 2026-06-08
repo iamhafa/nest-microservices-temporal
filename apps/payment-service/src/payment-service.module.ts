@@ -1,6 +1,5 @@
 import { StripeModule, StripeModuleConfig } from '@golevelup/nestjs-stripe';
-import { RmqCorrelationIdInterceptor } from '@libs/common/interceptor';
-import { SharedLoggerModule } from '@libs/common/logger/shared-logger.module';
+import { RmqCorrelationIdInterceptor, SharedLoggerModule, SharedRabbitMQModule } from '@libs/common';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue';
 import { SharedTemporalModule } from '@libs/temporal/shared-temporal.module';
 import { Module } from '@nestjs/common';
@@ -10,11 +9,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ClsModule } from 'nestjs-cls';
 import { join } from 'path';
 import { cwd } from 'process';
-import { PaymentTransactionEntity } from './entity/payment-transaction.entity';
-import { PaymentTransactionRepository } from './repository/payment-transaction.repository';
 import { ChargePaymentActivity } from './activity/charge-payment.activity';
 import { RefundPaymentActivity } from './activity/refund-payment.activity';
-import { SharedRabbitMQModule } from '@libs/common/rabbitmq';
+import { PaymentTransactionEntity } from './entity/payment-transaction.entity';
+import { PaymentTransactionRepository } from './repository/payment-transaction.repository';
 
 @Module({
   imports: [

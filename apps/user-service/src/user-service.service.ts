@@ -1,8 +1,10 @@
-import { IJwtPayload } from '@libs/common/auth/interface/jwt.interface';
-import { AppException } from '@libs/common/exception/app-exception';
-import { RabbitRPC, RabbitPayload } from '@golevelup/nestjs-rabbitmq';
-import { RmqExchange, RmqQueue } from '@libs/contract/rabbitmq/constants';
-import { AuthResponseDto, LoginUserDto, RegisterUserDto, UserResponseDto } from '@libs/contract/user/dto';
+import { RabbitPayload, RabbitRPC } from '@golevelup/nestjs-rabbitmq';
+import { IJwtPayload } from '@libs/auth';
+import { AppException, RmqExchange, RmqQueue } from '@libs/common';
+import { AuthResponseDto } from '@libs/contract/user/dto/auth-response.dto';
+import { LoginUserDto } from '@libs/contract/user/dto/login-user.dto';
+import { RegisterUserDto } from '@libs/contract/user/dto/register-user.dto';
+import { UserResponseDto } from '@libs/contract/user/dto/user-response.dto';
 import { UserErrorCode } from '@libs/contract/user/error';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';

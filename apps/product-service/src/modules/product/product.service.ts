@@ -1,14 +1,15 @@
-import { CreateProductDto, UpdateProductDto } from '@libs/contract/product/dto';
+import { RabbitPayload, RabbitRPC } from '@golevelup/nestjs-rabbitmq';
+import { RmqExchange, RmqQueue } from '@libs/common';
+import { CreateProductDto } from '@libs/contract/product/dto/create-product.dto';
+import { UpdateProductDto } from '@libs/contract/product/dto/update-product.dto';
 import { Injectable } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { RabbitRPC, RabbitPayload } from '@golevelup/nestjs-rabbitmq';
-import { RmqExchange, RmqQueue } from '@libs/contract/rabbitmq/constants';
-import { ProductEntity } from './entity/product.entity';
 import { CreateProductCommand } from './command/implement/create-product.command';
-import { UpdateProductCommand } from './command/implement/update-product.command';
 import { DeleteProductCommand } from './command/implement/delete-product.command';
-import { GetProductsQuery } from './query/implement/get-products.query';
+import { UpdateProductCommand } from './command/implement/update-product.command';
+import { ProductEntity } from './entity/product.entity';
 import { GetProductQuery } from './query/implement/get-product.query';
+import { GetProductsQuery } from './query/implement/get-products.query';
 
 @Injectable()
 export class ProductService {

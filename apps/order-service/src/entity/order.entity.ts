@@ -1,4 +1,4 @@
-import { OrderStatus } from '@libs/contract/order/enum';
+import { OrderStatus } from '@libs/contract/order/enum/order-status.enum';
 import {
   Column,
   CreateDateColumn,
@@ -46,7 +46,7 @@ export class OrderEntity {
   @DeleteDateColumn({ select: false })
   deleted_at_utc: Date;
 
-  @OneToMany(() => OrderItemEntity, item => item.order, { cascade: true })
+  @OneToMany(() => OrderItemEntity, (item) => item.order, { cascade: true })
   readonly items: Relation<OrderItemEntity[]>;
 
   get isCancelable(): boolean {

@@ -1,5 +1,5 @@
-import { CreateOrderDto, OrderItemDto } from '@libs/contract/order/dto';
-import { OrderStatus } from '@libs/contract/order/enum';
+import type { CreateOrderDto, OrderItemDto } from '@libs/contract/order/dto/create-order.dto';
+import { OrderStatus } from '@libs/contract/order/enum/order-status.enum';
 
 // Tạo đơn hàng
 export interface ICreateOrder {

@@ -1,14 +1,15 @@
-import { AppException } from '@libs/common/exception/app-exception';
-import { CreateProductDto, UpdateProductDto } from '@libs/contract/product/dto';
+import { AppException } from '@libs/common';
+import { CreateProductDto } from '@libs/contract/product/dto/create-product.dto';
+import { UpdateProductDto } from '@libs/contract/product/dto/update-product.dto';
 import { ProductErrorCode } from '@libs/contract/product/error';
 import { IValidateProductMetadata } from '@libs/temporal/activity';
 import { HttpStatus, Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { In } from 'typeorm';
-import { ProductCategoryRepository } from '../modules/product-category/repository/product-category.repository';
 import { ProductBrandRepository } from '../modules/product-brand/repository/product-brand.repository';
-import { ProductTagRepository } from '../modules/product-tag/repository/product-tag.repository';
+import { ProductCategoryRepository } from '../modules/product-category/repository/product-category.repository';
 import { ProductTagEntity } from '../modules/product-tag/entity/product-tag.entity';
+import { ProductTagRepository } from '../modules/product-tag/repository/product-tag.repository';
 
 @Activity({ name: 'validate-product-metadata-activity' })
 export class ValidateProductMetadataActivity implements IValidateProductMetadata {
@@ -52,8 +53,8 @@ export class ValidateProductMetadataActivity implements IValidateProductMetadata
         where: { id: In(tag_ids) },
       });
 
-      const foundIds = new Set(tags.map(tag => tag.id));
-      const missingIds: number[] = tag_ids.filter(tagId => !foundIds.has(tagId));
+      const foundIds = new Set(tags.map((tag) => tag.id));
+      const missingIds: number[] = tag_ids.filter((tagId) => !foundIds.has(tagId));
 
       if (missingIds.length > 0) {
         throw new AppException({

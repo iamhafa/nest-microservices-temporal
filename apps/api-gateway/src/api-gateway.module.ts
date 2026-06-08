@@ -1,8 +1,9 @@
-import { JwtAuthGuard } from '@libs/common/auth';
-import { SharedLoggerModule } from '@libs/common/logger/shared-logger.module';
+import { JwtAuthGuard } from '@libs/auth';
+import { IdempotencyInterceptor, SharedLoggerModule } from '@libs/common';
+import { RedisConnectionConfig, RedisModule } from '@nestjs-redis/client';
 import { ExecutionContext, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { ThrottlerGuard, ThrottlerModule, ThrottlerModuleOptions } from '@nestjs/throttler';
 import { randomUUID } from 'crypto';
@@ -50,6 +51,15 @@ import { UserModule } from './modules/user/user.module';
         errorMessage: 'Too Many Requests',
       }),
     }),
+    RedisModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService): RedisConnectionConfig => ({
+        options: {
+          name: 'default',
+          url: config.getOrThrow<string>('REDIS_URL'),
+        },
+      }),
+    }),
 
     // Custom dynamic modules
     SharedLoggerModule,
@@ -70,6 +80,10 @@ import { UserModule } from './modules/user/user.module';
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: IdempotencyInterceptor,
     },
   ],
 })

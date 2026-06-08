@@ -27,8 +27,8 @@ export class RmqCorrelationIdInterceptor implements NestInterceptor {
           this.clsService.set('correlationId', correlationId);
 
           next.handle().subscribe({
-            next: value => subscriber.next(value),
-            error: err => subscriber.error(err),
+            next: (value) => subscriber.next(value),
+            error: (err) => subscriber.error(err),
             complete: () => subscriber.complete(),
           });
         });

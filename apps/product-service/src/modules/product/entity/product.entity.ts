@@ -50,7 +50,7 @@ export class ProductEntity {
   @Column({ default: 'usd', comment: 'Đơn vị tiền tệ' })
   currency: string;
 
-  @OneToMany(() => ProductImageEntity, image => image.product, { cascade: true })
+  @OneToMany(() => ProductImageEntity, (image) => image.product, { cascade: true })
   readonly images: Relation<ProductImageEntity[]>;
 
   @Column({ type: 'boolean', default: true, comment: 'Sản phẩm còn hoạt động' })
@@ -73,11 +73,11 @@ export class ProductEntity {
   @DeleteDateColumn({ select: false })
   deleted_at_utc: Date;
 
-  @ManyToOne(() => ProductCategoryEntity, category => category.products)
+  @ManyToOne(() => ProductCategoryEntity, (category) => category.products)
   @JoinColumn({ name: 'category_id' })
   readonly category: Relation<ProductCategoryEntity>;
 
-  @ManyToMany(() => ProductTagEntity, tag => tag.products)
+  @ManyToMany(() => ProductTagEntity, (tag) => tag.products)
   @JoinTable({
     name: 'products_tags_link',
     joinColumn: { name: 'product_id', referencedColumnName: 'id' },
@@ -85,7 +85,7 @@ export class ProductEntity {
   })
   readonly tags: Relation<ProductTagEntity[]>;
 
-  @ManyToOne(() => ProductBrandEntity, brand => brand.products)
+  @ManyToOne(() => ProductBrandEntity, (brand) => brand.products)
   @JoinColumn({ name: 'brand_id' })
   readonly brand: Relation<ProductBrandEntity>;
 

@@ -21,10 +21,12 @@
     "noImplicitAny": true,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
-    "strict": true, // Bật chế độ kiểm tra kiểu nghiêm ngặt toàn diện (bao gồm strictNullChecks, noImplicitAny, v.v.)
-    "strictPropertyInitialization": false, // Tắt cảnh báo khởi tạo thuộc tính trong constructor (cần thiết cho các Entity của TypeORM)
-    "strictFunctionTypes": false, // Tắt kiểm tra tham số hàm nghiêm ngặt (cho phép gán Express Request vào IncomingMessage của pino-http)
+    "strict": true,
+    "strictPropertyInitialization": false,
+    "strictFunctionTypes": false,
     "paths": {
+      "@libs/auth": ["libs/auth/src"],
+      "@libs/auth/*": ["libs/auth/src/*"],
       "@libs/common": ["libs/common/src"],
       "@libs/common/*": ["libs/common/src/*"],
       "@libs/contract": ["libs/contract/src"],

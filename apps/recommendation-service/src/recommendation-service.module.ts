@@ -1,7 +1,6 @@
-import { RmqCorrelationIdInterceptor } from '@libs/common/interceptor';
+import { RmqCorrelationIdInterceptor, SharedRabbitMQModule } from '@libs/common';
 import { SharedLoggerModule } from '@libs/common/logger/shared-logger.module';
 import { Module } from '@nestjs/common';
-import { SharedRabbitMQModule } from '@libs/common/rabbitmq';
 import { ConfigModule } from '@nestjs/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ClsModule } from 'nestjs-cls';

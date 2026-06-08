@@ -1,1 +1,4 @@
-export * from './payment-error-code';
+export enum PaymentErrorCode {
+  PROCESSING_FAILED = 'PAY_001',
+  DECLINED = 'PAY_002',
+}

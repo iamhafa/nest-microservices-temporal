@@ -1,4 +1,4 @@
-import { UserRole } from '@libs/contract/user/enum';
+import { UserRole } from '@libs/contract/user/enum/user-role.enum';
 import { SetMetadata } from '@nestjs/common';
 
 export const ROLES_KEY: string = 'roles';

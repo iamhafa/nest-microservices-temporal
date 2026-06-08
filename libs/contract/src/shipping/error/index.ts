@@ -1,1 +1,3 @@
-export * from './shipping-error-code';
+export enum ShippingErrorCode {
+  NOT_FOUND = 'SHP_001',
+}

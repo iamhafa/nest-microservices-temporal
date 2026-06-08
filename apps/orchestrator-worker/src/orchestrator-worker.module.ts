@@ -1,5 +1,4 @@
-import { RmqCorrelationIdInterceptor } from '@libs/common/interceptor';
-import { SharedLoggerModule } from '@libs/common/logger/shared-logger.module';
+import { RmqCorrelationIdInterceptor, SharedLoggerModule } from '@libs/common';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue';
 import { SharedTemporalModule } from '@libs/temporal/shared-temporal.module';
 import { Module } from '@nestjs/common';

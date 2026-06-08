@@ -1,11 +1,15 @@
-import { RpcExceptionFilter } from '@libs/common/filter';
+import { RpcExceptionFilter } from '@libs/common';
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { Logger } from 'nestjs-pino';
 import { UserServiceModule } from './user-service.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(UserServiceModule);
-  app.useLogger(app.get(Logger));
+  // Kìm các log khởi tạo vào buffer để chờ custom logger (Pino) format
+  const app: NestExpressApplication = await NestFactory.create(UserServiceModule, { bufferLogs: true });
+  const logger = app.get(Logger);
+  app.useLogger(logger);
+  app.flushLogs(); // Xả toàn bộ log trong buffer ra màn hình bằng custom logger
   app.useGlobalFilters(new RpcExceptionFilter());
   app.enableShutdownHooks();
   await app.init();

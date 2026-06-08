@@ -3,7 +3,7 @@ import { ArgumentsHost, Catch, HttpException, HttpStatus } from '@nestjs/common'
 import { HttpArgumentsHost } from '@nestjs/common/interfaces';
 import { BaseExceptionFilter } from '@nestjs/core';
 import { Response } from 'express';
-import { AppException } from '../exception/app-exception';
+import { AppException } from './exception/app-exception';
 
 @Catch()
 export class HttpExceptionFilter extends BaseExceptionFilter {

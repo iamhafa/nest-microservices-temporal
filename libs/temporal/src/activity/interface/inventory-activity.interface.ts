@@ -1,4 +1,4 @@
-import { OrderItemDto } from '@libs/contract/order/dto';
+import type { OrderItemDto } from '@libs/contract/order/dto/create-order.dto';
 
 // Giữ kho tạm thời cho đơn đặt hàng
 export interface IReserveInventory {

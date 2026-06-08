@@ -1,6 +1,4 @@
-import { RmqCorrelationIdInterceptor } from '@libs/common/interceptor';
-import { SharedLoggerModule } from '@libs/common/logger/shared-logger.module';
-import { SharedRabbitMQModule } from '@libs/common/rabbitmq';
+import { RmqCorrelationIdInterceptor, SharedLoggerModule, SharedRabbitMQModule } from '@libs/common';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue';
 import { SharedTemporalModule } from '@libs/temporal/shared-temporal.module';
 import { Module } from '@nestjs/common';
@@ -10,14 +8,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ClsModule } from 'nestjs-cls';
 import { join } from 'path';
 import { cwd } from 'process';
+import { ConfirmInventoryActivity } from './activity/confirm-inventory.activity';
+import { InitializeInventoryActivity } from './activity/initialize-inventory.activity';
+import { ReleaseInventoryActivity } from './activity/release-inventory.activity';
+import { ReserveInventoryActity } from './activity/reserve-inventory.actity';
+import { RestoreInventoryActivity } from './activity/restore-inventory.activity';
 import { InventoryEntity } from './entity/inventory.entity';
 import { InventoryService } from './inventory-service.service';
 import { InventoryRepository } from './repository/inventory.repository';
-import { ReserveInventoryActity } from './activity/reserve-inventory.actity';
-import { ReleaseInventoryActivity } from './activity/release-inventory.activity';
-import { ConfirmInventoryActivity } from './activity/confirm-inventory.activity';
-import { RestoreInventoryActivity } from './activity/restore-inventory.activity';
-import { InitializeInventoryActivity } from './activity/initialize-inventory.activity';
 
 @Module({
   imports: [

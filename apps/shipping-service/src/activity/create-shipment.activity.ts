@@ -1,4 +1,4 @@
-import { DeliveryStatus } from '@libs/contract/shipping/enum';
+import { DeliveryStatus } from '@libs/contract/shipping/enum/delivery-status.enum';
 import { ICreateShipment } from '@libs/temporal/activity';
 import { Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';

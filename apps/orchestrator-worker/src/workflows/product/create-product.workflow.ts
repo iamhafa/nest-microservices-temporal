@@ -1,9 +1,9 @@
-import { CreateProductDto } from '@libs/contract/product/dto';
+import { CreateProductDto } from '@libs/contract/product/dto/create-product.dto';
 import {
-  IInitializeInventory,
-  IValidateProductMetadata,
   ICreateProduct,
   IDeleteProduct,
+  IInitializeInventory,
+  IValidateProductMetadata,
 } from '@libs/temporal/activity';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue';
 import { proxyActivities } from '@temporalio/workflow';

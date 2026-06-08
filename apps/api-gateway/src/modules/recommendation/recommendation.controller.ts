@@ -1,6 +1,5 @@
-import { RelatedProductDto } from '@libs/contract/recommendation/dto';
+import { RmqPublisherService } from '@libs/common';
 import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
-import { RmqPublisherService } from '@libs/common/rabbitmq';
 import { ApiBearerAuth, ApiInternalServerErrorResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 @ApiBearerAuth('Authorization')
@@ -11,9 +10,9 @@ export class RecommendationController {
 
   @Get('products/:id/related')
   @ApiOperation({ summary: 'Get related products based on product ID' })
-  @ApiOkResponse({ description: 'List of related products', type: [RelatedProductDto] })
+  @ApiOkResponse({ description: 'List of related products' })
   @ApiInternalServerErrorResponse({ description: 'Failed to get related products' })
-  getRelatedProducts(@Param('id', ParseIntPipe) id: number): Promise<RelatedProductDto[]> {
+  getRelatedProducts(@Param('id', ParseIntPipe) id: number) {
     return this.rmqPublisher.request('recommendation.getRelatedProducts', id);
   }
 }

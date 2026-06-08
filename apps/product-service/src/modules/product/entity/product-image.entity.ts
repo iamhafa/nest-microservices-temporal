@@ -30,7 +30,7 @@ export class ProductImageEntity {
   @UpdateDateColumn({ select: false })
   updated_at_utc: Date;
 
-  @ManyToOne(() => ProductEntity, product => product.images, { onDelete: 'CASCADE' })
+  @ManyToOne(() => ProductEntity, (product) => product.images, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'product_id' })
   readonly product: Relation<ProductEntity>;
 }

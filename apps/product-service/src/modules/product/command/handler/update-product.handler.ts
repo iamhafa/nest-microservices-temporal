@@ -1,14 +1,14 @@
-import { AppException } from '@libs/common/exception/app-exception';
+import { AppException } from '@libs/common';
 import { ProductErrorCode } from '@libs/contract/product/error';
 import { HttpStatus } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { In } from 'typeorm';
+import { ProductBrandRepository } from '../../../product-brand/repository/product-brand.repository';
 import { ProductCategoryRepository } from '../../../product-category/repository/product-category.repository';
 import { ProductTagEntity } from '../../../product-tag/entity/product-tag.entity';
 import { ProductTagRepository } from '../../../product-tag/repository/product-tag.repository';
 import { ProductRepository } from '../../repository/product.repository';
 import { UpdateProductCommand } from '../implement/update-product.command';
-import { ProductBrandRepository } from '../../../product-brand/repository/product-brand.repository';
 
 @CommandHandler(UpdateProductCommand)
 export class UpdateProductHandler implements ICommandHandler<UpdateProductCommand> {
@@ -60,8 +60,8 @@ export class UpdateProductHandler implements ICommandHandler<UpdateProductComman
         },
       });
 
-      const foundIds = new Set(foundTags.map(t => t.id));
-      const missingIds = tag_ids.filter(id => !foundIds.has(id));
+      const foundIds = new Set(foundTags.map((t) => t.id));
+      const missingIds = tag_ids.filter((id: number) => !foundIds.has(id));
 
       if (missingIds.length > 0) {
         throw new AppException({

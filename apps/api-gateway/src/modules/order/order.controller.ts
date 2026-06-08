@@ -1,6 +1,8 @@
-import { CancelOrderDto, CreateOrderDto, UpdateOrderStatusDto } from '@libs/contract/order/dto';
+import { Idempotent, RmqPublisherService } from '@libs/common';
+import { CancelOrderDto } from '@libs/contract/order/dto/cancel-order.dto';
+import { CreateOrderDto } from '@libs/contract/order/dto/create-order.dto';
+import { UpdateOrderStatusDto } from '@libs/contract/order/dto/update-order-status.dto';
 import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
-import { RmqPublisherService } from '@libs/common/rabbitmq';
 import {
   ApiAcceptedResponse,
   ApiBadRequestResponse,
@@ -20,6 +22,7 @@ export class OrderController {
 
   @Post('place')
   @HttpCode(HttpStatus.ACCEPTED)
+  @Idempotent()
   @ApiOperation({ summary: 'Place an order' })
   @ApiAcceptedResponse({ description: 'Order is processing' })
   @ApiBadRequestResponse({ description: 'Invalid request' })

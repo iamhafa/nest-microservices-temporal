@@ -1,6 +1,0 @@
-export enum ProductErrorCode {
-  NOT_FOUND = 'PRD_001',
-  CATEGORY_NOT_FOUND = 'PRD_002',
-  BRAND_NOT_FOUND = 'PRD_003',
-  TAG_NOT_FOUND = 'PRD_004',
-}

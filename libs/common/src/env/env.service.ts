@@ -10,6 +10,6 @@ export class EnvService {
   }
 
   isDevelopment(): boolean {
-    return this.configService.get<string>('NODE_ENV') === 'development';
+    return this.configService.get<string>('NODE_ENV', 'development') === 'development';
   }
 }

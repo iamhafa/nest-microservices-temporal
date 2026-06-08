@@ -1,5 +1,5 @@
 import { InjectStripeClient } from '@golevelup/nestjs-stripe';
-import { AppException } from '@libs/common/exception/app-exception';
+import { AppException } from '@libs/common';
 import { PaymentErrorCode } from '@libs/contract/payment/error';
 import { IChargePayment } from '@libs/temporal/activity';
 import { HttpStatus, Logger } from '@nestjs/common';

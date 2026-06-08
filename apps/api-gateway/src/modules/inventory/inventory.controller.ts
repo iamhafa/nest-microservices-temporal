@@ -1,6 +1,6 @@
-import { AdjustInventoryDto } from '@libs/contract/inventory/dto';
+import { RmqPublisherService } from '@libs/common';
+import { AdjustInventoryDto } from '@libs/contract/inventory/dto/adjust-inventory.dto';
 import { Body, Controller, Get, HttpCode, HttpStatus, Patch } from '@nestjs/common';
-import { RmqPublisherService } from '@libs/common/rabbitmq';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,

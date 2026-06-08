@@ -1,6 +1,4 @@
-import { RmqCorrelationIdInterceptor } from '@libs/common/interceptor';
-import { SharedLoggerModule } from '@libs/common/logger/shared-logger.module';
-import { SharedRabbitMQModule } from '@libs/common/rabbitmq';
+import { RmqCorrelationIdInterceptor, SharedLoggerModule, SharedRabbitMQModule } from '@libs/common';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue';
 import { SharedTemporalModule } from '@libs/temporal/shared-temporal.module';
 import { Module } from '@nestjs/common';
@@ -10,18 +8,18 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ClsModule } from 'nestjs-cls';
 import { join } from 'path';
 import { cwd } from 'process';
+import { CreateOrderActivity } from './activity/create-order.activity';
+import { DeleteOrderActivity } from './activity/delete-order.activity';
+import { GetOrderItemsActivity } from './activity/get-order-items.activity';
+import { GetOrderTotalAmountActivity } from './activity/get-order-total-amount.activity';
+import { GetPaymentIdActivity } from './activity/get-payment-id.activity';
+import { SavePaymentIdActivity } from './activity/save-payment-id.activity';
+import { UpdateOrderStatusActivity } from './activity/update-order-status.activity';
 import { OrderItemEntity } from './entity/order-item.entity';
 import { OrderEntity } from './entity/order.entity';
 import { OrderService } from './order-service.service';
-import { OrderRepository } from './repository/order.repository';
-import { CreateOrderActivity } from './activity/create-order.activity';
-import { DeleteOrderActivity } from './activity/delete-order.activity';
-import { SavePaymentIdActivity } from './activity/save-payment-id.activity';
-import { UpdateOrderStatusActivity } from './activity/update-order-status.activity';
-import { GetOrderTotalAmountActivity } from './activity/get-order-total-amount.activity';
-import { GetOrderItemsActivity } from './activity/get-order-items.activity';
-import { GetPaymentIdActivity } from './activity/get-payment-id.activity';
 import { OrderItemRepository } from './repository/order-item.repository';
+import { OrderRepository } from './repository/order.repository';
 
 @Module({
   imports: [

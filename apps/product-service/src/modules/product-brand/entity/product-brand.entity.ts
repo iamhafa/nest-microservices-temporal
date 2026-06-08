@@ -42,7 +42,7 @@ export class ProductBrandEntity {
   @DeleteDateColumn({ select: false })
   deleted_at_utc: Date;
 
-  @OneToMany(() => ProductEntity, product => product.brand)
+  @OneToMany(() => ProductEntity, (product) => product.brand)
   readonly products: Relation<ProductEntity[]>;
 
   @BeforeInsert()

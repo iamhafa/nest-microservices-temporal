@@ -22,8 +22,8 @@ export class ValidateProductsActivity implements IValidateProducts {
       },
     });
 
-    const foundIds = new Set(products.map(product => product.id));
-    const missingIds: number[] = productIds.filter(productId => !foundIds.has(productId));
+    const foundIds = new Set(products.map((product) => product.id));
+    const missingIds: number[] = productIds.filter((productId) => !foundIds.has(productId));
 
     if (missingIds.length > 0) {
       this.logger.warn(`Products not found or inactive: ${missingIds.join(', ')}`);

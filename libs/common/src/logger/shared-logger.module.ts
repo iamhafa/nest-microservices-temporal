@@ -1,17 +1,17 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Request, Response } from 'express';
 import { ClsModule, ClsService } from 'nestjs-cls';
-import { LoggerModule } from 'nestjs-pino';
+import { LoggerModule, Params } from 'nestjs-pino';
 import { EnvModule } from '../env/env.module';
 import { EnvService } from '../env/env.service';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
     LoggerModule.forRootAsync({
       imports: [EnvModule, ConfigModule, ClsModule],
       inject: [ClsService, ConfigService, EnvService],
-      useFactory: (clsService: ClsService, configService: ConfigService, envService: EnvService) => {
+      useFactory: (clsService: ClsService, configService: ConfigService, envService: EnvService): Params => {
         const addCorrelationId = (): Record<string, string> => {
           if (clsService.isActive()) {
             const correlationId = clsService.get('correlationId');
@@ -28,7 +28,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         };
 
         return {
-          forRoutes: ['/api/*path'],
           pinoHttp: {
             genReqId: (req: Request) => req.headers['X-Correlation-Id'] as string,
             transport: {
@@ -61,13 +60,16 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
             mixin: () => addCorrelationId(),
             serializers: {
               req: (req: Request) => ({
-                id: req.id,
                 method: req.method,
                 url: req.url,
               }),
-              res: (res: Response) => ({
-                statusCode: res.statusCode,
-              }),
+              res: (res: any) => {
+                const response = res.raw as Response; // Pino wrap response object, we need to cast it to Response to access response.locals
+                return {
+                  statusCode: response.statusCode,
+                  responseBody: response.locals?.responseBody,
+                };
+              },
             },
           },
         };

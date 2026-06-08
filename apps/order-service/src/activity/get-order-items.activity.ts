@@ -1,10 +1,10 @@
-import { OrderItemDto } from '@libs/contract/order/dto';
+import { OrderItemDto } from '@libs/contract/order/dto/create-order.dto';
 import { IGetOrderItems } from '@libs/temporal/activity';
 import { Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
-import { OrderRepository } from '../repository/order.repository';
-import { OrderEntity } from '../entity/order.entity';
 import { OrderItemEntity } from '../entity/order-item.entity';
+import { OrderEntity } from '../entity/order.entity';
+import { OrderRepository } from '../repository/order.repository';
 
 @Activity({ name: 'get-order-items-activity' })
 export class GetOrderItemsActivity implements IGetOrderItems {

@@ -1,4 +1,5 @@
-import { CreateProductDto, UpdateProductDto } from '@libs/contract/product/dto';
+import { CreateProductDto } from '@libs/contract/product/dto/create-product.dto';
+import { UpdateProductDto } from '@libs/contract/product/dto/update-product.dto';
 
 // Xác thực thông tin sản phẩm
 export interface IValidateProductMetadata {
@@ -24,4 +25,3 @@ export interface IDeleteProduct {
 export interface IGetProductPrices {
   execute(productIds: number[]): Promise<Record<number, number>>;
 }
-

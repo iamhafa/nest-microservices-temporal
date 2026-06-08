@@ -1,7 +1,7 @@
-import { AppException } from '@libs/common/exception/app-exception';
-import { RabbitRPC, RabbitPayload } from '@golevelup/nestjs-rabbitmq';
-import { RmqExchange, RmqQueue } from '@libs/contract/rabbitmq/constants';
-import { CreateProductBrandDto, UpdateProductBrandDto } from '@libs/contract/product/dto';
+import { RabbitPayload, RabbitRPC } from '@golevelup/nestjs-rabbitmq';
+import { AppException, RmqExchange, RmqQueue } from '@libs/common';
+import { CreateProductBrandDto } from '@libs/contract/product/dto/create-product-brand.dto';
+import { UpdateProductBrandDto } from '@libs/contract/product/dto/update-product-brand.dto';
 import { ProductErrorCode } from '@libs/contract/product/error';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { ProductBrandEntity } from './entity/product-brand.entity';

@@ -33,6 +33,6 @@ export class ProductCategoryEntity {
   @DeleteDateColumn({ select: false })
   deleted_at_utc: Date;
 
-  @OneToMany(() => ProductEntity, product => product.category)
+  @OneToMany(() => ProductEntity, (product) => product.category)
   readonly products: Relation<ProductEntity[]>;
 }
