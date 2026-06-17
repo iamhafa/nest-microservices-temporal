@@ -1,5 +1,6 @@
 ---
-trigger: always_on
+name: temporal-conventions
+description: Conventions and rules for Temporal workflows, activities, Saga pattern, task queues, and idempotency.
 ---
 
 # Temporal Workflow & Activity Patterns
@@ -8,7 +9,7 @@ trigger: always_on
 
 - **Orchestrator Worker** (`apps/orchestrator-worker`): Hosts and runs Temporal workflows.
 - **Activity Interfaces** (`libs/temporal/src/activity/interface/`): Define contracts for each service's activities.
-- **Task Queues** (`libs/temporal/src/queue.ts`): Each microservice has its own dedicated task queue.
+- **Task Queues** (`libs/temporal/src/queue/enum/workflow-task.queue.ts`): Each microservice has its own dedicated task queue.
 - **Shared Module** (`libs/temporal/src/shared-temporal.module.ts`): `SharedTemporalModule.forRoot()` wraps `nestjs-temporal-core` with config-driven connection.
 
 ## 📂 File Organization Rules
@@ -103,3 +104,24 @@ Because Temporal automatically retries Activities upon failures or network timeo
 1. **Check Database First**: Before performing any external API call (e.g., charging a payment), query the database to verify if the operation was already completed successfully in a previous attempt.
 2. **Deterministic Keys**: For external APIs that support idempotency (like Stripe), ALWAYS pass a deterministically generated `idempotencyKey` (e.g., `charge_order_${orderId}`). Do NOT store this key in the database if it is purely deterministic and you are acting as the API client.
 3. **Graceful Skips**: If an Activity detects that its work is already done (e.g., payment is already refunded), it should log a message and return success immediately instead of throwing an error.
+
+## 🛑 Rationalizations (Anti-patterns)
+
+- **"I'll inject a TypeORM repository or database connection directly into the workflow for a quick query."**
+  - **Rebuttal**: NO. Workflows must be strictly pure, deterministic functions. ALL side effects, including database queries, must be handled in an Activity.
+- **"I don't need idempotency checks since this activity is simple."**
+  - **Rebuttal**: NO. Temporal will retry failed activities automatically. Every state-mutating activity MUST verify if the action was already completed.
+
+## 🚩 Red Flags
+
+- Seeing `import { Repository }` or `@InjectRepository` inside a workflow file.
+- `Math.random()`, `Date.now()`, or direct UUID generation inside a workflow. (Use Temporal's deterministic utilities if absolutely necessary, or pass them in from the caller/activity).
+- State-mutating activities without a `SELECT` query or API idempotency key check at the beginning.
+
+## ✅ Verification Gates
+
+Before completing a Temporal integration, verify:
+- [ ] Is the compensation logic (try/catch) implemented in the exact REVERSE order of execution?
+- [ ] Are all cross-service operations orchestrated by a workflow?
+- [ ] Are activities marked as idempotent and handling retry scenarios gracefully?
+- [ ] Are workflows purely deterministic (no DB, no HTTP calls directly)?

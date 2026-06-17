@@ -42,3 +42,36 @@ Consistency between external/internal API data is mandatory. General coding styl
 - **DTO Documentation**: ALL fields in DTOs MUST be decorated with `@ApiProperty()` or specific decorators like `@ApiPropertyOptional()`.
 - Use `ConfigModule` and `ConfigService` for environment variable access — never use `process.env` directly.
 - Every new feature must follow existing patterns in the codebase.
+
+## 🏗 CQRS Pattern (Command Query Responsibility Segregation)
+
+For complex microservices (like `product-service`), the CQRS pattern using `@nestjs/cqrs` MUST be followed:
+
+1. **Folder Structure**:
+   ```
+   apps/<service-name>/src/modules/<feature>/
+   ├── command/
+   │   ├── implement/      ← Command definitions (plain classes, e.g., create-product.command.ts)
+   │   └── handler/        ← Command handlers (decorated with @CommandHandler, e.g., create-product.handler.ts)
+   ├── query/
+   │   ├── implement/      ← Query definitions (plain classes, e.g., get-product.query.ts)
+   │   └── handler/        ← Query handlers (decorated with @QueryHandler, e.g., get-product.handler.ts)
+   └── <feature>.service.ts ← Service proxy that dispatches commands/queries to the buses
+   ```
+
+2. **Service Dispatcher**:
+   The service class acts as a clean facade. It injects `CommandBus` and `QueryBus` and dispatches commands and queries:
+   ```typescript
+   @Injectable()
+   export class ProductService {
+     constructor(
+       private readonly commandBus: CommandBus,
+       private readonly queryBus: QueryBus,
+     ) {}
+
+     createProduct(dto: CreateProductDto) {
+       return this.commandBus.execute(new CreateProductCommand(dto));
+     }
+   }
+   ```
+

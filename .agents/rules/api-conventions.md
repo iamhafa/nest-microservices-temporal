@@ -1,3 +1,8 @@
+---
+name: api-conventions
+description: Conventions for API Gateways, DTOs, Swagger documentation, and RabbitMQ message payload naming.
+---
+
 # API & Contract Conventions
 
 When writing or modifying code in this workspace, ALWAYS adhere to the following rules for API Gateways and Data Contracts (DTOs):
@@ -5,7 +10,7 @@ When writing or modifying code in this workspace, ALWAYS adhere to the following
 1. **DTOs (`libs/contract`)**:
    - Always use `@ApiProperty()` on fields for Swagger documentation.
    - Always use `class-validator` decorators (e.g., `@IsString()`, `@IsNotEmpty()`) for strict validation.
-   - Always use `@Expose({ name: 'snake_case' })` from `class-transformer` to ensure request/response payloads are serialized into `snake_case`.
+   - Define fields directly in `snake_case` (e.g., `product_id`). Use `@Expose({ name: 'snake_case' })` only if internal property names must differ from the payload structure.
 
 2. **API Documentation (Swagger/OpenAPI) [MANDATORY]**:
    - Every controller method in `api-gateway` MUST have `@ApiOperation({ summary: 'Short description' })`.
@@ -18,9 +23,9 @@ When writing or modifying code in this workspace, ALWAYS adhere to the following
 
 3. **API Gateway Endpoints (`apps/api-gateway`)**:
    - For update or action endpoints (e.g., `PATCH`, `POST`), **place the resource `id` inside the `@Body` DTO** rather than using `@Param('id')` in the URL whenever possible. This allows you to forward a single payload via RabbitMQ without manual merging.
-   - Use `this.clientProxy.send('message-pattern', payload)` to forward requests to microservices and return the `Observable` directly.
+   - Inject `RmqPublisherService` from `@libs/common` and use `this.rmqPublisher.request('routing-key', payload)` to forward requests to microservices and return the response Promise. Do NOT use `@nestjs/microservices` ClientProxy.
 
 4. **Microservice Handlers**:
-   - Internal microservice controllers must use `@MessagePattern('message-pattern')` from `@nestjs/microservices`.
-   - Business logic must reside in the Service layer, not the Controller.
-   - For database errors or business validations internally, throw standard HTTP exceptions (e.g., `UnauthorizedException`, `ConflictException`) and assume `RpcExceptionFilter` maps them correctly over RabbitMQ.
+   - Microservices DO NOT use controllers. All RabbitMQ handlers must reside directly in the Service layer (e.g., `<service-name>.service.ts`) using the `@RabbitRPC` decorator from `@golevelup/nestjs-rabbitmq`.
+   - Business logic must reside in the Service layer.
+   - For database errors or business validations internally, throw standard NestJS exceptions or `AppException` and assume `HttpExceptionFilter` maps them correctly over RabbitMQ.

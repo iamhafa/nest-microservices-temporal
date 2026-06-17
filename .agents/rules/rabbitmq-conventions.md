@@ -1,3 +1,8 @@
+---
+name: rabbitmq-conventions
+description: Conventions for RabbitMQ communication, SharedRabbitMQModule, RmqPublisherService, RPC patterns, and x-correlation-id propagation.
+---
+
 # RabbitMQ Communication Conventions
 
 ## 🏗 Architecture Overview
@@ -57,3 +62,23 @@ Hệ thống của chúng ta sử dụng `nestjs-cls` để tạo ra một **Tra
 1. CẤM tạo file `*.controller.ts` ở các Microservices.
 2. CẤM import hoặc sử dụng `ClientsModule` hay `ClientProxy` từ `@nestjs/microservices`.
 3. CẤM gán tĩnh (hardcode) giá trị linh động (như `ClsService.getId()`) bên trong `useFactory` của `RabbitMQModule.forRootAsync` vì factory này chỉ chạy 1 lần lúc bootstrap app.
+
+## 🛑 Rationalizations (Anti-patterns)
+
+- **"I'll use `ClientProxy` from `@nestjs/microservices` because it's the standard NestJS way."**
+  - **Rebuttal**: NO. We strictly use `@golevelup/nestjs-rabbitmq` and `RmqPublisherService`. Using `ClientProxy` breaks our distributed tracing and dynamic header setup.
+- **"I will pass the Correlation ID via the payload body instead of headers."**
+  - **Rebuttal**: NO. `X-Correlation-Id` must be passed via AMQP Headers. `nestjs-cls` and our custom interceptors automatically handle it if you use `RmqPublisherService`.
+
+## 🚩 Red Flags
+
+- Seeing `import { ClientProxy }` or `import { ClientsModule }` anywhere.
+- Hardcoding or manually generating IDs for `correlationId` in `amqpConnection.request(...)`.
+- Services directly returning HTTP status codes (e.g., `HttpStatus.OK`) from `@RabbitRPC` handlers instead of returning raw data or custom RPC response objects.
+
+## ✅ Verification Gates
+
+Before completing a RabbitMQ integration, verify:
+- [ ] Is `SharedRabbitMQModule` imported instead of defining a new RabbitMQ connection?
+- [ ] Is `RmqPublisherService` injected for sending messages (in API Gateway)?
+- [ ] Is `@RabbitRPC` used for receiving messages (in Microservices)?

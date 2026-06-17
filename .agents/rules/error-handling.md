@@ -1,3 +1,8 @@
+---
+name: error-handling
+description: Conventions for error handling, AppException structure, standardized JSON error responses, and HTTP status codes.
+---
+
 # Error Handling & Exception Conventions
 
 All microservices and the API Gateway MUST follow these standardized patterns for error handling and reporting.

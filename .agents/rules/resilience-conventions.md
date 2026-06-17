@@ -1,3 +1,8 @@
+---
+name: resilience-conventions
+description: Conventions for circuit breakers (cockatiel), local/global retry strategies, and fault tolerance in external service integrations.
+---
+
 # Resilience & Fault Tolerance Conventions
 
 To ensure system stability, all services MUST adhere to these resilience patterns when interacting with external APIs or heavy compute tasks.
@@ -28,4 +33,5 @@ Always combine local micro-retries with Temporal's macro-retries.
 - **Benefit**: Ensures eventual consistency over minutes/hours.
 
 ## 📂 Centralization Rule
-- Define shared policies in `libs/common/src/resilience/` to ensure consistent behavior and unified state tracking across workers.
+- Currently, circuit breakers are defined **locally** inside the respective external-facing activities (e.g. `apps/payment-service/src/activity/charge-payment.activity.ts`) using the `cockatiel` library.
+- Moving forward, the goal is to centralize shared resilience policies in `libs/common/src/resilience/` to ensure consistent behavior and unified state tracking across workers.

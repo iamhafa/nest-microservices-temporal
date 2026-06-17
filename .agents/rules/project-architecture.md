@@ -24,7 +24,7 @@ description: Monorepo layout, service responsibilities, and shared libraries str
 | `inventory-service`      | Quản lý tồn kho (reserve, confirm, release, restore)              | ✅    | ✅          |
 | `payment-service`        | Xử lý thanh toán (charge, refund)                                 | ✅    | ✅          |
 | `shipping-service`       | Tạo và quản lý vận chuyển                                         | ✅    | ✅          |
-| `product-service`        | Quản lý sản phẩm (CRUD, validation)                               | ✅    | ✅          |
+| `product-service`        | Quản lý sản phẩm (CRUD, validation - Sử dụng CQRS Pattern)        | ✅    | ✅          |
 | `recommendation-service` | Gợi ý sản phẩm                                                    | ❌    | ❌          |
 | `user-service`           | Quản lý/xác thực người dùng                                       | ✅    | ❌          |
 | `orchestrator-worker`    | Chạy Temporal workflows (KHÔNG phải HTTP service)                 | ❌    | ❌          |
@@ -63,6 +63,7 @@ apps/api-gateway/src/
 | `common`   | `@libs/common`   | Shared enums, logger, utilities, decorators                   |
 | `contract` | `@libs/contract` | DTOs (trong `/dto`) và enums (trong `/enum`) dùng chung giữa services |
 | `temporal` | `@libs/temporal` | Activity interfaces, task queue enums, shared Temporal module |
+| `auth`     | `@libs/auth`     | JWT Authentication guard, Roles authorization guard, decorators |
 
 ### Key Rules
 
@@ -85,3 +86,22 @@ flowchart TD
 - **Client ↔ API Gateway**: HTTP/REST
 - **API Gateway ↔ Services**: RabbitMQ (request/response pattern)
 - **Orchestrator ↔ Services**: Temporal Activities (each service has its own task queue)
+
+## 🛑 Rationalizations (Anti-patterns)
+
+- **"I'll just add a Controller in the microservice for easier testing."**
+  - **Rebuttal**: NO. Microservices only communicate via RabbitMQ RPC (`@RabbitRPC`). Controllers are ONLY allowed in the `api-gateway`.
+- **"I will import an entity or service directly from `apps/another-service/src`."**
+  - **Rebuttal**: NO. Strict service isolation is enforced. Services can only import from shared libraries (`libs/*`). Data sharing must be done via DTOs and RabbitMQ.
+
+## 🚩 Red Flags
+
+- Seeing `import { ... } from '../../another-service/...'` in any file.
+- Any file ending in `.controller.ts` inside `apps/` (other than `apps/api-gateway/`).
+- Direct HTTP requests (`axios`, `HttpModule`) between microservices instead of RabbitMQ/Temporal.
+
+## ✅ Verification Gates
+
+Before completing an architecture setup or feature scaffolding, verify:
+- [ ] Are all cross-service DTOs defined inside `libs/contract`?
+- [ ] Is the communication flow strictly: API Gateway -> RabbitMQ -> Microservice -> Temporal (if needed)?
