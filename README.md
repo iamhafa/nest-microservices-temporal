@@ -14,7 +14,6 @@ This project is a scalable, robust **microservices architecture** built with **N
 | `payment-service`        | Payment processing (charge, refund).                                | ✅       | ✅                |
 | `shipping-service`       | Shipment creation and management.                                   | ✅       | ✅                |
 | `product-service`        | Product catalog management and validation.                          | ✅       | ✅                |
-| `recommendation-service` | Product recommendations.                                            | ❌       | ❌                |
 | `user-service`           | User management and authentication.                                 | ✅       | ❌                |
 | `orchestrator-worker`    | Executes Temporal workflows (Saga orchestrator).                    | ❌       | ❌                |
 
