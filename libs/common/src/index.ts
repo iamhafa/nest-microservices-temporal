@@ -6,7 +6,7 @@ export * from './filter/http-exception.filter';
 export * from './filter/rpc-exception.filter';
 export * from './interceptor/idempotency.interceptor';
 export * from './interceptor/response.interceptor';
-export * from './interceptor/rmq-correlation-id.interceptor';
+export * from './interceptor/rmq-context.interceptor';
 export * from './logger/shared-logger.module';
 export * from './rabbitmq/enum/rmq-exchange.enum';
 export * from './rabbitmq/enum/rmq-queue.enum';

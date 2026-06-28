@@ -2,7 +2,7 @@ import { RabbitPayload, RabbitRPC } from '@golevelup/nestjs-rabbitmq';
 import { AppException, RmqExchange, RmqQueue } from '@libs/common';
 import { AdjustInventoryDto } from '@libs/contract/inventory/dto/adjust-inventory.dto';
 import { InventoryErrorCode } from '@libs/contract/inventory/error';
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { UpdateResult } from 'typeorm';
 import { InventoryEntity } from './entity/inventory.entity';
 import { InventoryRepository } from './repository/inventory.repository';
@@ -58,5 +58,25 @@ export class InventoryService {
   })
   getAllInventories(): Promise<InventoryEntity[]> {
     return this.inventoryRepository.find();
+  }
+
+  @RabbitRPC({
+    exchange: RmqExchange.ECOMMERCE,
+    routingKey: 'inventory.getAvailableStock.query',
+    queue: RmqQueue.INVENTORY_QUEUE,
+  })
+  async getAvailableStock(@RabbitPayload() productId: number): Promise<{ productId: number; availableQuantity: number }> {
+    const inventory = await this.inventoryRepository.findOneBy({ product_id: productId });
+    if (!inventory) {
+      throw new AppException({
+        code: InventoryErrorCode.NOT_FOUND, // Assuming this exists or falls back to generic error
+        message: `Inventory for product #${productId} not found`,
+        status: HttpStatus.NOT_FOUND,
+      });
+    }
+    return {
+      productId,
+      availableQuantity: Math.max(0, inventory.stock - inventory.reserved_quantity),
+    };
   }
 }

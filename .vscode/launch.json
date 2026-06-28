@@ -73,16 +73,6 @@
       "restart": true
     },
     {
-      "name": "recommendation-service",
-      "type": "node",
-      "request": "launch",
-      "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["start:dev", "recommendation-service"],
-      "cwd": "${workspaceFolder}",
-      "console": "integratedTerminal",
-      "restart": true
-    },
-    {
       "name": "user-service",
       "type": "node",
       "request": "launch",
@@ -110,7 +100,6 @@
         "inventory-service",
         "payment-service",
         "shipping-service",
-        // "recommendation-service",
         "user-service"
       ]
     }

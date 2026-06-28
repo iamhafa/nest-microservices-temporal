@@ -1,6 +1,6 @@
 import { RmqPublisherService } from '@libs/common';
 import { AdjustInventoryDto } from '@libs/contract/inventory/dto/adjust-inventory.dto';
-import { Body, Controller, Get, HttpCode, HttpStatus, Patch } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -30,5 +30,12 @@ export class InventoryController {
   @ApiOkResponse({ description: 'List of inventories' })
   getInventories(): Promise<any[]> {
     return this.rmqPublisher.request('inventory.getAll', {});
+  }
+
+  @Get('products/:productId/available-stock')
+  @ApiOperation({ summary: 'Get available stock for a product' })
+  @ApiOkResponse({ description: 'Available stock details' })
+  getAvailableStock(@Param('productId', ParseIntPipe) productId: number): Promise<{ productId: number; availableQuantity: number }> {
+    return this.rmqPublisher.request('inventory.getAvailableStock.query', productId);
   }
 }

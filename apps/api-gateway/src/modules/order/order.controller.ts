@@ -37,6 +37,13 @@ export class OrderController {
     return this.rmqPublisher.request('order.getAll', {});
   }
 
+  @Get('my-orders')
+  @ApiOperation({ summary: 'Get current user orders' })
+  @ApiOkResponse({ description: 'List of user orders' })
+  getMyOrders(): Promise<any> {
+    return this.rmqPublisher.request('order.getMyOrders.query', {});
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get order by ID' })
   @ApiOkResponse({ description: 'Order details' })

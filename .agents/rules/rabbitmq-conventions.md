@@ -1,6 +1,6 @@
 ---
 name: rabbitmq-conventions
-description: Conventions for RabbitMQ communication, SharedRabbitMQModule, RmqPublisherService, RPC patterns, and x-correlation-id propagation.
+description: Conventions for RabbitMQ communication, SharedRabbitMQModule, RmqPublisherService, RPC patterns, x-correlation-id propagation, and message naming conventions.
 ---
 
 # RabbitMQ Communication Conventions
@@ -10,6 +10,23 @@ description: Conventions for RabbitMQ communication, SharedRabbitMQModule, RmqPu
 - **Producer (API Gateway)**: Bắn message qua các microservices bằng cách gọi RPC (sử dụng thư viện `@golevelup/nestjs-rabbitmq`).
 - **Consumer (Microservices)**: Lắng nghe và xử lý message (dùng `@RabbitRPC`). Không được có file `*.controller.ts`.
 - Không sử dụng `@nestjs/microservices` vì khó cấu hình Header động và hạn chế về mặt Interceptor.
+
+## 🏷 Message Naming Convention (Quy tắc đặt tên Routing Key)
+
+Để dễ quản lý và phân biệt mục đích của các message trong hệ thống phân tán, BẮT BUỘC tuân thủ định dạng sau cho Routing Key:
+
+**Format:** `<domain>.<action>.<type>`
+
+Trong đó:
+1. **`<domain>`**: Tên của domain/feature (ví dụ: `order`, `product`, `user`, `inventory`, `cart`). Luôn viết thường (camelCase).
+2. **`<action>`**: Hành động đang được thực hiện (ví dụ: `create`, `updateStatus`, `getMyOrders`). Dùng camelCase.
+3. **`<type>`**: Bắt buộc phải là 1 trong 3 loại sau:
+   - **`command`**: Khi yêu cầu thay đổi trạng thái hệ thống (CUD - Create/Update/Delete). Thường kỳ vọng một action được thực thi.
+     - *Ví dụ:* `order.create.command`, `inventory.adjust.command`
+   - **`query`**: Khi yêu cầu đọc dữ liệu mà không thay đổi hệ thống.
+     - *Ví dụ:* `order.getMyOrders.query`, `product.getAll.query`
+   - **`event`**: Khi thông báo một sự kiện đã xảy ra để các service khác lắng nghe (Publish/Subscribe).
+     - *Ví dụ:* `order.created.event`, `payment.failed.event`
 
 ## 🔗 SharedRabbitMQModule & RmqPublisherService
 
@@ -26,7 +43,7 @@ Tất cả các kết nối đến RabbitMQ (cho cả Consumer và Producer) **B
 
     @Post('register')
     registerUser(@Body() dto: CreateUserDto): Promise<any> {
-      return this.rmqPublisher.request('user.register', dto);
+      return this.rmqPublisher.request('user.register.command', dto); // <- Naming Convention
     }
   }
   ```
@@ -40,7 +57,7 @@ Tất cả các kết nối đến RabbitMQ (cho cả Consumer và Producer) **B
   export class UserService {
     @RabbitRPC({
       exchange: RmqExchange.ECOMMERCE,
-      routingKey: 'user.register',
+      routingKey: 'user.register.command', // <- Naming Convention
       queue: 'user-register-queue',
     })
     async registerUser(dto: CreateUserDto) {
@@ -75,6 +92,7 @@ Hệ thống của chúng ta sử dụng `nestjs-cls` để tạo ra một **Tra
 - Seeing `import { ClientProxy }` or `import { ClientsModule }` anywhere.
 - Hardcoding or manually generating IDs for `correlationId` in `amqpConnection.request(...)`.
 - Services directly returning HTTP status codes (e.g., `HttpStatus.OK`) from `@RabbitRPC` handlers instead of returning raw data or custom RPC response objects.
+- Routing keys not following the `<domain>.<action>.<type>` pattern.
 
 ## ✅ Verification Gates
 
@@ -82,3 +100,4 @@ Before completing a RabbitMQ integration, verify:
 - [ ] Is `SharedRabbitMQModule` imported instead of defining a new RabbitMQ connection?
 - [ ] Is `RmqPublisherService` injected for sending messages (in API Gateway)?
 - [ ] Is `@RabbitRPC` used for receiving messages (in Microservices)?
+- [ ] Does the routing key follow the `domain.action.type` naming convention?

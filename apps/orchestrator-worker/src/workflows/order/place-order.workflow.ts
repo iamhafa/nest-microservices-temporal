@@ -84,7 +84,7 @@ const orderActivities: ActivityInterfaceFor<{
   },
 });
 
-export async function placeOrderWorkflow(createOrderDto: CreateOrderDto) {
+export async function placeOrderWorkflow(createOrderDto: CreateOrderDto, userId?: number) {
   console.log('Payload:', createOrderDto);
   const { items, address } = createOrderDto;
   let orderId: number | undefined;
@@ -103,7 +103,7 @@ export async function placeOrderWorkflow(createOrderDto: CreateOrderDto) {
     const productPrices: Record<number, number> = await productActivities.getProductPrices(productIds);
 
     // 2nd: Create Order with real prices from DB
-    orderId = await orderActivities.createOrder(createOrderDto, productPrices);
+    orderId = await orderActivities.createOrder(createOrderDto, productPrices, userId);
 
     // 3rd: Reserve inventory
     await inventoryProxyActivities.reserveInventory(orderId, items);

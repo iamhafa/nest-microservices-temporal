@@ -30,9 +30,12 @@ export class OrderService {
     const correlationId: string = this.clsService.get('correlationId');
     const workflowId: string = `place-order:${correlationId}`;
 
+    // Get userId from CLS
+    const userId = this.clsService.get('userId');
+
     const workFlowResponse: WorkflowExecutionResult = await this.temporalService.startWorkflow(
       'placeOrderWorkflow',
-      [createOrderDto],
+      [createOrderDto, userId],
       {
         taskQueue: WorkFlowTaskQueue.ORDER,
         workflowId,
@@ -125,6 +128,20 @@ export class OrderService {
   })
   getOrders(): Promise<OrderEntity[]> {
     return this.orderRepository.find({
+      relations: { items: true },
+      order: { created_at_utc: 'DESC' },
+    });
+  }
+
+  @RabbitRPC({
+    exchange: RmqExchange.ECOMMERCE,
+    routingKey: 'order.getMyOrders.query',
+    queue: RmqQueue.ORDER_QUEUE,
+  })
+  getMyOrders(): Promise<OrderEntity[]> {
+    const userId: number = this.clsService.get('userId');
+    return this.orderRepository.find({
+      where: { user_id: userId },
       relations: { items: true },
       order: { created_at_utc: 'DESC' },
     });

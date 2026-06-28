@@ -18,7 +18,7 @@ export class CreateOrderActivity implements ICreateOrder {
   ) {}
 
   @ActivityMethod({ name: 'createOrder' })
-  async execute(createOrderDto: CreateOrderDto, productPrices: Record<number, number>): Promise<number> {
+  async execute(createOrderDto: CreateOrderDto, productPrices: Record<number, number>, userId?: number): Promise<number> {
     const { items, address, email } = createOrderDto;
 
     // calculate total amount of order
@@ -38,6 +38,7 @@ export class CreateOrderActivity implements ICreateOrder {
       status: OrderStatus.PENDING,
       address,
       email,
+      user_id: userId,
       total_amount: totalAmount,
       items: orderItems,
     });

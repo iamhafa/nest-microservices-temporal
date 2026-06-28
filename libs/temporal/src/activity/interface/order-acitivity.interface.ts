@@ -3,7 +3,7 @@ import { OrderStatus } from '@libs/contract/order/enum/order-status.enum';
 
 // Tạo đơn hàng
 export interface ICreateOrder {
-  execute(dto: CreateOrderDto, productPrices: Record<number, number>): Promise<number>;
+  execute(dto: CreateOrderDto, productPrices: Record<number, number>, userId?: number): Promise<number>;
 }
 
 // Xóa đơn hàng

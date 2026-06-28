@@ -1,5 +1,5 @@
 import {
-  RmqCorrelationIdInterceptor,
+  RmqContextInterceptor,
   RpcExceptionFilter,
   SharedLoggerModule,
   SharedRabbitMQModule,
@@ -62,7 +62,7 @@ import { UserService } from './user-service.service';
   providers: [
     {
       provide: APP_INTERCEPTOR,
-      useClass: RmqCorrelationIdInterceptor,
+      useClass: RmqContextInterceptor,
     },
     {
       provide: APP_FILTER,

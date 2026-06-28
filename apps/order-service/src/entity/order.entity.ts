@@ -13,11 +13,15 @@ import {
 import { OrderItemEntity } from './order-item.entity';
 
 @Entity('orders')
+@Index('idx_order_user_id', ['user_id'])
 @Index('idx_order_payment_id', ['payment_id'])
 @Index('idx_order_status', ['status'])
 export class OrderEntity {
   @PrimaryGeneratedColumn()
   id: number;
+
+  @Column({ nullable: true, comment: 'ID của user, null nếu mua hàng không cần đăng nhập' })
+  user_id: number;
 
   @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.PENDING })
   status: OrderStatus;

@@ -1,4 +1,4 @@
-import { RmqCorrelationIdInterceptor, SharedLoggerModule } from '@libs/common';
+import { RmqContextInterceptor, SharedLoggerModule } from '@libs/common';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue';
 import { SharedTemporalModule } from '@libs/temporal/shared-temporal.module';
 import { Module } from '@nestjs/common';
@@ -30,7 +30,7 @@ import { join } from 'path';
   providers: [
     {
       provide: APP_INTERCEPTOR,
-      useClass: RmqCorrelationIdInterceptor,
+      useClass: RmqContextInterceptor,
     },
   ],
 })

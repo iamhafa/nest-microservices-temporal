@@ -1,4 +1,4 @@
-import { RmqCorrelationIdInterceptor, SharedRabbitMQModule } from '@libs/common';
+import { RmqContextInterceptor, SharedRabbitMQModule } from '@libs/common';
 import { SharedLoggerModule } from '@libs/common/logger/shared-logger.module';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue';
 import { SharedTemporalModule } from '@libs/temporal/shared-temporal.module';
@@ -52,7 +52,7 @@ import { ShippingService } from './shipping-service.service';
   providers: [
     {
       provide: APP_INTERCEPTOR,
-      useClass: RmqCorrelationIdInterceptor,
+      useClass: RmqContextInterceptor,
     },
     ShippingService,
     CreateShipmentActivity,

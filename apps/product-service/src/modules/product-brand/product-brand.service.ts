@@ -13,7 +13,7 @@ export class ProductBrandService {
 
   @RabbitRPC({
     exchange: RmqExchange.ECOMMERCE,
-    routingKey: 'productBrand.create',
+    routingKey: 'productBrand.create.command',
     queue: RmqQueue.PRODUCT_QUEUE,
   })
   async createProductBrand(@RabbitPayload() dto: CreateProductBrandDto): Promise<ProductBrandEntity> {
@@ -23,7 +23,7 @@ export class ProductBrandService {
 
   @RabbitRPC({
     exchange: RmqExchange.ECOMMERCE,
-    routingKey: 'productBrand.getAll',
+    routingKey: 'productBrand.getAll.query',
     queue: RmqQueue.PRODUCT_QUEUE,
   })
   getProductBrands(): Promise<ProductBrandEntity[]> {
@@ -32,7 +32,7 @@ export class ProductBrandService {
 
   @RabbitRPC({
     exchange: RmqExchange.ECOMMERCE,
-    routingKey: 'productBrand.get',
+    routingKey: 'productBrand.get.query',
     queue: RmqQueue.PRODUCT_QUEUE,
   })
   async getProductBrand(@RabbitPayload() id: number): Promise<ProductBrandEntity> {
@@ -49,7 +49,7 @@ export class ProductBrandService {
 
   @RabbitRPC({
     exchange: RmqExchange.ECOMMERCE,
-    routingKey: 'productBrand.update',
+    routingKey: 'productBrand.update.command',
     queue: RmqQueue.PRODUCT_QUEUE,
   })
   async updateProductBrand(@RabbitPayload() dto: UpdateProductBrandDto): Promise<void> {
@@ -66,7 +66,7 @@ export class ProductBrandService {
 
   @RabbitRPC({
     exchange: RmqExchange.ECOMMERCE,
-    routingKey: 'productBrand.delete',
+    routingKey: 'productBrand.delete.command',
     queue: RmqQueue.PRODUCT_QUEUE,
   })
   async deleteProductBrand(@RabbitPayload() id: number): Promise<void> {

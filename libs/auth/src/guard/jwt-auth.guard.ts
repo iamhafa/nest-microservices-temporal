@@ -1,9 +1,9 @@
 import { AppException } from '@libs/common';
 import { SystemErrorCode } from '@libs/contract/base/error';
-import { CanActivate, ExecutionContext, HttpStatus, Injectable } from '@nestjs/common';
+import { CanActivate, ExecutionContext, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
-import { JwtService } from '@nestjs/jwt';
+import { JsonWebTokenError, JwtService, TokenExpiredError } from '@nestjs/jwt';
 import { Request } from 'express';
 import { ClsService } from 'nestjs-cls';
 import { IS_PUBLIC_KEY } from '../decorator/public.decorator';
@@ -11,11 +11,13 @@ import { IAuthRequest, IJwtPayload } from '../interface/jwt.interface';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
+  private readonly logger = new Logger(JwtAuthGuard.name);
+
   constructor(
+    private reflector: Reflector,
+    private clsService: ClsService,
     private jwtService: JwtService,
     private configService: ConfigService,
-    private clsService: ClsService,
-    private reflector: Reflector,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -46,10 +48,22 @@ export class JwtAuthGuard implements CanActivate {
 
       // Also attach to cls context for internal correlation across modules (like RabbitMQ headers)
       this.clsService.set('userId', payload.user_id);
-    } catch {
+    } catch (error: unknown) {
+      let message: string;
+
+      if (error instanceof TokenExpiredError) {
+        message = 'Authentication token has expired';
+      } else if (error instanceof JsonWebTokenError) {
+        message = 'Invalid authentication token';
+      } else {
+        message = 'Unknown authentication error';
+      }
+      // Log error
+      this.logger.error(message, error);
+
       throw new AppException({
         code: SystemErrorCode.UNAUTHORIZED,
-        message: 'Invalid or expired authentication token',
+        message,
         status: HttpStatus.UNAUTHORIZED,
       });
     }

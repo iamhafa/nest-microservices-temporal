@@ -1,4 +1,4 @@
-import { RmqCorrelationIdInterceptor, SharedLoggerModule, SharedRabbitMQModule } from '@libs/common';
+import { RmqContextInterceptor, SharedLoggerModule, SharedRabbitMQModule } from '@libs/common';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue';
 import { SharedTemporalModule } from '@libs/temporal/shared-temporal.module';
 import { Module } from '@nestjs/common';
@@ -62,7 +62,7 @@ import { InventoryRepository } from './repository/inventory.repository';
   providers: [
     {
       provide: APP_INTERCEPTOR,
-      useClass: RmqCorrelationIdInterceptor,
+      useClass: RmqContextInterceptor,
     },
     ReserveInventoryActity,
     ReleaseInventoryActivity,
