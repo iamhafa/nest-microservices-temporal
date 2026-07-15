@@ -1,7 +1,8 @@
+import { IRegisterUserDto } from '@libs/contract/user';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
 
-export class RegisterUserDto {
+export class RegisterUserDto implements IRegisterUserDto {
   @ApiProperty({ example: 'user123@example.com' })
   @IsEmail()
   @IsNotEmpty()

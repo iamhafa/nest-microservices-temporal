@@ -1,21 +1,19 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, IsInt, IsNotEmpty, IsString, Min, ValidateNested } from 'class-validator';
+import { IsArray, IsEmail, IsNotEmpty, IsString, ValidateNested } from 'class-validator';
+import { ICreateOrderDto, IOrderItem } from '@libs/contract/order';
 
-export class OrderItemDto {
+export class OrderItemDto implements IOrderItem {
   @ApiProperty({ example: 1 })
-  @IsInt()
   @IsNotEmpty()
   product_id: number;
 
   @ApiProperty({ example: 2 })
-  @IsInt()
-  @Min(1)
   @IsNotEmpty()
   quantity: number;
 }
 
-export class CreateOrderDto {
+export class CreateOrderDto implements ICreateOrderDto {
   @ApiProperty({
     type: [OrderItemDto],
     example: [
@@ -34,8 +32,8 @@ export class CreateOrderDto {
   @IsNotEmpty()
   address: string;
 
-  @ApiProperty({ example: 'ser@example.com' })
-  @IsString()
+  @ApiProperty({ example: 'user@example.com' })
+  @IsEmail()
   @IsNotEmpty()
   email: string;
 }

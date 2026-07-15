@@ -1,10 +1,12 @@
 import { RabbitPayload, RabbitRPC } from '@golevelup/nestjs-rabbitmq';
 import { AppException, RmqExchange, RmqQueue } from '@libs/common';
 import { RmqRoutingKey } from '@libs/common/rabbitmq/enum/rmq-queue.enum';
-import { CancelOrderDto } from '@libs/contract/order/dto/cancel-order.dto';
-import { CreateOrderDto } from '@libs/contract/order/dto/create-order.dto';
-import { UpdateOrderStatusDto } from '@libs/contract/order/dto/update-order-status.dto';
-import { OrderErrorCode } from '@libs/contract/order/error';
+import {
+  type ICancelOrderDto,
+  type ICreateOrderDto,
+  type IUpdateOrderStatusDto,
+  OrderErrorCode,
+} from '@libs/contract/order';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { ClsService } from 'nestjs-cls';
@@ -25,7 +27,7 @@ export class OrderService {
     routingKey: RmqRoutingKey.ORDER_CREATE,
     queue: RmqQueue.ORDER_QUEUE,
   })
-  async createOrder(@RabbitPayload() createOrderDto: CreateOrderDto): Promise<any> {
+  async createOrder(@RabbitPayload() createOrderDto: ICreateOrderDto): Promise<any> {
     // Get correlationId from CLS
     const correlationId: string = this.clsService.get('correlationId');
     const workflowId: string = `place-order:${correlationId}`;
@@ -86,7 +88,7 @@ export class OrderService {
     routingKey: RmqRoutingKey.ORDER_CANCEL,
     queue: RmqQueue.ORDER_QUEUE,
   })
-  async cancelOrder(@RabbitPayload() cancelOrderDto: CancelOrderDto): Promise<any> {
+  async cancelOrder(@RabbitPayload() cancelOrderDto: ICancelOrderDto): Promise<any> {
     const order: OrderEntity = await this.getOrder(cancelOrderDto.order_id);
 
     if (!order.isCancelable) {
@@ -152,7 +154,7 @@ export class OrderService {
     routingKey: 'order.updateStatus',
     queue: RmqQueue.ORDER_QUEUE,
   })
-  async updateOrderStatus(@RabbitPayload() updateOrderStatusDto: UpdateOrderStatusDto): Promise<OrderEntity> {
+  async updateOrderStatus(@RabbitPayload() updateOrderStatusDto: IUpdateOrderStatusDto): Promise<OrderEntity> {
     const order: OrderEntity = await this.getOrder(updateOrderStatusDto.order_id);
     order.status = updateOrderStatusDto.status;
     return this.orderRepository.save(order);

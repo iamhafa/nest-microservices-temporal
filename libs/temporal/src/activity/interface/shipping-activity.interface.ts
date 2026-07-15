@@ -1,4 +1,4 @@
 // Tạo đơn vận chuyển
-export interface ICreateShipment {
+export interface ICreateShipmentActivity {
   execute(orderId: number, address: string): Promise<number>;
 }

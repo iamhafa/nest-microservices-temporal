@@ -1,10 +1,10 @@
-import { ISavePaymentId } from '@libs/temporal/activity';
+import { ISavePaymentIdActivity } from '@libs/temporal/activity';
 import { Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { OrderRepository } from '../repository/order.repository';
 
 @Activity({ name: 'save-payment-id-activity' })
-export class SavePaymentIdActivity implements ISavePaymentId {
+export class SavePaymentIdActivity implements ISavePaymentIdActivity {
   private readonly logger = new Logger(SavePaymentIdActivity.name);
 
   constructor(private readonly orderRepository: OrderRepository) {}

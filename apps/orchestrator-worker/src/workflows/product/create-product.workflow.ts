@@ -1,17 +1,17 @@
-import { CreateProductDto } from '@libs/contract/product/dto/create-product.dto';
+import { ICreateProductDto } from '@libs/contract/product';
 import {
-  ICreateProduct,
-  IDeleteProduct,
-  IInitializeInventory,
-  IValidateProductMetadata,
+  ICreateProductActivity,
+  IDeleteProductActivity,
+  IInitializeInventoryActivity,
+  IValidateProductMetadataActivity,
 } from '@libs/temporal/activity';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue';
 import { proxyActivities } from '@temporalio/workflow';
 
 const productActivities = proxyActivities<{
-  validateProductMetadata: IValidateProductMetadata['execute'];
-  createProduct: ICreateProduct['execute'];
-  deleteProduct: IDeleteProduct['execute'];
+  validateProductMetadata: IValidateProductMetadataActivity['execute'];
+  createProduct: ICreateProductActivity['execute'];
+  deleteProduct: IDeleteProductActivity['execute'];
 }>({
   startToCloseTimeout: '30 seconds',
   taskQueue: WorkFlowTaskQueue.PRODUCT,
@@ -23,7 +23,7 @@ const productActivities = proxyActivities<{
 });
 
 const inventoryActivities = proxyActivities<{
-  initializeInventory: IInitializeInventory['execute'];
+  initializeInventory: IInitializeInventoryActivity['execute'];
 }>({
   startToCloseTimeout: '30 seconds',
   taskQueue: WorkFlowTaskQueue.INVENTORY,
@@ -34,12 +34,12 @@ const inventoryActivities = proxyActivities<{
   },
 });
 
-export async function createProductWorkflow(createProductDto: CreateProductDto) {
+export async function createProductWorkflow(createProductDto: ICreateProductDto) {
   console.log('createProductDto:', createProductDto);
   let productId: number | undefined;
 
   try {
-    const { quantity, ...productDto } = createProductDto;
+    const { quantity = 0, ...productDto } = createProductDto;
 
     // Step 1: Validate Category, Brand, and Tags
     await productActivities.validateProductMetadata(createProductDto);

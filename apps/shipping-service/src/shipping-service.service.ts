@@ -1,7 +1,6 @@
 import { RabbitPayload, RabbitRPC } from '@golevelup/nestjs-rabbitmq';
 import { AppException, RmqExchange, RmqQueue } from '@libs/common';
-import { UpdateDeliveryStatusDto } from '@libs/contract/shipping/dto/update-delivery-status.dto';
-import { ShippingErrorCode } from '@libs/contract/shipping/error';
+import { type IUpdateDeliveryStatusDto, ShippingErrorCode } from '@libs/contract/shipping';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { ShippingEntity } from './entity/shipping.entity';
 import { ShippingRepository } from './repository/shipping.repository';
@@ -25,7 +24,7 @@ export class ShippingService {
     queue: RmqQueue.SHIPPING_QUEUE,
   })
   async updateDeliveryStatus(
-    @RabbitPayload() updateDeliveryStatusDto: UpdateDeliveryStatusDto,
+    @RabbitPayload() updateDeliveryStatusDto: IUpdateDeliveryStatusDto,
   ): Promise<ShippingEntity> {
     const { id, status } = updateDeliveryStatusDto;
     const shipping = await this.shippingRepository.findOneBy({ id });

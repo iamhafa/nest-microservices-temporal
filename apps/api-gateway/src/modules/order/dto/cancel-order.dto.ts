@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsInt, IsOptional, IsString, Min } from 'class-validator';
+import { ICancelOrderDto } from '@libs/contract/order';
 
-export class CancelOrderDto {
+export class CancelOrderDto implements ICancelOrderDto {
   @ApiProperty({ example: 1, required: true })
   @IsInt()
   @Min(0)

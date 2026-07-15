@@ -1,5 +1,5 @@
-import { OrderItemDto } from '@libs/contract/order/dto/create-order.dto';
-import { IGetOrderItems } from '@libs/temporal/activity';
+import { IOrderItem } from '@libs/contract/order';
+import { IGetOrderItemsActivity } from '@libs/temporal/activity';
 import { Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { OrderItemEntity } from '../entity/order-item.entity';
@@ -7,13 +7,13 @@ import { OrderEntity } from '../entity/order.entity';
 import { OrderRepository } from '../repository/order.repository';
 
 @Activity({ name: 'get-order-items-activity' })
-export class GetOrderItemsActivity implements IGetOrderItems {
+export class GetOrderItemsActivity implements IGetOrderItemsActivity {
   private readonly logger = new Logger(GetOrderItemsActivity.name);
 
   constructor(private readonly orderRepository: OrderRepository) {}
 
   @ActivityMethod({ name: 'getOrderItems' })
-  async execute(orderId: number): Promise<OrderItemDto[]> {
+  async execute(orderId: number): Promise<IOrderItem[]> {
     const order: OrderEntity = await this.orderRepository.findOneOrFail({
       where: {
         id: orderId,
@@ -30,7 +30,7 @@ export class GetOrderItemsActivity implements IGetOrderItems {
     });
     this.logger.log(`[Order ${orderId}] Fetched ${order.items.length} items`);
 
-    const orderItems: OrderItemDto[] = order.items.map((item: OrderItemEntity) => ({
+    const orderItems: IOrderItem[] = order.items.map((item: OrderItemEntity) => ({
       product_id: item.product_id,
       quantity: item.quantity,
     }));

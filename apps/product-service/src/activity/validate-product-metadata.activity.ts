@@ -1,8 +1,7 @@
 import { AppException } from '@libs/common';
-import { CreateProductDto } from '@libs/contract/product/dto/create-product.dto';
-import { UpdateProductDto } from '@libs/contract/product/dto/update-product.dto';
-import { ProductErrorCode } from '@libs/contract/product/error';
-import { IValidateProductMetadata } from '@libs/temporal/activity';
+import type { ICreateProductDto, IUpdateProductDto } from '@libs/contract/product';
+import { ProductErrorCode } from '@libs/contract/product';
+import { IValidateProductMetadataActivity } from '@libs/temporal/activity';
 import { HttpStatus, Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { In } from 'typeorm';
@@ -12,7 +11,7 @@ import { ProductTagEntity } from '../modules/product-tag/entity/product-tag.enti
 import { ProductTagRepository } from '../modules/product-tag/repository/product-tag.repository';
 
 @Activity({ name: 'validate-product-metadata-activity' })
-export class ValidateProductMetadataActivity implements IValidateProductMetadata {
+export class ValidateProductMetadataActivity implements IValidateProductMetadataActivity {
   private readonly logger = new Logger(ValidateProductMetadataActivity.name);
 
   constructor(
@@ -22,7 +21,7 @@ export class ValidateProductMetadataActivity implements IValidateProductMetadata
   ) {}
 
   @ActivityMethod({ name: 'validateProductMetadata' })
-  async execute(productDto: CreateProductDto | UpdateProductDto): Promise<void> {
+  async execute(productDto: ICreateProductDto | IUpdateProductDto): Promise<void> {
     const { category_id, brand_id, tag_ids } = productDto;
     this.logger.log(`Validating metadata for product: ${productDto.name}`);
 

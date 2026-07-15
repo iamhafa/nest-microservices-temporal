@@ -1,5 +1,5 @@
-import { CreateProductDto } from '@libs/contract/product/dto/create-product.dto';
+import { ICreateProductDto } from '@libs/contract/product';
 
 export class CreateProductCommand {
-  constructor(public readonly createProductDto: CreateProductDto) {}
+  constructor(public readonly createProductDto: ICreateProductDto) {}
 }

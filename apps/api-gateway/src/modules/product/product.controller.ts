@@ -1,6 +1,5 @@
 import { RmqPublisherService } from '@libs/common';
-import { CreateProductDto } from '@libs/contract/product/dto/create-product.dto';
-import { UpdateProductDto } from '@libs/contract/product/dto/update-product.dto';
+import { CreateProductDto, UpdateProductDto } from './dto';
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
 import {
   ApiAcceptedResponse,

@@ -1,27 +1,26 @@
-import { CreateProductDto } from '@libs/contract/product/dto/create-product.dto';
-import { UpdateProductDto } from '@libs/contract/product/dto/update-product.dto';
+import type { ICreateProductDto, IUpdateProductDto } from '@libs/contract/product';
 
 // Xác thực thông tin sản phẩm
-export interface IValidateProductMetadata {
-  execute(productDto: CreateProductDto | UpdateProductDto): Promise<void>;
+export interface IValidateProductMetadataActivity {
+  execute(productDto: ICreateProductDto | IUpdateProductDto): Promise<void>;
 }
 
 // Xác thực danh sách sản phẩm
-export interface IValidateProducts {
+export interface IValidateProductsActivity {
   execute(productIds: number[]): Promise<boolean>;
 }
 
 // Tạo sản phẩm
-export interface ICreateProduct {
-  execute(createProductDto: Omit<CreateProductDto, 'quantity'>): Promise<number>;
+export interface ICreateProductActivity {
+  execute(createProductDto: Omit<ICreateProductDto, 'quantity'>): Promise<number>;
 }
 
 // Xoá sản phẩm
-export interface IDeleteProduct {
+export interface IDeleteProductActivity {
   execute(productId: number): Promise<void>;
 }
 
 // Lấy giá sản phẩm
-export interface IGetProductPrices {
+export interface IGetProductPricesActivity {
   execute(productIds: number[]): Promise<Record<number, number>>;
 }

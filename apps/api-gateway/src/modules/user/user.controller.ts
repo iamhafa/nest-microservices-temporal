@@ -1,9 +1,6 @@
 import { type IAuthRequest, Public } from '@libs/auth';
 import { RmqPublisherService } from '@libs/common';
-import { AuthResponseDto } from '@libs/contract/user/dto/auth-response.dto';
-import { LoginUserDto } from '@libs/contract/user/dto/login-user.dto';
-import { RegisterUserDto } from '@libs/contract/user/dto/register-user.dto';
-import { UserResponseDto } from '@libs/contract/user/dto/user-response.dto';
+import { AuthResponseDto, LoginUserDto, RegisterUserDto, UserResponseDto } from './dto';
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req } from '@nestjs/common';
 import { ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 

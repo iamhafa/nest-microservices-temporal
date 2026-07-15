@@ -1,4 +1,4 @@
-import { IGetProductPrices } from '@libs/temporal/activity';
+import { IGetProductPricesActivity } from '@libs/temporal/activity';
 import { Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { In } from 'typeorm';
@@ -6,7 +6,7 @@ import { ProductEntity } from '../modules/product/entity/product.entity';
 import { ProductRepository } from '../modules/product/repository/product.repository';
 
 @Activity({ name: 'get-product-prices-activity' })
-export class GetProductPricesActivity implements IGetProductPrices {
+export class GetProductPricesActivity implements IGetProductPricesActivity {
   private readonly logger = new Logger(GetProductPricesActivity.name);
 
   constructor(private readonly productRepository: ProductRepository) {}

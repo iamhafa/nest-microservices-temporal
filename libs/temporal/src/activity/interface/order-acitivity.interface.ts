@@ -1,37 +1,36 @@
-import type { CreateOrderDto, OrderItemDto } from '@libs/contract/order/dto/create-order.dto';
-import { OrderStatus } from '@libs/contract/order/enum/order-status.enum';
+import { ICreateOrderDto, IOrderItem, OrderStatus } from '@libs/contract/order';
 
 // Tạo đơn hàng
-export interface ICreateOrder {
-  execute(dto: CreateOrderDto, productPrices: Record<number, number>, userId?: number): Promise<number>;
+export interface ICreateOrderActivity {
+  execute(dto: ICreateOrderDto, productPrices: Record<number, number>, userId?: number): Promise<number>;
 }
 
 // Xóa đơn hàng
-export interface IDeleteOrder {
+export interface IDeleteOrderActivity {
   execute(orderId: number): Promise<void>;
 }
 
 // Lưu ID thanh toán vào đơn hàng
-export interface ISavePaymentId {
+export interface ISavePaymentIdActivity {
   execute(orderId: number, paymentId: number): Promise<void>;
 }
 
 // Cập nhật trạng thái đơn hàng
-export interface IUpdateOrderStatus {
+export interface IUpdateOrderStatusActivity {
   execute(orderId: number, status: OrderStatus, cancel_reason?: string): Promise<void>;
 }
 
 // Lấy tổng số tiền đơn hàng
-export interface IGetOrderTotalAmount {
+export interface IGetOrderTotalAmountActivity {
   execute(orderId: number): Promise<number>;
 }
 
 // Lấy danh sách sản phẩm trong đơn hàng
-export interface IGetOrderItems {
-  execute(orderId: number): Promise<OrderItemDto[]>;
+export interface IGetOrderItemsActivity {
+  execute(orderId: number): Promise<IOrderItem[]>;
 }
 
 // Lấy ID thanh toán của đơn hàng
-export interface IGetPaymentId {
+export interface IGetPaymentIdActivity {
   execute(orderId: number): Promise<number>;
 }

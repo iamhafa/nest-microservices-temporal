@@ -1,11 +1,13 @@
 import { RabbitPayload, RabbitRPC } from '@golevelup/nestjs-rabbitmq';
 import { IJwtPayload } from '@libs/auth';
 import { AppException, RmqExchange, RmqQueue } from '@libs/common';
-import { AuthResponseDto } from '@libs/contract/user/dto/auth-response.dto';
-import { LoginUserDto } from '@libs/contract/user/dto/login-user.dto';
-import { RegisterUserDto } from '@libs/contract/user/dto/register-user.dto';
-import { UserResponseDto } from '@libs/contract/user/dto/user-response.dto';
-import { UserErrorCode } from '@libs/contract/user/error';
+import {
+  type IAuthResponseDto,
+  type ILoginUserDto,
+  type IRegisterUserDto,
+  type IUserResponseDto,
+  UserErrorCode,
+} from '@libs/contract/user';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { compare, hash } from 'bcrypt';
@@ -24,7 +26,7 @@ export class UserService {
     routingKey: 'user.register',
     queue: RmqQueue.USER_QUEUE,
   })
-  async registerUser(@RabbitPayload() registerUserDto: RegisterUserDto): Promise<AuthResponseDto> {
+  async registerUser(@RabbitPayload() registerUserDto: IRegisterUserDto): Promise<IAuthResponseDto> {
     const { email, password, first_name, last_name } = registerUserDto;
 
     const existingUser: boolean = await this.userRepository.existsBy({ email });
@@ -56,7 +58,7 @@ export class UserService {
     routingKey: 'user.login',
     queue: RmqQueue.USER_QUEUE,
   })
-  async loginUser(@RabbitPayload() loginUserDto: LoginUserDto): Promise<AuthResponseDto> {
+  async loginUser(@RabbitPayload() loginUserDto: ILoginUserDto): Promise<IAuthResponseDto> {
     const { email, password } = loginUserDto;
 
     const user = await this.userRepository.findOne({
@@ -92,7 +94,7 @@ export class UserService {
     routingKey: 'user.get',
     queue: RmqQueue.USER_QUEUE,
   })
-  async getUserById(@RabbitPayload() id: number): Promise<UserResponseDto> {
+  async getUserById(@RabbitPayload() id: number): Promise<IUserResponseDto> {
     const user = await this.userRepository.findOneBy({
       id,
       is_active: true,
@@ -107,7 +109,7 @@ export class UserService {
     return user;
   }
 
-  private generateAuthResponse(user: UserEntity): AuthResponseDto {
+  private generateAuthResponse(user: UserEntity): IAuthResponseDto {
     const payload: IJwtPayload = {
       user_id: user.id,
       email: user.email,

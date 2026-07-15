@@ -1,7 +1,6 @@
 import { RabbitPayload, RabbitRPC } from '@golevelup/nestjs-rabbitmq';
 import { RmqExchange, RmqQueue } from '@libs/common';
-import { CreateProductDto } from '@libs/contract/product/dto/create-product.dto';
-import { UpdateProductDto } from '@libs/contract/product/dto/update-product.dto';
+import type { ICreateProductDto, IUpdateProductDto } from '@libs/contract/product';
 import { Injectable } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { CreateProductCommand } from './command/implement/create-product.command';
@@ -23,7 +22,9 @@ export class ProductService {
     routingKey: 'product.create',
     queue: RmqQueue.PRODUCT_QUEUE,
   })
-  createProduct(@RabbitPayload() createProductDto: CreateProductDto): Promise<{ message: string; workflowId: string }> {
+  createProduct(
+    @RabbitPayload() createProductDto: ICreateProductDto,
+  ): Promise<{ message: string; workflowId: string }> {
     return this.commandBus.execute(new CreateProductCommand(createProductDto));
   }
 
@@ -50,7 +51,7 @@ export class ProductService {
     routingKey: 'product.update',
     queue: RmqQueue.PRODUCT_QUEUE,
   })
-  updateProduct(@RabbitPayload() updateProductDto: UpdateProductDto): Promise<void> {
+  updateProduct(@RabbitPayload() updateProductDto: IUpdateProductDto): Promise<void> {
     return this.commandBus.execute(new UpdateProductCommand(updateProductDto));
   }
 

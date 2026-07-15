@@ -1,20 +1,20 @@
 import { AppException } from '@libs/common';
-import { InventoryErrorCode } from '@libs/contract/inventory/error';
-import { OrderItemDto } from '@libs/contract/order/dto/create-order.dto';
-import { IConfirmInventory } from '@libs/temporal/activity';
+import { InventoryErrorCode } from '@libs/contract/inventory';
+import { IOrderItem } from '@libs/contract/order';
+import { IConfirmInventoryActivity } from '@libs/temporal/activity';
 import { HttpStatus, Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { EntityManager } from 'typeorm';
 import { InventoryEntity } from '../entity/inventory.entity';
 
 @Activity({ name: 'confirm-inventory-activity' })
-export class ConfirmInventoryActivity implements IConfirmInventory {
+export class ConfirmInventoryActivity implements IConfirmInventoryActivity {
   private readonly logger = new Logger(ConfirmInventoryActivity.name);
 
   constructor(private readonly entityManager: EntityManager) {}
 
   @ActivityMethod({ name: 'confirmInventory' })
-  execute(orderId: number, orderItems: OrderItemDto[]): Promise<void> {
+  execute(orderId: number, orderItems: IOrderItem[]): Promise<void> {
     this.logger.log(`[Order ${orderId}] Confirming inventory deduction.`);
 
     return this.entityManager.transaction(async (manager: EntityManager) => {

@@ -1,11 +1,11 @@
-import { OrderStatus } from '@libs/contract/order/enum/order-status.enum';
-import { IUpdateOrderStatus } from '@libs/temporal/activity';
+import { OrderStatus } from '@libs/contract/order';
+import { IUpdateOrderStatusActivity } from '@libs/temporal/activity';
 import { Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { OrderRepository } from '../repository/order.repository';
 
 @Activity({ name: 'update-order-status-activity' })
-export class UpdateOrderStatusActivity implements IUpdateOrderStatus {
+export class UpdateOrderStatusActivity implements IUpdateOrderStatusActivity {
   private readonly logger = new Logger(UpdateOrderStatusActivity.name);
 
   constructor(private readonly orderRepository: OrderRepository) {}

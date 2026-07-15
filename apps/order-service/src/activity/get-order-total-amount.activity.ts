@@ -1,10 +1,10 @@
-import { IGetOrderTotalAmount } from '@libs/temporal/activity';
+import { IGetOrderTotalAmountActivity } from '@libs/temporal/activity';
 import { Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { OrderRepository } from '../repository/order.repository';
 
 @Activity({ name: 'get-order-total-amount-activity' })
-export class GetOrderTotalAmountActivity implements IGetOrderTotalAmount {
+export class GetOrderTotalAmountActivity implements IGetOrderTotalAmountActivity {
   private readonly logger = new Logger(GetOrderTotalAmountActivity.name);
 
   constructor(private readonly orderRepository: OrderRepository) {}

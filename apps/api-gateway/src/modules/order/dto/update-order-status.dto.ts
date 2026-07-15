@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsInt, IsNotEmpty, Min } from 'class-validator';
-import { OrderStatus } from '../enum/order-status.enum';
+import { IUpdateOrderStatusDto, OrderStatus } from '@libs/contract/order';
 
-export class UpdateOrderStatusDto {
-  @ApiProperty({ example: 1, description: 'Order ID (set by API Gateway from URL param)' })
+export class UpdateOrderStatusDto implements IUpdateOrderStatusDto {
+  @ApiProperty({ example: 1, description: 'Order ID' })
   @IsInt()
   @Min(1)
   order_id: number;

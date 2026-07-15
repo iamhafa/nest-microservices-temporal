@@ -1,5 +1,5 @@
-import { UpdateProductDto } from '@libs/contract/product/dto/update-product.dto';
+import { IUpdateProductDto } from '@libs/contract/product';
 
 export class UpdateProductCommand {
-  constructor(public readonly updateProductDto: UpdateProductDto) {}
+  constructor(public readonly updateProductDto: IUpdateProductDto) {}
 }

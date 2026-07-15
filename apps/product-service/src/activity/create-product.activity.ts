@@ -1,5 +1,5 @@
-import { CreateProductDto } from '@libs/contract/product/dto/create-product.dto';
-import { ICreateProduct } from '@libs/temporal/activity';
+import type { ICreateProductDto } from '@libs/contract/product';
+import { ICreateProductActivity } from '@libs/temporal/activity';
 import { Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { ProductImageEntity } from '../modules/product/entity/product-image.entity';
@@ -8,7 +8,7 @@ import { ProductImageRepository } from '../modules/product/repository/product-im
 import { ProductRepository } from '../modules/product/repository/product.repository';
 
 @Activity({ name: 'create-product-activity' })
-export class CreateProductActivity implements ICreateProduct {
+export class CreateProductActivity implements ICreateProductActivity {
   private readonly logger = new Logger(CreateProductActivity.name);
 
   constructor(
@@ -17,7 +17,7 @@ export class CreateProductActivity implements ICreateProduct {
   ) {}
 
   @ActivityMethod({ name: 'createProduct' })
-  async execute(createProductDto: Omit<CreateProductDto, 'quantity'>): Promise<number> {
+  async execute(createProductDto: Omit<ICreateProductDto, 'quantity'>): Promise<number> {
     this.logger.log(`Creating product: ${createProductDto.name}`);
 
     const { tag_ids, image_urls, ...productDto } = createProductDto;
@@ -25,7 +25,7 @@ export class CreateProductActivity implements ICreateProduct {
     const tags = tag_ids?.map((id: number) => ({ id }));
 
     const images: ProductImageEntity[] = this.productImageRepository.create(
-      image_urls?.map((url: string, index: number) => ({
+      (image_urls ?? []).map((url: string, index: number) => ({
         image_url: url,
         is_thumbnail: index === 0,
       })),

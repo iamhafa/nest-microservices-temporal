@@ -1,9 +1,9 @@
 // Thanh toán đơn hàng
-export interface IChargePayment {
+export interface IChargePaymentActivity {
   execute(orderId: number, totalAmount: number): Promise<number>;
 }
 
 // Hoàn tiền đơn hàng
-export interface IRefundPayment {
+export interface IRefundPaymentActivity {
   execute(orderId: number, totalAmount?: number): Promise<void>;
 }

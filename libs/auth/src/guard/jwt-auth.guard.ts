@@ -1,5 +1,5 @@
 import { AppException } from '@libs/common';
-import { SystemErrorCode } from '@libs/contract/base/error';
+import { SystemErrorCode } from '@libs/contract/base';
 import { CanActivate, ExecutionContext, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';

@@ -1,7 +1,7 @@
+import { IUserResponseDto, UserRole } from '@libs/contract/user';
 import { ApiProperty } from '@nestjs/swagger';
-import { UserRole } from '../enum/user-role.enum';
 
-export class UserResponseDto {
+export class UserResponseDto implements IUserResponseDto {
   @ApiProperty({ example: 1 })
   id: number;
 

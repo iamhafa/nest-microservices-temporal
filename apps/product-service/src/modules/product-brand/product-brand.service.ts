@@ -1,8 +1,6 @@
 import { RabbitPayload, RabbitRPC } from '@golevelup/nestjs-rabbitmq';
 import { AppException, RmqExchange, RmqQueue } from '@libs/common';
-import { CreateProductBrandDto } from '@libs/contract/product/dto/create-product-brand.dto';
-import { UpdateProductBrandDto } from '@libs/contract/product/dto/update-product-brand.dto';
-import { ProductErrorCode } from '@libs/contract/product/error';
+import { type ICreateProductBrandDto, type IUpdateProductBrandDto, ProductErrorCode } from '@libs/contract/product';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { ProductBrandEntity } from './entity/product-brand.entity';
 import { ProductBrandRepository } from './repository/product-brand.repository';
@@ -16,7 +14,7 @@ export class ProductBrandService {
     routingKey: 'productBrand.create.command',
     queue: RmqQueue.PRODUCT_QUEUE,
   })
-  async createProductBrand(@RabbitPayload() dto: CreateProductBrandDto): Promise<ProductBrandEntity> {
+  async createProductBrand(@RabbitPayload() dto: ICreateProductBrandDto): Promise<ProductBrandEntity> {
     const brand = this.productBrandRepository.create(dto);
     return this.productBrandRepository.save(brand);
   }
@@ -52,7 +50,7 @@ export class ProductBrandService {
     routingKey: 'productBrand.update.command',
     queue: RmqQueue.PRODUCT_QUEUE,
   })
-  async updateProductBrand(@RabbitPayload() dto: UpdateProductBrandDto): Promise<void> {
+  async updateProductBrand(@RabbitPayload() dto: IUpdateProductBrandDto): Promise<void> {
     const { id, ...updateData } = dto;
     const result = await this.productBrandRepository.update(id, updateData);
     if (result.affected === 0) {

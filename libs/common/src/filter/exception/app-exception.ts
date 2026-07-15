@@ -1,10 +1,10 @@
-import { SystemErrorCode } from '@libs/contract/base/error';
-import { InventoryErrorCode } from '@libs/contract/inventory/error';
-import { OrderErrorCode } from '@libs/contract/order/error';
-import { PaymentErrorCode } from '@libs/contract/payment/error';
-import { ProductErrorCode } from '@libs/contract/product/error';
-import { ShippingErrorCode } from '@libs/contract/shipping/error';
-import { UserErrorCode } from '@libs/contract/user/error';
+import { SystemErrorCode } from '@libs/contract/base';
+import { InventoryErrorCode } from '@libs/contract/inventory';
+import { OrderErrorCode } from '@libs/contract/order';
+import { PaymentErrorCode } from '@libs/contract/payment';
+import { ProductErrorCode } from '@libs/contract/product';
+import { ShippingErrorCode } from '@libs/contract/shipping';
+import { UserErrorCode } from '@libs/contract/user';
 import { HttpException, HttpStatus } from '@nestjs/common';
 
 interface ExceptionDetails {

@@ -1,5 +1,5 @@
 import { AppException, AppExceptionOptions, EnvService, HttpExceptionFilter, ResponseInterceptor } from '@libs/common';
-import { SystemErrorCode } from '@libs/contract/base/error';
+import { SystemErrorCode } from '@libs/contract/base';
 import { HttpStatus, ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';

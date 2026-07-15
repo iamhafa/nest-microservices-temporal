@@ -1,7 +1,7 @@
 import { InjectStripeClient } from '@golevelup/nestjs-stripe';
 import { AppException } from '@libs/common';
-import { PaymentErrorCode } from '@libs/contract/payment/error';
-import { IRefundPayment } from '@libs/temporal/activity';
+import { PaymentErrorCode } from '@libs/contract/payment/error/payment-code.error';
+import { IRefundPaymentActivity } from '@libs/temporal/activity';
 import { HttpStatus, Logger } from '@nestjs/common';
 import {
   BrokenCircuitError,
@@ -18,7 +18,7 @@ import { PaymentStatus, PaymentTransactionEntity } from '../entity/payment-trans
 import { PaymentTransactionRepository } from '../repository/payment-transaction.repository';
 
 @Activity({ name: 'refund-payment' })
-export class RefundPaymentActivity implements IRefundPayment {
+export class RefundPaymentActivity implements IRefundPaymentActivity {
   private readonly logger = new Logger(RefundPaymentActivity.name);
 
   private readonly circuitBreaker: CircuitBreakerPolicy = circuitBreaker(handleAll, {

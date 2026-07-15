@@ -1,4 +1,4 @@
-import { SystemErrorCode } from '@libs/contract/base/error';
+import { SystemErrorCode } from '@libs/contract/base';
 import { ArgumentsHost, Catch, HttpException, HttpStatus } from '@nestjs/common';
 import { HttpArgumentsHost } from '@nestjs/common/interfaces';
 import { BaseExceptionFilter } from '@nestjs/core';

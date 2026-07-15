@@ -1,7 +1,5 @@
 import { Idempotent, RmqPublisherService } from '@libs/common';
-import { CancelOrderDto } from '@libs/contract/order/dto/cancel-order.dto';
-import { CreateOrderDto } from '@libs/contract/order/dto/create-order.dto';
-import { UpdateOrderStatusDto } from '@libs/contract/order/dto/update-order-status.dto';
+import { CancelOrderDto, CreateOrderDto, UpdateOrderStatusDto } from './dto';
 import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
 import {
   ApiAcceptedResponse,

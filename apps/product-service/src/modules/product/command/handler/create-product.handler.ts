@@ -1,5 +1,5 @@
 import { AppException } from '@libs/common';
-import { ProductErrorCode } from '@libs/contract/product/error';
+import { ProductErrorCode } from '@libs/contract/product';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue';
 import { HttpStatus } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';

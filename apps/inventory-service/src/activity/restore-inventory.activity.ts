@@ -1,20 +1,20 @@
 import { AppException } from '@libs/common';
-import { InventoryErrorCode } from '@libs/contract/inventory/error';
-import { OrderItemDto } from '@libs/contract/order/dto/create-order.dto';
-import { IRestoreInventory } from '@libs/temporal/activity';
+import { InventoryErrorCode } from '@libs/contract/inventory';
+import { IOrderItem } from '@libs/contract/order';
+import { IRestoreInventoryActivity } from '@libs/temporal/activity';
 import { Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { EntityManager, UpdateResult } from 'typeorm';
 import { InventoryEntity } from '../entity/inventory.entity';
 
 @Activity({ name: 'restore-inventory-activity' })
-export class RestoreInventoryActivity implements IRestoreInventory {
+export class RestoreInventoryActivity implements IRestoreInventoryActivity {
   private readonly logger = new Logger(RestoreInventoryActivity.name);
 
   constructor(private readonly entityManager: EntityManager) {}
 
   @ActivityMethod({ name: 'restoreInventory' })
-  execute(orderId: number, orderItems: OrderItemDto[]): Promise<void> {
+  execute(orderId: number, orderItems: IOrderItem[]): Promise<void> {
     this.logger.warn(`[Order ${orderId}] Restoring inventory (Cancel Order):`, orderItems);
 
     return this.entityManager.transaction(async (manager: EntityManager) => {

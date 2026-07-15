@@ -1,7 +1,8 @@
+import { ILoginUserDto } from '@libs/contract/user';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
 
-export class LoginUserDto {
+export class LoginUserDto implements ILoginUserDto {
   @ApiProperty({ example: 'sangprdcv@gmail.com' })
   @IsEmail()
   @IsNotEmpty()

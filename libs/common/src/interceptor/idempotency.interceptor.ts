@@ -1,4 +1,4 @@
-import { SystemErrorCode } from '@libs/contract/base/error';
+import { SystemErrorCode } from '@libs/contract/base';
 import { InjectRedis } from '@nestjs-redis/client';
 import { CallHandler, ExecutionContext, HttpStatus, Injectable, Logger, NestInterceptor } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';

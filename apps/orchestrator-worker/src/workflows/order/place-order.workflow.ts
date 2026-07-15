@@ -1,25 +1,24 @@
-import { CreateOrderDto, OrderItemDto } from '@libs/contract/order/dto/create-order.dto';
-import { OrderStatus } from '@libs/contract/order/enum/order-status.enum';
+import { ICreateOrderDto, IOrderItem, OrderStatus } from '@libs/contract/order';
 import type {
-  IChargePayment,
-  IConfirmInventory,
-  ICreateOrder,
-  ICreateShipment,
-  IGetOrderTotalAmount,
-  IGetProductPrices,
-  IRefundPayment,
-  IReleaseInventory,
-  IReserveInventory,
-  ISavePaymentId,
-  IUpdateOrderStatus,
-  IValidateProducts,
+  IChargePaymentActivity,
+  IConfirmInventoryActivity,
+  ICreateOrderActivity,
+  ICreateShipmentActivity,
+  IGetOrderTotalAmountActivity,
+  IGetProductPricesActivity,
+  IRefundPaymentActivity,
+  IReleaseInventoryActivity,
+  IReserveInventoryActivity,
+  ISavePaymentIdActivity,
+  IUpdateOrderStatusActivity,
+  IValidateProductsActivity,
 } from '@libs/temporal/activity';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue';
 import { ActivityInterfaceFor, proxyActivities } from '@temporalio/workflow';
 
 const productActivities: ActivityInterfaceFor<{
-  validateProducts: IValidateProducts['execute'];
-  getProductPrices: IGetProductPrices['execute'];
+  validateProducts: IValidateProductsActivity['execute'];
+  getProductPrices: IGetProductPricesActivity['execute'];
 }> = proxyActivities({
   startToCloseTimeout: '30 seconds',
   taskQueue: WorkFlowTaskQueue.PRODUCT,
@@ -31,9 +30,9 @@ const productActivities: ActivityInterfaceFor<{
 });
 
 const inventoryProxyActivities: ActivityInterfaceFor<{
-  reserveInventory: IReserveInventory['execute'];
-  releaseInventory: IReleaseInventory['execute'];
-  confirmInventory: IConfirmInventory['execute'];
+  reserveInventory: IReserveInventoryActivity['execute'];
+  releaseInventory: IReleaseInventoryActivity['execute'];
+  confirmInventory: IConfirmInventoryActivity['execute'];
 }> = proxyActivities({
   startToCloseTimeout: '30 seconds',
   taskQueue: WorkFlowTaskQueue.INVENTORY,
@@ -45,8 +44,8 @@ const inventoryProxyActivities: ActivityInterfaceFor<{
 });
 
 const paymentActivities: ActivityInterfaceFor<{
-  chargePayment: IChargePayment['execute'];
-  refundPayment: IRefundPayment['execute'];
+  chargePayment: IChargePaymentActivity['execute'];
+  refundPayment: IRefundPaymentActivity['execute'];
 }> = proxyActivities({
   startToCloseTimeout: '30 seconds',
   taskQueue: WorkFlowTaskQueue.PAYMENT,
@@ -58,7 +57,7 @@ const paymentActivities: ActivityInterfaceFor<{
 });
 
 const shippingActivities: ActivityInterfaceFor<{
-  createShipment: ICreateShipment['execute'];
+  createShipment: ICreateShipmentActivity['execute'];
 }> = proxyActivities({
   startToCloseTimeout: '30 seconds',
   taskQueue: WorkFlowTaskQueue.SHIPPING,
@@ -70,10 +69,10 @@ const shippingActivities: ActivityInterfaceFor<{
 });
 
 const orderActivities: ActivityInterfaceFor<{
-  createOrder: ICreateOrder['execute'];
-  getOrderTotalAmount: IGetOrderTotalAmount['execute'];
-  savePaymentId: ISavePaymentId['execute'];
-  updateOrderStatus: IUpdateOrderStatus['execute'];
+  createOrder: ICreateOrderActivity['execute'];
+  getOrderTotalAmount: IGetOrderTotalAmountActivity['execute'];
+  savePaymentId: ISavePaymentIdActivity['execute'];
+  updateOrderStatus: IUpdateOrderStatusActivity['execute'];
 }> = proxyActivities({
   startToCloseTimeout: '30 seconds',
   taskQueue: WorkFlowTaskQueue.ORDER,
@@ -84,7 +83,7 @@ const orderActivities: ActivityInterfaceFor<{
   },
 });
 
-export async function placeOrderWorkflow(createOrderDto: CreateOrderDto, userId?: number) {
+export async function placeOrderWorkflow(createOrderDto: ICreateOrderDto, userId?: number) {
   console.log('Payload:', createOrderDto);
   const { items, address } = createOrderDto;
   let orderId: number | undefined;
@@ -93,7 +92,7 @@ export async function placeOrderWorkflow(createOrderDto: CreateOrderDto, userId?
 
   try {
     // 0th: Validate products exist & active
-    const productIds: number[] = items.map((item: OrderItemDto) => item.product_id);
+    const productIds: number[] = items.map((item: IOrderItem) => item.product_id);
     const isValid: boolean = await productActivities.validateProducts(productIds);
     if (!isValid) {
       throw new Error('Some products are invalid or inactive');

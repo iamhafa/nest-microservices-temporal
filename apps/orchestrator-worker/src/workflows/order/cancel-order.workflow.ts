@@ -1,21 +1,19 @@
-import type { CancelOrderDto } from '@libs/contract/order/dto/cancel-order.dto';
-import { OrderItemDto } from '@libs/contract/order/dto/create-order.dto';
-import { OrderStatus } from '@libs/contract/order/enum/order-status.enum';
+import { ICancelOrderDto, IOrderItem, OrderStatus } from '@libs/contract/order';
 import {
-  IGetOrderItems,
-  IGetPaymentId,
-  IRefundPayment,
-  IReleaseInventory,
-  IRestoreInventory,
-  IUpdateOrderStatus,
+  IGetOrderItemsActivity,
+  IGetPaymentIdActivity,
+  IRefundPaymentActivity,
+  IReleaseInventoryActivity,
+  IRestoreInventoryActivity,
+  IUpdateOrderStatusActivity,
 } from '@libs/temporal/activity';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue';
 import { ActivityInterfaceFor, proxyActivities } from '@temporalio/workflow';
 
 const orderActivities: ActivityInterfaceFor<{
-  getPaymentId: IGetPaymentId['execute'];
-  getOrderItems: IGetOrderItems['execute'];
-  updateOrderStatus: IUpdateOrderStatus['execute'];
+  getPaymentId: IGetPaymentIdActivity['execute'];
+  getOrderItems: IGetOrderItemsActivity['execute'];
+  updateOrderStatus: IUpdateOrderStatusActivity['execute'];
 }> = proxyActivities({
   startToCloseTimeout: '30 seconds',
   taskQueue: WorkFlowTaskQueue.ORDER,
@@ -27,7 +25,7 @@ const orderActivities: ActivityInterfaceFor<{
 });
 
 const paymentActivities: ActivityInterfaceFor<{
-  refundPayment: IRefundPayment['execute'];
+  refundPayment: IRefundPaymentActivity['execute'];
 }> = proxyActivities({
   startToCloseTimeout: '30 seconds',
   taskQueue: WorkFlowTaskQueue.PAYMENT,
@@ -39,8 +37,8 @@ const paymentActivities: ActivityInterfaceFor<{
 });
 
 const inventoryProxyActivities: ActivityInterfaceFor<{
-  restoreInventory: IRestoreInventory['execute'];
-  releaseInventory: IReleaseInventory['execute'];
+  restoreInventory: IRestoreInventoryActivity['execute'];
+  releaseInventory: IReleaseInventoryActivity['execute'];
 }> = proxyActivities({
   startToCloseTimeout: '30 seconds',
   taskQueue: WorkFlowTaskQueue.INVENTORY,
@@ -51,7 +49,7 @@ const inventoryProxyActivities: ActivityInterfaceFor<{
   },
 });
 
-export async function cancelOrderWorkflow(cancelOrderDto: CancelOrderDto): Promise<void> {
+export async function cancelOrderWorkflow(cancelOrderDto: ICancelOrderDto): Promise<void> {
   const { order_id, cancel_reason } = cancelOrderDto;
 
   const paymentId = await orderActivities.getPaymentId(order_id);
@@ -59,7 +57,7 @@ export async function cancelOrderWorkflow(cancelOrderDto: CancelOrderDto): Promi
     await paymentActivities.refundPayment(order_id);
   }
 
-  const items: OrderItemDto[] = await orderActivities.getOrderItems(order_id);
+  const items: IOrderItem[] = await orderActivities.getOrderItems(order_id);
   // Nếu đã thanh toán → inventory đã confirm → cộng lại stock
   // Nếu chưa thanh toán → inventory chỉ reserve → nhả reserved
   if (paymentId) {
