@@ -1,5 +1,5 @@
 ---
-name: auth-conventions
+trigger: model_decision
 description: Authentication and authorization rules, including JwtAuthGuard, RolesGuard, Public and Roles decorators, and CLS userId context.
 ---
 
@@ -13,6 +13,7 @@ When writing or modifying API Gateway endpoints and controllers, ALWAYS adhere t
 - This is enforced globally in `ApiGatewayModule` using the `JwtAuthGuard` from `@libs/auth`.
 
 ### 🔓 Public Endpoints
+
 - To make an endpoint public (bypass JWT validation), decorate the controller method or class with `@Public()` from `@libs/auth`:
 
 ```typescript
@@ -57,6 +58,7 @@ export class UserController {
 ## 👤 Extracting User Identity
 
 ### 1. In API Gateway Controllers (HTTP context)
+
 The `JwtAuthGuard` decodes the JWT and attaches the payload to the express `request` object.
 You can cast the request object to `IAuthRequest` and access the user payload via `request.user`.
 
@@ -75,12 +77,15 @@ export class ProfileController {
 ```
 
 ### 2. Anywhere in the Downstream Execution Flow (CLS Context)
+
 During the authentication step, `JwtAuthGuard` automatically saves the authenticated `user_id` into the CLS context:
+
 ```typescript
 this.clsService.set('userId', payload.user_id);
 ```
 
 - **Rule:** You can retrieve the authenticated user's ID anywhere in downstream services (e.g. RabbitMQ publishers, validators) without passing it through DTOs by injecting `ClsService` and calling:
+
 ```typescript
 const userId = this.clsService.get<number>('userId');
 ```

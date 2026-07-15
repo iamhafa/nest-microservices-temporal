@@ -1,5 +1,5 @@
 ---
-name: distributed-tracing
+trigger: model_decision
 description: Rules and architectural flow for Correlation ID, Logging, and Context Propagation across Microservices, API Gateway, RabbitMQ, and Temporal.
 ---
 
