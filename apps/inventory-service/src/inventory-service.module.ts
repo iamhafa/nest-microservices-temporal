@@ -2,7 +2,7 @@ import { RmqContextInterceptor, SharedLoggerModule, SharedRabbitMQModule } from 
 import { WorkFlowTaskQueue } from '@libs/temporal/queue';
 import { SharedTemporalModule } from '@libs/temporal/shared-temporal.module';
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ClsModule } from 'nestjs-cls';
@@ -13,7 +13,7 @@ import { InitializeInventoryActivity } from './activity/initialize-inventory.act
 import { ReleaseInventoryActivity } from './activity/release-inventory.activity';
 import { ReserveInventoryActity } from './activity/reserve-inventory.actity';
 import { RestoreInventoryActivity } from './activity/restore-inventory.activity';
-import { InventoryEntity } from './entity/inventory.entity';
+import { dataSourceOptions } from './database/config/database.config';
 import { InventoryService } from './inventory-service.service';
 import { InventoryRepository } from './repository/inventory.repository';
 
@@ -27,24 +27,7 @@ import { InventoryRepository } from './repository/inventory.repository';
     // Custom dynamic modules
     SharedRabbitMQModule,
     SharedLoggerModule,
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.getOrThrow<string>('DB_HOST'),
-        port: configService.getOrThrow<number>('DB_PORT'),
-        username: configService.getOrThrow<string>('DB_USER'),
-        password: configService.getOrThrow<string>('DB_PASS'),
-        database: configService.getOrThrow<string>('DB_NAME'),
-        entities: [InventoryEntity],
-        synchronize: true,
-        invalidWhereValuesBehavior: {
-          undefined: 'throw',
-          null: 'throw',
-        },
-      }),
-    }),
+    TypeOrmModule.forRoot(dataSourceOptions),
 
     SharedTemporalModule.forRoot({
       taskQueue: WorkFlowTaskQueue.INVENTORY,

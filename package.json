@@ -20,6 +20,10 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./apps/nest-microservices-temporal/test/jest-e2e.json",
+    "db:generate": "./.script/typeorm.sh generate",
+    "db:run": "./.script/typeorm.sh run",
+    "db:revert": "./.script/typeorm.sh revert",
+    "db:create": "./.script/typeorm.sh create",
     "prepare": "husky"
   },
   "dependencies": {

@@ -35,7 +35,7 @@ export class InventoryEntity {
    * TypeORM sẽ tự động kiểm tra version này.
    */
   @VersionColumn({
-    comment: 'Phiên bản khóa lạc quan (Optimistic Locking) dùng để ngăn chặn tranh chấp dữ liệu (Race Condition).',
+    comment: 'Phiên bản khóa lạc quan (Optimistic Locking) dùng để ngăn chặn tranh chấp dữ liệu (Race Condition)',
   })
   version: number;
 
