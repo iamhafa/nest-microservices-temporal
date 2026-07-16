@@ -1,5 +1,6 @@
 import { StripeModule, StripeModuleConfig } from '@golevelup/nestjs-stripe';
-import { RmqContextInterceptor, SharedLoggerModule, SharedRabbitMQModule } from '@libs/common';
+import { SharedLoggerModule } from '@libs/common';
+import { RmqContextInterceptor, SharedRabbitMQModule } from '@libs/messaging';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue';
 import { SharedTemporalModule } from '@libs/temporal/shared-temporal.module';
 import { Module } from '@nestjs/common';

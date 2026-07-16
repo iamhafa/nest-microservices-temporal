@@ -1,4 +1,4 @@
-import { SharedRabbitMQModule } from '@libs/common';
+import { SharedRabbitMQModule } from '@libs/messaging';
 import { Module } from '@nestjs/common';
 import { ProductBrandController } from './product-brand.controller';
 import { ProductController } from './product.controller';

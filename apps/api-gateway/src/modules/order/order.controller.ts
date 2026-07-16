@@ -1,4 +1,5 @@
-import { Idempotent, RmqPublisherService } from '@libs/common';
+import { Idempotent } from '@libs/common';
+import { RmqPublisherService } from '@libs/messaging';
 import { CancelOrderDto, CreateOrderDto, UpdateOrderStatusDto } from './dto';
 import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
 import {

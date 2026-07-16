@@ -1,4 +1,5 @@
-import { RmqContextInterceptor, RpcExceptionFilter, SharedLoggerModule, SharedRabbitMQModule } from '@libs/common';
+import { RpcExceptionFilter, SharedLoggerModule } from '@libs/common';
+import { RmqContextInterceptor, SharedRabbitMQModule } from '@libs/messaging';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';

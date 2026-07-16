@@ -1,6 +1,7 @@
 import { RabbitPayload, RabbitRPC } from '@golevelup/nestjs-rabbitmq';
 import { IJwtPayload } from '@libs/auth';
-import { AppException, RmqExchange, RmqQueue } from '@libs/common';
+import { AppException } from '@libs/common';
+import { RmqExchange, RmqQueue } from '@libs/messaging';
 import {
   type IAuthResponseDto,
   type ILoginUserDto,

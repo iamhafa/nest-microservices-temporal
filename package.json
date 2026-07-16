@@ -105,10 +105,11 @@
       "ts"
     ],
     "moduleNameMapper": {
-      "^@app/auth(|/.*)$": "<rootDir>/libs/auth/src/$1",
-      "^@app/common(|/.*)$": "<rootDir>/libs/common/src/$1",
-      "^@app/contract(|/.*)$": "<rootDir>/libs/contract/src/$1",
-      "^@app/temporal(|/.*)$": "<rootDir>/libs/temporal/src/$1"
+      "^@libs/auth(|/.*)$": "<rootDir>/libs/auth/src/$1",
+      "^@libs/common(|/.*)$": "<rootDir>/libs/common/src/$1",
+      "^@libs/contract(|/.*)$": "<rootDir>/libs/contract/src/$1",
+      "^@libs/messaging(|/.*)$": "<rootDir>/libs/messaging/src/$1",
+      "^@libs/temporal(|/.*)$": "<rootDir>/libs/temporal/src/$1"
     },
     "rootDir": ".",
     "roots": [

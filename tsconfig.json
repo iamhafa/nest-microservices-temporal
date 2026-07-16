@@ -31,6 +31,8 @@
       "@libs/common/*": ["libs/common/src/*"],
       "@libs/contract": ["libs/contract/src"],
       "@libs/contract/*": ["libs/contract/src/*"],
+      "@libs/messaging": ["libs/messaging/src"],
+      "@libs/messaging/*": ["libs/messaging/src/*"],
       "@libs/temporal": ["libs/temporal/src"],
       "@libs/temporal/*": ["libs/temporal/src/*"]
     }

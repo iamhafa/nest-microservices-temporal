@@ -1,12 +1,12 @@
 import { RabbitPayload, RabbitRPC } from '@golevelup/nestjs-rabbitmq';
-import { AppException, RmqExchange, RmqQueue } from '@libs/common';
-import { RmqRoutingKey } from '@libs/common/rabbitmq/enum/rmq-queue.enum';
+import { AppException } from '@libs/common';
 import {
   type ICancelOrderDto,
   type ICreateOrderDto,
   type IUpdateOrderStatusDto,
   OrderErrorCode,
 } from '@libs/contract/order';
+import { RmqExchange, RmqQueue, RmqRoutingKey } from '@libs/messaging';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { ClsService } from 'nestjs-cls';

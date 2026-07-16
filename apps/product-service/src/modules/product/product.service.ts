@@ -1,5 +1,5 @@
 import { RabbitPayload, RabbitRPC } from '@golevelup/nestjs-rabbitmq';
-import { RmqExchange, RmqQueue } from '@libs/common';
+import { RmqExchange, RmqQueue } from '@libs/messaging';
 import type { ICreateProductDto, IUpdateProductDto } from '@libs/contract/product';
 import { Injectable } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';

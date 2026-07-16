@@ -1,4 +1,4 @@
-import { RmqPublisherService } from '@libs/common';
+import { RmqPublisherService } from '@libs/messaging';
 import { UpdateDeliveryStatusDto } from './dto';
 import { Body, Controller, Get, Patch } from '@nestjs/common';
 import { ApiBearerAuth, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';

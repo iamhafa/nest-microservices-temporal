@@ -6,8 +6,8 @@ import {
 } from '@golevelup/nestjs-rabbitmq';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { RmqExchange } from './enum/rmq-exchange.enum';
-import { RmqPublisherService } from './rmq-publisher.service';
+import { RmqExchange } from '../enum/rmq-exchange.enum';
+import { RmqPublisherService } from '../service/rmq-publisher.service';
 
 @Module({
   imports: [

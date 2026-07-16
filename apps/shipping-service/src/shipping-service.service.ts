@@ -1,5 +1,6 @@
 import { RabbitPayload, RabbitRPC } from '@golevelup/nestjs-rabbitmq';
-import { AppException, RmqExchange, RmqQueue } from '@libs/common';
+import { AppException } from '@libs/common';
+import { RmqExchange, RmqQueue } from '@libs/messaging';
 import { type IUpdateDeliveryStatusDto, ShippingErrorCode } from '@libs/contract/shipping';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { ShippingEntity } from './entity/shipping.entity';

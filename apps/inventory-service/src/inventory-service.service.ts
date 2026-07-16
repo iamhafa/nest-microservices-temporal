@@ -1,5 +1,6 @@
 import { RabbitPayload, RabbitRPC } from '@golevelup/nestjs-rabbitmq';
-import { AppException, RmqExchange, RmqQueue } from '@libs/common';
+import { AppException } from '@libs/common';
+import { RmqExchange, RmqQueue } from '@libs/messaging';
 import { type IAdjustInventoryDto, InventoryErrorCode } from '@libs/contract/inventory';
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { UpdateResult } from 'typeorm';

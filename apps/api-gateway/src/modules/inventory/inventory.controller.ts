@@ -1,4 +1,4 @@
-import { RmqPublisherService } from '@libs/common';
+import { RmqPublisherService } from '@libs/messaging';
 import { AdjustInventoryDto } from './dto';
 import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch } from '@nestjs/common';
 import {
