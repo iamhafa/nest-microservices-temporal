@@ -1,0 +1,84 @@
+{
+  "mcpServers": {
+    "mcp-product-service-db": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres"
+      ],
+      "env": {
+        "PGHOST": "${DB_HOST:-localhost}",
+        "PGPORT": "${DB_PORT:-5432}",
+        "PGUSER": "${DB_USER:-postgres}",
+        "PGPASSWORD": "${DB_PASSWORD:-postgres}",
+        "PGDATABASE": "nest-temporal-product-service"
+      }
+    },
+    "mcp-order-service-db": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres"
+      ],
+      "env": {
+        "PGHOST": "${DB_HOST:-localhost}",
+        "PGPORT": "${DB_PORT:-5432}",
+        "PGUSER": "${DB_USER:-postgres}",
+        "PGPASSWORD": "${DB_PASSWORD:-postgres}",
+        "PGDATABASE": "nest-temporal-order-service"
+      }
+    },
+    "mcp-inventory-service-db": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres"
+      ],
+      "env": {
+        "PGHOST": "${DB_HOST:-localhost}",
+        "PGPORT": "${DB_PORT:-5432}",
+        "PGUSER": "${DB_USER:-postgres}",
+        "PGPASSWORD": "${DB_PASSWORD:-postgres}",
+        "PGDATABASE": "nest-temporal-inventory-service"
+      }
+    },
+    "mcp-payment-service-db": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres"
+      ],
+      "env": {
+        "PGHOST": "${DB_HOST:-localhost}",
+        "PGPORT": "${DB_PORT:-5432}",
+        "PGUSER": "${DB_USER:-postgres}",
+        "PGPASSWORD": "${DB_PASSWORD:-postgres}",
+        "PGDATABASE": "nest-temporal-payment-service"
+      }
+    },
+    "mcp-user-service-db": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres"
+      ],
+      "env": {
+        "PGHOST": "${DB_HOST:-localhost}",
+        "PGPORT": "${DB_PORT:-5432}",
+        "PGUSER": "${DB_USER:-postgres}",
+        "PGPASSWORD": "${DB_PASSWORD:-postgres}",
+        "PGDATABASE": "nest-temporal-user-service"
+      }
+    },
+    "mcp-stripe": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@stripe/mcp"
+      ],
+      "env": {
+        "STRIPE_SECRET_KEY": "${STRIPE_SECRET_KEY}"
+      }
+    }
+  }
+}
