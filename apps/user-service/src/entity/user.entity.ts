@@ -1,13 +1,5 @@
 import { UserRole } from '@libs/contract/user/enum/user-role.enum';
-import {
-  Column,
-  CreateDateColumn,
-  DeleteDateColumn,
-  Entity,
-  Index,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 @Index('idx_user_email', ['email'], { unique: true })
 @Entity('users')

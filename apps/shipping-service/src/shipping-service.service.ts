@@ -24,9 +24,7 @@ export class ShippingService {
     routingKey: 'shipping.updateStatus',
     queue: RmqQueue.SHIPPING_QUEUE,
   })
-  async updateDeliveryStatus(
-    @RabbitPayload() updateDeliveryStatusDto: IUpdateDeliveryStatusDto,
-  ): Promise<ShippingEntity> {
+  async updateDeliveryStatus(@RabbitPayload() updateDeliveryStatusDto: IUpdateDeliveryStatusDto): Promise<ShippingEntity> {
     const { id, status } = updateDeliveryStatusDto;
     const shipping = await this.shippingRepository.findOneBy({ id });
     if (!shipping) {

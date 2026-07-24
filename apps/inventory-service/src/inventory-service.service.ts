@@ -69,9 +69,7 @@ export class InventoryService {
       deadLetterRoutingKey: 'inventory.failed',
     },
   })
-  async getAvailableStock(
-    @RabbitPayload() productId: number,
-  ): Promise<{ productId: number; availableQuantity: number }> {
+  async getAvailableStock(@RabbitPayload() productId: number): Promise<{ productId: number; availableQuantity: number }> {
     const inventory = await this.inventoryRepository.findOneBy({ product_id: productId });
     if (!inventory) {
       throw new AppException({

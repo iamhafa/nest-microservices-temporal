@@ -24,7 +24,7 @@ description: Monorepo layout, service responsibilities, and shared libraries str
 | `inventory-service`      | Quản lý tồn kho (reserve, confirm, release, restore)              | ✅    | ✅          |
 | `payment-service`        | Xử lý thanh toán (charge, refund)                                 | ✅    | ✅          |
 | `shipping-service`       | Tạo và quản lý vận chuyển                                         | ✅    | ✅          |
-| `product-service`        | Quản lý sản phẩm (CRUD, validation - Sử dụng CQRS Pattern)        | ✅    | ✅          |
+| `product-service`        | Quản lý sản phẩm (CRUD, validation)                               | ✅    | ✅          |
 | `recommendation-service` | Gợi ý sản phẩm                                                    | ❌    | ❌          |
 | `user-service`           | Quản lý/xác thực người dùng                                       | ✅    | ❌          |
 | `orchestrator-worker`    | Chạy Temporal workflows (KHÔNG phải HTTP service)                 | ❌    | ❌          |

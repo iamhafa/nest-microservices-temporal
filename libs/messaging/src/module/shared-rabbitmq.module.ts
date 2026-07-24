@@ -1,9 +1,4 @@
-import {
-  defaultNackErrorHandler,
-  MessageHandlerErrorBehavior,
-  RabbitMQConfig,
-  RabbitMQModule,
-} from '@golevelup/nestjs-rabbitmq';
+import { defaultNackErrorHandler, MessageHandlerErrorBehavior, RabbitMQConfig, RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RmqExchange } from '../enum/rmq-exchange.enum';
