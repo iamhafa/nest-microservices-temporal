@@ -1,1 +1,9 @@
+echo 'Running pre-commit hooks'
+
+echo 'Running format...'
+pnpm format
+
+echo 'Running lint...'
 pnpm lint
+
+echo 'Done!'

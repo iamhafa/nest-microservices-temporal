@@ -4,81 +4,54 @@
       "command": "npx",
       "args": [
         "-y",
-        "@modelcontextprotocol/server-postgres"
-      ],
-      "env": {
-        "PGHOST": "${DB_HOST:-localhost}",
-        "PGPORT": "${DB_PORT:-5432}",
-        "PGUSER": "${DB_USER:-postgres}",
-        "PGPASSWORD": "${DB_PASSWORD:-postgres}",
-        "PGDATABASE": "nest-temporal-product-service"
-      }
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://postgres:postgres@localhost:5432/nest-temporal-product-service"
+      ]
     },
     "mcp-order-service-db": {
       "command": "npx",
       "args": [
         "-y",
-        "@modelcontextprotocol/server-postgres"
-      ],
-      "env": {
-        "PGHOST": "${DB_HOST:-localhost}",
-        "PGPORT": "${DB_PORT:-5432}",
-        "PGUSER": "${DB_USER:-postgres}",
-        "PGPASSWORD": "${DB_PASSWORD:-postgres}",
-        "PGDATABASE": "nest-temporal-order-service"
-      }
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://postgres:postgres@localhost:5432/nest-temporal-order-service"
+      ]
     },
     "mcp-inventory-service-db": {
       "command": "npx",
       "args": [
         "-y",
-        "@modelcontextprotocol/server-postgres"
-      ],
-      "env": {
-        "PGHOST": "${DB_HOST:-localhost}",
-        "PGPORT": "${DB_PORT:-5432}",
-        "PGUSER": "${DB_USER:-postgres}",
-        "PGPASSWORD": "${DB_PASSWORD:-postgres}",
-        "PGDATABASE": "nest-temporal-inventory-service"
-      }
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://postgres:postgres@localhost:5432/nest-temporal-inventory-service"
+      ]
     },
     "mcp-payment-service-db": {
       "command": "npx",
       "args": [
         "-y",
-        "@modelcontextprotocol/server-postgres"
-      ],
-      "env": {
-        "PGHOST": "${DB_HOST:-localhost}",
-        "PGPORT": "${DB_PORT:-5432}",
-        "PGUSER": "${DB_USER:-postgres}",
-        "PGPASSWORD": "${DB_PASSWORD:-postgres}",
-        "PGDATABASE": "nest-temporal-payment-service"
-      }
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://postgres:postgres@localhost:5432/nest-temporal-payment-service"
+      ]
     },
     "mcp-user-service-db": {
       "command": "npx",
       "args": [
         "-y",
-        "@modelcontextprotocol/server-postgres"
-      ],
-      "env": {
-        "PGHOST": "${DB_HOST:-localhost}",
-        "PGPORT": "${DB_PORT:-5432}",
-        "PGUSER": "${DB_USER:-postgres}",
-        "PGPASSWORD": "${DB_PASSWORD:-postgres}",
-        "PGDATABASE": "nest-temporal-user-service"
-      }
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://postgres:postgres@localhost:5432/nest-temporal-user-service"
+      ]
     },
-    "mcp-stripe": {
+    "mcp-shipping-service-db": {
       "command": "npx",
       "args": [
         "-y",
-        "@stripe/mcp"
-      ],
-      "env": {
-        "STRIPE_SECRET_KEY": "${STRIPE_SECRET_KEY}"
-      }
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://postgres:postgres@localhost:5432/nest-temporal-shipping-service"
+      ]
+    },
+    "mcp-stripe": {
+      "command": "npx",
+      // Uses dotenv-cli to load STRIPE_SECRET_KEY from root .env without hardcoding secrets
+      "args": ["-y", "dotenv-cli", "-e", ".env", "--", "npx", "-y", "@stripe/mcp"]
     }
   }
 }
