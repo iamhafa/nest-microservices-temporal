@@ -8,8 +8,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ClsModule } from 'nestjs-cls';
-import { join } from 'path';
-import { cwd } from 'process';
 import { ChargePaymentActivity } from './activity/charge-payment.activity';
 import { RefundPaymentActivity } from './activity/refund-payment.activity';
 import { PaymentTransactionEntity } from './entity/payment-transaction.entity';
@@ -18,10 +16,7 @@ import { PaymentTransactionRepository } from './repository/payment-transaction.r
 @Module({
   imports: [
     ClsModule.forRoot({ global: true }),
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: [join(cwd(), 'apps/payment-service/.env'), join(cwd(), '.env')],
-    }),
+    ConfigModule.forRoot(),
     StripeModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService): StripeModuleConfig => ({
@@ -41,7 +36,7 @@ import { PaymentTransactionRepository } from './repository/payment-transaction.r
         port: configService.getOrThrow<number>('DB_PORT'),
         username: configService.getOrThrow<string>('DB_USER'),
         password: configService.getOrThrow<string>('DB_PASS'),
-        database: configService.getOrThrow<string>('DB_NAME'),
+        database: configService.getOrThrow<string>('PAYMENT_DB_NAME'),
         entities: [PaymentTransactionEntity],
         synchronize: true,
         invalidWhereValuesBehavior: {

@@ -7,8 +7,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ClsModule } from 'nestjs-cls';
-import { join } from 'path';
-import { cwd } from 'process';
 import { CreateProductActivity } from './activity/create-product.activity';
 import { DeleteProductActivity } from './activity/delete-product.activity';
 import { GetProductPricesActivity } from './activity/get-product-prices.activity';
@@ -22,10 +20,7 @@ import { ProductModule } from './modules/product/product.module';
 @Module({
   imports: [
     ClsModule.forRoot({ global: true }),
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: [join(cwd(), 'apps/product-service/.env'), join(cwd(), '.env')],
-    }),
+    ConfigModule.forRoot(),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
@@ -34,7 +29,7 @@ import { ProductModule } from './modules/product/product.module';
         port: configService.getOrThrow<number>('DB_PORT'),
         username: configService.getOrThrow<string>('DB_USER'),
         password: configService.getOrThrow<string>('DB_PASS'),
-        database: configService.getOrThrow<string>('DB_NAME'),
+        database: configService.getOrThrow<string>('PRODUCT_DB_NAME'),
         autoLoadEntities: true, // must be true for TypeORM to find entities
         synchronize: true,
         invalidWhereValuesBehavior: {

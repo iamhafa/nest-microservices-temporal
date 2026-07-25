@@ -7,8 +7,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ClsModule } from 'nestjs-cls';
-import { join } from 'path';
-import { cwd } from 'process';
 import { CreateShipmentActivity } from './activity/create-shipment.activity';
 import { ShippingEntity } from './entity/shipping.entity';
 import { ShippingRepository } from './repository/shipping.repository';
@@ -17,10 +15,7 @@ import { ShippingService } from './shipping-service.service';
 @Module({
   imports: [
     ClsModule.forRoot({ global: true }),
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: [join(cwd(), 'apps/shipping-service/.env'), join(cwd(), '.env')],
-    }),
+    ConfigModule.forRoot(),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
@@ -29,7 +24,7 @@ import { ShippingService } from './shipping-service.service';
         port: configService.getOrThrow<number>('DB_PORT'),
         username: configService.getOrThrow<string>('DB_USER'),
         password: configService.getOrThrow<string>('DB_PASS'),
-        database: configService.getOrThrow<string>('DB_NAME'),
+        database: configService.getOrThrow<string>('SHIPPING_DB_NAME'),
         entities: [ShippingEntity],
         synchronize: true,
         invalidWhereValuesBehavior: {

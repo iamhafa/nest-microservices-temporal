@@ -6,8 +6,6 @@ import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ClsModule } from 'nestjs-cls';
-import { join } from 'path';
-import { cwd } from 'process';
 import { UserEntity } from './entity/user.entity';
 import { UserRepository } from './repository/user.repository';
 import { UserService } from './user-service.service';
@@ -16,10 +14,7 @@ import { UserService } from './user-service.service';
   imports: [
     // Core Modules
     ClsModule.forRoot({ global: true }),
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: [join(cwd(), 'apps/user-service/.env'), join(cwd(), '.env')],
-    }),
+    ConfigModule.forRoot(),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
@@ -28,7 +23,7 @@ import { UserService } from './user-service.service';
         port: configService.getOrThrow<number>('DB_PORT'),
         username: configService.getOrThrow<string>('DB_USER'),
         password: configService.getOrThrow<string>('DB_PASS'),
-        database: configService.getOrThrow<string>('DB_NAME'),
+        database: configService.getOrThrow<string>('USER_DB_NAME'),
         entities: [UserEntity],
         synchronize: true,
         invalidWhereValuesBehavior: {

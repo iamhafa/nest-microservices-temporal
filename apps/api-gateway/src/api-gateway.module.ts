@@ -18,7 +18,7 @@ import { UserModule } from './modules/user/user.module';
 @Module({
   imports: [
     // Core Modules
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot(),
     JwtModule.register({ global: true }),
     ClsModule.forRoot({
       global: true,
