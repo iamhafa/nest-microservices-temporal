@@ -2,7 +2,7 @@ import { RabbitPayload, RabbitRPC } from '@golevelup/nestjs-rabbitmq';
 import { AppException } from '@libs/common';
 import type { ICreateProductDto, IUpdateProductDto } from '@libs/contract/product';
 import { ProductErrorCode } from '@libs/contract/product';
-import { RmqExchange, RmqQueue } from '@libs/messaging';
+import { ProductRoutingKey, RmqExchange, RmqQueue } from '@libs/messaging';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { ClsService } from 'nestjs-cls';
@@ -28,7 +28,7 @@ export class ProductService {
 
   @RabbitRPC({
     exchange: RmqExchange.ECOMMERCE,
-    routingKey: 'product.create',
+    routingKey: ProductRoutingKey.CREATE,
     queue: RmqQueue.PRODUCT_QUEUE,
   })
   async createProduct(@RabbitPayload() createProductDto: ICreateProductDto): Promise<{ message: string; workflowId: string }> {
@@ -63,7 +63,7 @@ export class ProductService {
 
   @RabbitRPC({
     exchange: RmqExchange.ECOMMERCE,
-    routingKey: 'product.getAll',
+    routingKey: ProductRoutingKey.GET_ALL,
     queue: RmqQueue.PRODUCT_QUEUE,
   })
   getProducts(): Promise<ProductEntity[]> {
@@ -102,7 +102,7 @@ export class ProductService {
 
   @RabbitRPC({
     exchange: RmqExchange.ECOMMERCE,
-    routingKey: 'product.get',
+    routingKey: ProductRoutingKey.GET_BY_ID,
     queue: RmqQueue.PRODUCT_QUEUE,
   })
   async getProduct(@RabbitPayload() id: number): Promise<ProductEntity> {
@@ -138,7 +138,7 @@ export class ProductService {
 
   @RabbitRPC({
     exchange: RmqExchange.ECOMMERCE,
-    routingKey: 'product.update',
+    routingKey: ProductRoutingKey.UPDATE,
     queue: RmqQueue.PRODUCT_QUEUE,
   })
   async updateProduct(@RabbitPayload() updateProductDto: IUpdateProductDto): Promise<any> {
@@ -223,7 +223,7 @@ export class ProductService {
 
   @RabbitRPC({
     exchange: RmqExchange.ECOMMERCE,
-    routingKey: 'product.delete',
+    routingKey: ProductRoutingKey.DELETE,
     queue: RmqQueue.PRODUCT_QUEUE,
   })
   async deleteProduct(@RabbitPayload() id: number): Promise<void> {

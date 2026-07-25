@@ -1,6 +1,6 @@
 import { RabbitPayload, RabbitRPC } from '@golevelup/nestjs-rabbitmq';
 import { AppException } from '@libs/common';
-import { RmqExchange, RmqQueue } from '@libs/messaging';
+import { ProductBrandRoutingKey, RmqExchange, RmqQueue } from '@libs/messaging';
 import { type ICreateProductBrandDto, type IUpdateProductBrandDto, ProductErrorCode } from '@libs/contract/product';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { ProductBrandEntity } from './entity/product-brand.entity';
@@ -12,7 +12,7 @@ export class ProductBrandService {
 
   @RabbitRPC({
     exchange: RmqExchange.ECOMMERCE,
-    routingKey: 'productBrand.create.command',
+    routingKey: ProductBrandRoutingKey.CREATE,
     queue: RmqQueue.PRODUCT_QUEUE,
   })
   async createProductBrand(@RabbitPayload() dto: ICreateProductBrandDto): Promise<ProductBrandEntity> {
@@ -22,7 +22,7 @@ export class ProductBrandService {
 
   @RabbitRPC({
     exchange: RmqExchange.ECOMMERCE,
-    routingKey: 'productBrand.getAll.query',
+    routingKey: ProductBrandRoutingKey.GET_ALL,
     queue: RmqQueue.PRODUCT_QUEUE,
   })
   getProductBrands(): Promise<ProductBrandEntity[]> {
@@ -31,7 +31,7 @@ export class ProductBrandService {
 
   @RabbitRPC({
     exchange: RmqExchange.ECOMMERCE,
-    routingKey: 'productBrand.get.query',
+    routingKey: ProductBrandRoutingKey.GET_BY_ID,
     queue: RmqQueue.PRODUCT_QUEUE,
   })
   async getProductBrand(@RabbitPayload() id: number): Promise<ProductBrandEntity> {
@@ -48,7 +48,7 @@ export class ProductBrandService {
 
   @RabbitRPC({
     exchange: RmqExchange.ECOMMERCE,
-    routingKey: 'productBrand.update.command',
+    routingKey: ProductBrandRoutingKey.UPDATE,
     queue: RmqQueue.PRODUCT_QUEUE,
   })
   async updateProductBrand(@RabbitPayload() dto: IUpdateProductBrandDto): Promise<void> {
@@ -65,7 +65,7 @@ export class ProductBrandService {
 
   @RabbitRPC({
     exchange: RmqExchange.ECOMMERCE,
-    routingKey: 'productBrand.delete.command',
+    routingKey: ProductBrandRoutingKey.DELETE,
     queue: RmqQueue.PRODUCT_QUEUE,
   })
   async deleteProductBrand(@RabbitPayload() id: number): Promise<void> {

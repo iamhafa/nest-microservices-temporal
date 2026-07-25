@@ -1,6 +1,6 @@
 import { RabbitPayload, RabbitRPC } from '@golevelup/nestjs-rabbitmq';
 import { AppException } from '@libs/common';
-import { RmqExchange, RmqQueue } from '@libs/messaging';
+import { InventoryRoutingKey, RmqExchange, RmqQueue } from '@libs/messaging';
 import { type IAdjustInventoryDto, InventoryErrorCode } from '@libs/contract/inventory';
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { UpdateResult } from 'typeorm';
@@ -15,7 +15,7 @@ export class InventoryService {
 
   @RabbitRPC({
     exchange: RmqExchange.ECOMMERCE,
-    routingKey: 'inventory.adjust',
+    routingKey: InventoryRoutingKey.ADJUST,
     queue: RmqQueue.INVENTORY_QUEUE,
     queueOptions: {
       deadLetterExchange: RmqExchange.ECOMMERCE_DLX,
@@ -49,7 +49,7 @@ export class InventoryService {
 
   @RabbitRPC({
     exchange: RmqExchange.ECOMMERCE,
-    routingKey: 'inventory.getAll',
+    routingKey: InventoryRoutingKey.GET_ALL,
     queue: RmqQueue.INVENTORY_QUEUE,
     queueOptions: {
       deadLetterExchange: RmqExchange.ECOMMERCE_DLX,
@@ -62,7 +62,7 @@ export class InventoryService {
 
   @RabbitRPC({
     exchange: RmqExchange.ECOMMERCE,
-    routingKey: 'inventory.getAvailableStock.query',
+    routingKey: InventoryRoutingKey.GET_AVAILABLE_STOCK,
     queue: RmqQueue.INVENTORY_QUEUE,
     queueOptions: {
       deadLetterExchange: RmqExchange.ECOMMERCE_DLX,

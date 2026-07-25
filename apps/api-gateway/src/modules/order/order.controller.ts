@@ -1,6 +1,5 @@
 import { Idempotent } from '@libs/common';
-import { RmqPublisherService } from '@libs/messaging';
-import { CancelOrderDto, CreateOrderDto, UpdateOrderStatusDto } from './dto';
+import { OrderRoutingKey, RmqPublisherService } from '@libs/messaging';
 import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
 import {
   ApiAcceptedResponse,
@@ -12,6 +11,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { CancelOrderDto, CreateOrderDto, UpdateOrderStatusDto } from './dto';
 
 @ApiBearerAuth('Authorization')
 @ApiTags('Order')
@@ -26,21 +26,21 @@ export class OrderController {
   @ApiAcceptedResponse({ description: 'Order is processing' })
   @ApiBadRequestResponse({ description: 'Invalid request' })
   createOrder(@Body() createOrderDto: CreateOrderDto): Promise<any> {
-    return this.rmqPublisher.request('order.create', createOrderDto);
+    return this.rmqPublisher.request(OrderRoutingKey.CREATE, createOrderDto);
   }
 
   @Get()
   @ApiOperation({ summary: 'Get all orders' })
   @ApiOkResponse({ description: 'List of orders' })
   getOrders(): Promise<any> {
-    return this.rmqPublisher.request('order.getAll', {});
+    return this.rmqPublisher.request(OrderRoutingKey.GET_ALL, {});
   }
 
   @Get('my-orders')
   @ApiOperation({ summary: 'Get current user orders' })
   @ApiOkResponse({ description: 'List of user orders' })
   getMyOrders(): Promise<any> {
-    return this.rmqPublisher.request('order.getMyOrders.query', {});
+    return this.rmqPublisher.request(OrderRoutingKey.GET_MY_ORDERS, {});
   }
 
   @Get(':id')
@@ -48,7 +48,7 @@ export class OrderController {
   @ApiOkResponse({ description: 'Order details' })
   @ApiNotFoundResponse({ description: 'Order not found' })
   getOrder(@Param('id', ParseIntPipe) id: number): Promise<any> {
-    return this.rmqPublisher.request('order.get', id);
+    return this.rmqPublisher.request(OrderRoutingKey.GET_BY_ID, id);
   }
 
   @Patch('status')
@@ -58,7 +58,7 @@ export class OrderController {
   @ApiNotFoundResponse({ description: 'Order not found' })
   @ApiBadRequestResponse({ description: 'Invalid status transition' })
   updateOrderStatus(@Body() updateOrderStatusDto: UpdateOrderStatusDto): Promise<any> {
-    return this.rmqPublisher.request('order.updateStatus', updateOrderStatusDto);
+    return this.rmqPublisher.request(OrderRoutingKey.UPDATE_STATUS, updateOrderStatusDto);
   }
 
   @Post('cancel')
@@ -67,6 +67,6 @@ export class OrderController {
   @ApiAcceptedResponse({ description: 'Order cancelled successfully' })
   @ApiBadRequestResponse({ description: 'Invalid request' })
   cancelOrder(@Body() cancelOrderDto: CancelOrderDto): Promise<any> {
-    return this.rmqPublisher.request('order.cancel', cancelOrderDto);
+    return this.rmqPublisher.request(OrderRoutingKey.CANCEL, cancelOrderDto);
   }
 }

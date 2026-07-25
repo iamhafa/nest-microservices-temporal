@@ -1,7 +1,7 @@
 import { RabbitPayload, RabbitRPC } from '@golevelup/nestjs-rabbitmq';
 import { IJwtPayload } from '@libs/auth';
 import { AppException } from '@libs/common';
-import { RmqExchange, RmqQueue } from '@libs/messaging';
+import { RmqExchange, RmqQueue, UserRoutingKey } from '@libs/messaging';
 import {
   type IAuthResponseDto,
   type ILoginUserDto,
@@ -24,7 +24,7 @@ export class UserService {
 
   @RabbitRPC({
     exchange: RmqExchange.ECOMMERCE,
-    routingKey: 'user.register',
+    routingKey: UserRoutingKey.REGISTER,
     queue: RmqQueue.USER_QUEUE,
   })
   async registerUser(@RabbitPayload() registerUserDto: IRegisterUserDto): Promise<IAuthResponseDto> {
@@ -56,7 +56,7 @@ export class UserService {
 
   @RabbitRPC({
     exchange: RmqExchange.ECOMMERCE,
-    routingKey: 'user.login',
+    routingKey: UserRoutingKey.LOGIN,
     queue: RmqQueue.USER_QUEUE,
   })
   async loginUser(@RabbitPayload() loginUserDto: ILoginUserDto): Promise<IAuthResponseDto> {
@@ -92,7 +92,7 @@ export class UserService {
 
   @RabbitRPC({
     exchange: RmqExchange.ECOMMERCE,
-    routingKey: 'user.get',
+    routingKey: UserRoutingKey.GET_BY_ID,
     queue: RmqQueue.USER_QUEUE,
   })
   async getUserById(@RabbitPayload() id: number): Promise<IUserResponseDto> {

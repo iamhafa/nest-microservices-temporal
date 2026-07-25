@@ -1,4 +1,4 @@
-import { RmqPublisherService } from '@libs/messaging';
+import { ProductBrandRoutingKey, RmqPublisherService } from '@libs/messaging';
 import { CreateProductBrandDto, UpdateProductBrandDto } from './dto';
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
 import {
@@ -24,14 +24,14 @@ export class ProductBrandController {
   @ApiAcceptedResponse({ description: 'Product brand creation initiated' })
   @ApiBadRequestResponse({ description: 'Invalid request' })
   createProductBrand(@Body() createProductBrandDto: CreateProductBrandDto): Promise<any> {
-    return this.rmqPublisher.request('productBrand.create.command', createProductBrandDto);
+    return this.rmqPublisher.request(ProductBrandRoutingKey.CREATE, createProductBrandDto);
   }
 
   @Get()
   @ApiOperation({ summary: 'Get all product brands' })
   @ApiOkResponse({ description: 'List of product brands' })
   getProductBrands(): Promise<any[]> {
-    return this.rmqPublisher.request('productBrand.getAll.query', {});
+    return this.rmqPublisher.request(ProductBrandRoutingKey.GET_ALL, {});
   }
 
   @Get(':id')
@@ -39,7 +39,7 @@ export class ProductBrandController {
   @ApiOkResponse({ description: 'Product brand details' })
   @ApiNotFoundResponse({ description: 'Product brand not found' })
   getProductBrand(@Param('id', ParseIntPipe) id: number): Promise<any> {
-    return this.rmqPublisher.request('productBrand.get.query', id);
+    return this.rmqPublisher.request(ProductBrandRoutingKey.GET_BY_ID, id);
   }
 
   @Put()
@@ -49,7 +49,7 @@ export class ProductBrandController {
   @ApiNotFoundResponse({ description: 'Product brand not found' })
   @ApiBadRequestResponse({ description: 'Invalid request' })
   updateProductBrand(@Body() updateProductBrandDto: UpdateProductBrandDto): Promise<any> {
-    return this.rmqPublisher.request('productBrand.update.command', updateProductBrandDto);
+    return this.rmqPublisher.request(ProductBrandRoutingKey.UPDATE, updateProductBrandDto);
   }
 
   @Delete(':id')
@@ -58,6 +58,6 @@ export class ProductBrandController {
   @ApiNoContentResponse({ description: 'Product brand deleted successfully' })
   @ApiNotFoundResponse({ description: 'Product brand not found' })
   deleteProductBrand(@Param('id', ParseIntPipe) id: number): Promise<any> {
-    return this.rmqPublisher.request('productBrand.delete.command', id);
+    return this.rmqPublisher.request(ProductBrandRoutingKey.DELETE, id);
   }
 }

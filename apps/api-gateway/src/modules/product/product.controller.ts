@@ -1,4 +1,4 @@
-import { RmqPublisherService } from '@libs/messaging';
+import { ProductRoutingKey, RmqPublisherService } from '@libs/messaging';
 import { CreateProductDto, UpdateProductDto } from './dto';
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Post, Put } from '@nestjs/common';
 import {
@@ -24,14 +24,14 @@ export class ProductController {
   @ApiAcceptedResponse({ description: 'Product creation initiated' })
   @ApiUnprocessableEntityResponse({ description: 'Invalid request' })
   createProduct(@Body() createProductDto: CreateProductDto): Promise<any> {
-    return this.rmqPublisher.request('product.create', createProductDto);
+    return this.rmqPublisher.request(ProductRoutingKey.CREATE, createProductDto);
   }
 
   @Get()
   @ApiOperation({ summary: 'Get all products' })
   @ApiOkResponse({ description: 'List of products' })
   getProducts(): Promise<any[]> {
-    return this.rmqPublisher.request('product.getAll', {});
+    return this.rmqPublisher.request(ProductRoutingKey.GET_ALL, {});
   }
 
   @Get(':id')
@@ -39,7 +39,7 @@ export class ProductController {
   @ApiOkResponse({ description: 'Product details' })
   @ApiNotFoundResponse({ description: 'Product not found' })
   getProduct(@Param('id', ParseIntPipe) id: number): Promise<any> {
-    return this.rmqPublisher.request('product.get', id);
+    return this.rmqPublisher.request(ProductRoutingKey.GET_BY_ID, id);
   }
 
   @Put()
@@ -49,7 +49,7 @@ export class ProductController {
   @ApiNotFoundResponse({ description: 'Product not found' })
   @ApiUnprocessableEntityResponse({ description: 'Invalid request' })
   updateProduct(@Body() updateProductDto: UpdateProductDto): Promise<any> {
-    return this.rmqPublisher.request('product.update', updateProductDto);
+    return this.rmqPublisher.request(ProductRoutingKey.UPDATE, updateProductDto);
   }
 
   @Delete(':id')
@@ -58,6 +58,6 @@ export class ProductController {
   @ApiNoContentResponse({ description: 'Product deleted successfully' })
   @ApiNotFoundResponse({ description: 'Product not found' })
   deleteProduct(@Param('id', ParseIntPipe) id: number): Promise<any> {
-    return this.rmqPublisher.request('product.delete', id);
+    return this.rmqPublisher.request(ProductRoutingKey.DELETE, id);
   }
 }

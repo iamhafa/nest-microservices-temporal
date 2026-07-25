@@ -1,5 +1,4 @@
-import { RmqPublisherService } from '@libs/messaging';
-import { AdjustInventoryDto } from './dto';
+import { InventoryRoutingKey, RmqPublisherService } from '@libs/messaging';
 import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -9,6 +8,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { AdjustInventoryDto } from './dto';
 
 @ApiBearerAuth('Authorization')
 @ApiTags('Inventory')
@@ -22,14 +22,14 @@ export class InventoryController {
   @ApiNoContentResponse({ description: 'Inventory adjustment requested' })
   @ApiBadRequestResponse({ description: 'Invalid request data' })
   adjustInventory(@Body() adjustInventoryDto: AdjustInventoryDto): Promise<void> {
-    return this.rmqPublisher.request('inventory.adjust', adjustInventoryDto);
+    return this.rmqPublisher.request(InventoryRoutingKey.ADJUST, adjustInventoryDto);
   }
 
   @Get()
   @ApiOperation({ summary: 'Get all inventories' })
   @ApiOkResponse({ description: 'List of inventories' })
   getInventories(): Promise<any[]> {
-    return this.rmqPublisher.request('inventory.getAll', {});
+    return this.rmqPublisher.request(InventoryRoutingKey.GET_ALL, {});
   }
 
   @Get('products/:productId/available-stock')
@@ -38,6 +38,6 @@ export class InventoryController {
   getAvailableStock(
     @Param('productId', ParseIntPipe) productId: number,
   ): Promise<{ productId: number; availableQuantity: number }> {
-    return this.rmqPublisher.request('inventory.getAvailableStock.query', productId);
+    return this.rmqPublisher.request(InventoryRoutingKey.GET_AVAILABLE_STOCK, productId);
   }
 }

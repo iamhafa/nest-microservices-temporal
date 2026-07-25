@@ -1,7 +1,7 @@
 import { RabbitPayload, RabbitRPC } from '@golevelup/nestjs-rabbitmq';
 import { AppException } from '@libs/common';
 import { type ICancelOrderDto, type ICreateOrderDto, type IUpdateOrderStatusDto, OrderErrorCode } from '@libs/contract/order';
-import { RmqExchange, RmqQueue, RmqRoutingKey } from '@libs/messaging';
+import { OrderRoutingKey, RmqExchange, RmqQueue } from '@libs/messaging';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { ClsService } from 'nestjs-cls';
@@ -19,7 +19,7 @@ export class OrderService {
 
   @RabbitRPC({
     exchange: RmqExchange.ECOMMERCE,
-    routingKey: RmqRoutingKey.ORDER_CREATE,
+    routingKey: OrderRoutingKey.CREATE,
     queue: RmqQueue.ORDER_QUEUE,
   })
   async createOrder(@RabbitPayload() createOrderDto: ICreateOrderDto): Promise<any> {
@@ -58,7 +58,7 @@ export class OrderService {
 
   @RabbitRPC({
     exchange: RmqExchange.ECOMMERCE,
-    routingKey: 'order.get',
+    routingKey: OrderRoutingKey.GET_BY_ID,
     queue: RmqQueue.ORDER_QUEUE,
   })
   async getOrder(@RabbitPayload() orderId: number): Promise<OrderEntity> {
@@ -80,7 +80,7 @@ export class OrderService {
 
   @RabbitRPC({
     exchange: RmqExchange.ECOMMERCE,
-    routingKey: RmqRoutingKey.ORDER_CANCEL,
+    routingKey: OrderRoutingKey.CANCEL,
     queue: RmqQueue.ORDER_QUEUE,
   })
   async cancelOrder(@RabbitPayload() cancelOrderDto: ICancelOrderDto): Promise<any> {
@@ -120,7 +120,7 @@ export class OrderService {
 
   @RabbitRPC({
     exchange: RmqExchange.ECOMMERCE,
-    routingKey: 'order.getAll',
+    routingKey: OrderRoutingKey.GET_ALL,
     queue: RmqQueue.ORDER_QUEUE,
   })
   getOrders(): Promise<OrderEntity[]> {
@@ -132,7 +132,7 @@ export class OrderService {
 
   @RabbitRPC({
     exchange: RmqExchange.ECOMMERCE,
-    routingKey: 'order.getMyOrders.query',
+    routingKey: OrderRoutingKey.GET_MY_ORDERS,
     queue: RmqQueue.ORDER_QUEUE,
   })
   getMyOrders(): Promise<OrderEntity[]> {
@@ -146,7 +146,7 @@ export class OrderService {
 
   @RabbitRPC({
     exchange: RmqExchange.ECOMMERCE,
-    routingKey: 'order.updateStatus',
+    routingKey: OrderRoutingKey.UPDATE_STATUS,
     queue: RmqQueue.ORDER_QUEUE,
   })
   async updateOrderStatus(@RabbitPayload() updateOrderStatusDto: IUpdateOrderStatusDto): Promise<OrderEntity> {

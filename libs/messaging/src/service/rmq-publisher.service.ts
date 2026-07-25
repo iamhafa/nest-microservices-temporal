@@ -2,7 +2,7 @@ import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import { Injectable } from '@nestjs/common';
 import { MessagePropertyHeaders, Options } from 'amqplib';
 import { ClsService } from 'nestjs-cls';
-import { RmqExchange } from '../enum/rmq-exchange.enum';
+import { RmqExchange } from '../enum/exchange/rmq-exchange.enum';
 
 @Injectable()
 export class RmqPublisherService {
