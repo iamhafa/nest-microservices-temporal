@@ -9,4 +9,4 @@ export * from './enum/routing-key/shipping-routing-key.enum';
 export * from './enum/routing-key/user-routing-key.enum';
 export * from './interceptor/rmq-context.interceptor';
 export * from './module/shared-rabbitmq.module';
-export * from './service/rmq-publisher.service';
+export * from './publisher/rmq-publisher.service';

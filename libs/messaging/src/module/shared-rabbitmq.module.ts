@@ -2,7 +2,7 @@ import { defaultNackErrorHandler, MessageHandlerErrorBehavior, RabbitMQConfig, R
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RmqExchange } from '../enum/exchange/rmq-exchange.enum';
-import { RmqPublisherService } from '../service/rmq-publisher.service';
+import { RmqPublisherService } from '../publisher/rmq-publisher.service';
 
 @Module({
   imports: [
