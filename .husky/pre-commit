@@ -6,4 +6,4 @@ pnpm format
 echo 'Running lint...'
 pnpm lint
 
-echo 'Done!'
+echo 'Pre-commit completed!'

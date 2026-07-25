@@ -1,5 +1,6 @@
 export enum OrderErrorCode {
   NOT_FOUND = 'ORD_001',
   NOT_CANCELABLE = 'ORD_002',
+  ORDER_NOT_FOUND = 'ORD_003',
   WORKFLOW_FAILED = 'ORD_999',
 }

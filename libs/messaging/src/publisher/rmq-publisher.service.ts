@@ -6,6 +6,7 @@ import { RmqExchange } from '../enum/exchange/rmq-exchange.enum';
 import { InventoryRoutingKey } from '../enum/routing-key/inventory-routing-key.enum';
 import { OrderRoutingKey } from '../enum/routing-key/order-routing-key.enum';
 import { PaymentRoutingKey } from '../enum/routing-key/payment-routing-key.enum';
+import { ProductBrandRoutingKey } from '../enum/routing-key/product-brand-routing-key.enum';
 import { ProductRoutingKey } from '../enum/routing-key/product-routing-key.enum';
 import { ShippingRoutingKey } from '../enum/routing-key/shipping-routing-key.enum';
 import { UserRoutingKey } from '../enum/routing-key/user-routing-key.enum';
@@ -52,5 +53,6 @@ type RoutingKey =
   | OrderRoutingKey
   | PaymentRoutingKey
   | ProductRoutingKey
+  | ProductBrandRoutingKey
   | ShippingRoutingKey
   | UserRoutingKey;

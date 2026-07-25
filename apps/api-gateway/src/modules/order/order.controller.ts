@@ -22,8 +22,8 @@ export class OrderController {
   @Post('place')
   @HttpCode(HttpStatus.ACCEPTED)
   @Idempotent()
-  @ApiOperation({ summary: 'Place an order' })
-  @ApiAcceptedResponse({ description: 'Order is processing' })
+  @ApiOperation({ summary: '⚡ [Workflow Async] Place an order' })
+  @ApiAcceptedResponse({ description: 'Order placement initiated' })
   @ApiBadRequestResponse({ description: 'Invalid request' })
   createOrder(@Body() createOrderDto: CreateOrderDto): Promise<any> {
     return this.rmqPublisher.request(OrderRoutingKey.CREATE, createOrderDto);
@@ -63,7 +63,7 @@ export class OrderController {
 
   @Post('cancel')
   @HttpCode(HttpStatus.ACCEPTED)
-  @ApiOperation({ summary: 'Cancel an order' })
+  @ApiOperation({ summary: '⚡ [Workflow Async] Cancel an order' })
   @ApiAcceptedResponse({ description: 'Order cancelled successfully' })
   @ApiBadRequestResponse({ description: 'Invalid request' })
   cancelOrder(@Body() cancelOrderDto: CancelOrderDto): Promise<any> {

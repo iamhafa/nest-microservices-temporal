@@ -20,7 +20,7 @@ export class ProductController {
 
   @Post()
   @HttpCode(HttpStatus.ACCEPTED)
-  @ApiOperation({ summary: 'Create a product' })
+  @ApiOperation({ summary: '⚡ [Workflow Async] Create a product' })
   @ApiAcceptedResponse({ description: 'Product creation initiated' })
   @ApiUnprocessableEntityResponse({ description: 'Invalid request' })
   createProduct(@Body() createProductDto: CreateProductDto): Promise<any> {

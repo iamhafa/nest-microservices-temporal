@@ -40,7 +40,7 @@ export class HttpExceptionFilter extends BaseExceptionFilter {
           success: false,
           error: {
             code: SystemErrorCode.UNCAUGHT_EXCEPTION,
-            message: 'Uncaught exception',
+            message: exception.message,
           },
         },
       };
