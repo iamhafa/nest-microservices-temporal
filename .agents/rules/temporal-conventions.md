@@ -64,6 +64,18 @@ const paymentActivities: ActivityInterfaceFor<IPaymentActivity> = proxyActivitie
 - Export with descriptive names: `export async function placeOrderWorkflow(...)`.
 - Workflow must accept a DTO input and a resource ID (e.g., `orderId`).
 
+### 🛑 Import Restrictions in Workflows (V8 Sandbox & Webpack Isolation)
+
+Temporal Workflows execute inside a **deterministic V8 Isolate Sandbox** bundled by Webpack (`@temporalio/worker`).
+
+1. **NO Node.js Native / Heavy Framework Imports**:
+   - Workflow files (`*.workflow.ts`) MUST NOT import any package or module that references Node.js native modules (`node:zlib`, `fs`, `net`, `http`) or NestJS runtime frameworks (`@nestjs/swagger`, `@nestjs/core`, `@nestjs/common`, `typeorm`).
+2. **Pure Interface & Enum Contracts (`@libs/contract`)**:
+   - Shared contracts exported via `@libs/contract/<domain>` barrel files (`index.ts`) MUST ONLY export **pure TypeScript interfaces and enums** (e.g., `IOrderResponseDto`, `OrderStatus`).
+   - **NEVER export NestJS Swagger DTO classes** (containing `@ApiProperty` decorators) from barrel files used by Workflows. Importing `@nestjs/swagger` inside a workflow barrel export will break the Webpack V8 Sandbox bundler with `UnhandledSchemeError: Reading from "node:zlib"`.
+3. **Swagger DTO Isolation**:
+   - Keep Swagger DTO classes with `@ApiProperty` inside `apps/api-gateway/src/modules/<domain>/dto/` implementing pure interfaces from `@libs/contract`.
+
 ## 🔄 Saga Pattern & Compensation (CRITICAL)
 
 This project uses the **Saga Pattern** with manual compensation in a try/catch block:

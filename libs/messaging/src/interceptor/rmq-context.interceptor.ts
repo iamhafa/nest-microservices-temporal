@@ -1,13 +1,11 @@
 import { isRabbitContext } from '@golevelup/nestjs-rabbitmq';
-import { CallHandler, ExecutionContext, Injectable, Logger, NestInterceptor } from '@nestjs/common';
+import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
 import { ConsumeMessage } from 'amqplib';
 import { ClsService } from 'nestjs-cls';
 import { Observable, Subscriber, Subscription } from 'rxjs';
 
 @Injectable()
 export class RmqContextInterceptor implements NestInterceptor {
-  private readonly logger = new Logger(RmqContextInterceptor.name);
-
   constructor(private readonly clsService: ClsService) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<Subscription> {

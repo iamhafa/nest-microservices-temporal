@@ -33,11 +33,8 @@ export class RmqPublisherService {
 
     const headers: MessagePropertyHeaders = {
       'X-Correlation-Id': this.clsService.getId(), // must be attach correlationId via headers of RabbitMQ,
+      'X-User-Id': userId,
     };
-
-    if (userId) {
-      headers['X-User-Id'] = userId;
-    }
 
     return this.amqpConnection.request<T>({
       exchange: RmqExchange.ECOMMERCE,

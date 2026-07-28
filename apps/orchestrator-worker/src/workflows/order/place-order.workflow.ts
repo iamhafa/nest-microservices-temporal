@@ -14,7 +14,7 @@ import type {
   IValidateProductsActivity,
 } from '@libs/temporal/activity';
 import { WorkFlowTaskQueue } from '@libs/temporal/queue';
-import { ActivityInterfaceFor, proxyActivities } from '@temporalio/workflow';
+import { ActivityInterfaceFor, ApplicationFailure, proxyActivities } from '@temporalio/workflow';
 
 const productActivities: ActivityInterfaceFor<{
   validateProducts: IValidateProductsActivity['execute'];
@@ -95,7 +95,7 @@ export async function placeOrderWorkflow(createOrderDto: ICreateOrderDto, userId
     const productIds: number[] = items.map((item: IOrderItem) => item.product_id);
     const isValid: boolean = await productActivities.validateProducts(productIds);
     if (!isValid) {
-      throw new Error('Some products are invalid or inactive');
+      throw ApplicationFailure.nonRetryable('Some products are invalid or inactive');
     }
 
     // 1st: Fetch product prices from DB
@@ -144,6 +144,10 @@ export async function placeOrderWorkflow(createOrderDto: ICreateOrderDto, userId
       );
     }
 
-    throw error;
+    if (error instanceof ApplicationFailure) {
+      throw error;
+    }
+    const message: string = error instanceof Error ? error.message : 'Workflow execution failed';
+    throw ApplicationFailure.nonRetryable(message);
   }
 }
