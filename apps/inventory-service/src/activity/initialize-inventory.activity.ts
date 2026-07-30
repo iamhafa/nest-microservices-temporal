@@ -1,4 +1,4 @@
-import { IInitializeInventoryActivity } from '@libs/temporal/activity';
+import { IInitializeInventoryActivity } from '@libs/temporal';
 import { Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { EntityManager } from 'typeorm';

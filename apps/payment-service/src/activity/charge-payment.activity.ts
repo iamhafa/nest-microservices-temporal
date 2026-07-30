@@ -1,7 +1,7 @@
 import { InjectStripeClient } from '@golevelup/nestjs-stripe';
 import { AppException } from '@libs/common';
 import { PaymentErrorCode } from '@libs/contract/payment/error/payment-code.error';
-import { IChargePaymentActivity } from '@libs/temporal/activity';
+import { IChargePaymentActivity } from '@libs/temporal';
 import { HttpStatus, Logger } from '@nestjs/common';
 import {
   BrokenCircuitError,

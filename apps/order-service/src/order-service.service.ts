@@ -2,7 +2,7 @@ import { RabbitPayload, RabbitRPC } from '@golevelup/nestjs-rabbitmq';
 import { AppException } from '@libs/common';
 import { type ICancelOrderDto, type ICreateOrderDto, type IUpdateOrderStatusDto, OrderErrorCode } from '@libs/contract/order';
 import { OrderRoutingKey, RmqExchange, RmqQueue } from '@libs/messaging';
-import { WorkFlowTaskQueue } from '@libs/temporal/queue';
+import { WorkFlowTaskQueue } from '@libs/temporal';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { ClsService } from 'nestjs-cls';
 import { TemporalService, WorkflowExecutionResult } from 'nestjs-temporal-core';

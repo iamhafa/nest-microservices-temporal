@@ -1,5 +1,5 @@
 import { IOrderItem } from '@libs/contract/order';
-import { IGetOrderItemsActivity } from '@libs/temporal/activity';
+import { IGetOrderItemsActivity } from '@libs/temporal';
 import { Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { OrderItemEntity } from '../entity/order-item.entity';

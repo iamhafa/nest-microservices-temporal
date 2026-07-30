@@ -1,5 +1,5 @@
 import { OrderStatus } from '@libs/contract/order';
-import { IUpdateOrderStatusActivity } from '@libs/temporal/activity';
+import { IUpdateOrderStatusActivity } from '@libs/temporal';
 import { Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { OrderRepository } from '../repository/order.repository';

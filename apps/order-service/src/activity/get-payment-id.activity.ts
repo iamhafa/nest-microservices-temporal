@@ -1,4 +1,4 @@
-import { IGetPaymentIdActivity } from '@libs/temporal/activity';
+import { IGetPaymentIdActivity } from '@libs/temporal';
 import { Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { OrderRepository } from '../repository/order.repository';

@@ -1,6 +1,6 @@
 import type { ICreateOrderDto, IOrderItem } from '@libs/contract/order';
 import { OrderStatus } from '@libs/contract/order';
-import { ICreateOrderActivity } from '@libs/temporal/activity';
+import { ICreateOrderActivity } from '@libs/temporal';
 import { Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { OrderItemEntity } from '../entity/order-item.entity';

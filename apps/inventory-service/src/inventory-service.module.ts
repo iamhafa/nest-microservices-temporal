@@ -1,12 +1,12 @@
 import { SharedLoggerModule } from '@libs/common';
 import { RmqContextInterceptor, SharedRabbitMQModule } from '@libs/messaging';
-import { WorkFlowTaskQueue } from '@libs/temporal/queue';
-import { SharedTemporalModule } from '@libs/temporal/shared-temporal.module';
+import { WorkFlowTaskQueue } from '@libs/temporal';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ClsModule } from 'nestjs-cls';
+import { TemporalModule, TemporalOptions } from 'nestjs-temporal-core';
 import { ConfirmInventoryActivity } from './activity/confirm-inventory.activity';
 import { InitializeInventoryActivity } from './activity/initialize-inventory.activity';
 import { ReleaseInventoryActivity } from './activity/release-inventory.activity';
@@ -43,17 +43,24 @@ import { InventoryRepository } from './repository/inventory.repository';
       }),
     }),
 
-    SharedTemporalModule.forRoot({
-      taskQueue: WorkFlowTaskQueue.INVENTORY,
-      worker: {
-        activityClasses: [
-          ReserveInventoryActity,
-          ReleaseInventoryActivity,
-          ConfirmInventoryActivity,
-          RestoreInventoryActivity,
-          InitializeInventoryActivity,
-        ],
-      },
+    TemporalModule.registerAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService): TemporalOptions => ({
+        connection: {
+          address: config.getOrThrow<string>('TEMPORAL_HOST'),
+          namespace: config.getOrThrow<string>('TEMPORAL_NAMESPACE'),
+        },
+        taskQueue: WorkFlowTaskQueue.INVENTORY,
+        worker: {
+          activityClasses: [
+            ReserveInventoryActity,
+            ReleaseInventoryActivity,
+            ConfirmInventoryActivity,
+            RestoreInventoryActivity,
+            InitializeInventoryActivity,
+          ],
+        },
+      }),
     }),
   ],
   providers: [

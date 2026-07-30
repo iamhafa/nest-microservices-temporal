@@ -1,7 +1,7 @@
 import { AppException } from '@libs/common';
 import { InventoryErrorCode } from '@libs/contract/inventory';
 import { IOrderItem } from '@libs/contract/order';
-import { IConfirmInventoryActivity } from '@libs/temporal/activity';
+import { IConfirmInventoryActivity } from '@libs/temporal';
 import { HttpStatus, Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { EntityManager } from 'typeorm';

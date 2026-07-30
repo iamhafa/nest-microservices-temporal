@@ -1,5 +1,5 @@
 import type { ICreateProductDto } from '@libs/contract/product';
-import { ICreateProductActivity } from '@libs/temporal/activity';
+import { ICreateProductActivity } from '@libs/temporal';
 import { Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { ProductImageEntity } from '../modules/product/entity/product-image.entity';

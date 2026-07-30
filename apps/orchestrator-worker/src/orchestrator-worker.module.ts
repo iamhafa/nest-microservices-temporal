@@ -1,11 +1,11 @@
 import { SharedLoggerModule } from '@libs/common';
 import { RmqContextInterceptor } from '@libs/messaging';
-import { WorkFlowTaskQueue } from '@libs/temporal/queue';
-import { SharedTemporalModule } from '@libs/temporal/shared-temporal.module';
+import { WorkFlowTaskQueue } from '@libs/temporal';
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ClsModule } from 'nestjs-cls';
+import { TemporalModule, TemporalOptions } from 'nestjs-temporal-core';
 import { join } from 'path';
 
 @Module({
@@ -15,17 +15,24 @@ import { join } from 'path';
 
     // Custom dynamic modules
     SharedLoggerModule,
-    SharedTemporalModule.forRoot({
-      taskQueue: WorkFlowTaskQueue.ORDER,
-      worker: {
-        workflowsPath: join(__dirname, 'workflows/order'),
-      },
-    }),
-    SharedTemporalModule.forRoot({
-      taskQueue: WorkFlowTaskQueue.PRODUCT,
-      worker: {
-        workflowsPath: join(__dirname, 'workflows/product'),
-      },
+    TemporalModule.registerAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService): TemporalOptions => ({
+        connection: {
+          address: config.getOrThrow<string>('TEMPORAL_HOST'),
+          namespace: config.getOrThrow<string>('TEMPORAL_NAMESPACE'),
+        },
+        workers: [
+          {
+            taskQueue: WorkFlowTaskQueue.ORDER,
+            workflowsPath: join(__dirname, 'workflows/order'),
+          },
+          {
+            taskQueue: WorkFlowTaskQueue.PRODUCT,
+            workflowsPath: join(__dirname, 'workflows/product'),
+          },
+        ],
+      }),
     }),
   ],
   providers: [

@@ -1,7 +1,7 @@
 import { AppException } from '@libs/common';
 import type { ICreateProductDto, IUpdateProductDto } from '@libs/contract/product';
 import { ProductErrorCode } from '@libs/contract/product';
-import { IValidateProductMetadataActivity } from '@libs/temporal/activity';
+import { IValidateProductMetadataActivity } from '@libs/temporal';
 import { HttpStatus, Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { In } from 'typeorm';

@@ -6,8 +6,8 @@ import {
   IReleaseInventoryActivity,
   IRestoreInventoryActivity,
   IUpdateOrderStatusActivity,
-} from '@libs/temporal/activity';
-import { WorkFlowTaskQueue } from '@libs/temporal/queue';
+  WorkFlowTaskQueue,
+} from '@libs/temporal';
 import { ActivityInterfaceFor, proxyActivities } from '@temporalio/workflow';
 
 const orderActivities: ActivityInterfaceFor<{

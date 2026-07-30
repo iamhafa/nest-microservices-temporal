@@ -1,4 +1,4 @@
-import { IGetProductPricesActivity } from '@libs/temporal/activity';
+import { IGetProductPricesActivity } from '@libs/temporal';
 import { Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { In } from 'typeorm';

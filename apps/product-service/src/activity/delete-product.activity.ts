@@ -1,4 +1,4 @@
-import { IDeleteProductActivity } from '@libs/temporal/activity';
+import { IDeleteProductActivity } from '@libs/temporal';
 import { Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { ProductRepository } from '../modules/product/repository/product.repository';

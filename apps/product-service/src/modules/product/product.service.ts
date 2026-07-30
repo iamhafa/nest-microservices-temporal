@@ -3,7 +3,7 @@ import { AppException } from '@libs/common';
 import type { ICreateProductDto, IUpdateProductDto } from '@libs/contract/product';
 import { ProductErrorCode } from '@libs/contract/product';
 import { ProductRoutingKey, RmqExchange, RmqQueue } from '@libs/messaging';
-import { WorkFlowTaskQueue } from '@libs/temporal/queue';
+import { WorkFlowTaskQueue } from '@libs/temporal';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { ClsService } from 'nestjs-cls';
 import { TemporalService, WorkflowExecutionResult } from 'nestjs-temporal-core';

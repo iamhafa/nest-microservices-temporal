@@ -1,12 +1,12 @@
 import { SharedLoggerModule } from '@libs/common';
 import { RmqContextInterceptor, SharedRabbitMQModule } from '@libs/messaging';
-import { WorkFlowTaskQueue } from '@libs/temporal/queue';
-import { SharedTemporalModule } from '@libs/temporal/shared-temporal.module';
+import { WorkFlowTaskQueue } from '@libs/temporal';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ClsModule } from 'nestjs-cls';
+import { TemporalModule, TemporalOptions } from 'nestjs-temporal-core';
 import { CreateOrderActivity } from './activity/create-order.activity';
 import { DeleteOrderActivity } from './activity/delete-order.activity';
 import { GetOrderItemsActivity } from './activity/get-order-items.activity';
@@ -45,19 +45,26 @@ import { OrderRepository } from './repository/order.repository';
     // Custom dynamic modules
     SharedRabbitMQModule,
     SharedLoggerModule,
-    SharedTemporalModule.forRoot({
-      taskQueue: WorkFlowTaskQueue.ORDER,
-      worker: {
-        activityClasses: [
-          CreateOrderActivity,
-          DeleteOrderActivity,
-          SavePaymentIdActivity,
-          UpdateOrderStatusActivity,
-          GetOrderTotalAmountActivity,
-          GetOrderItemsActivity,
-          GetPaymentIdActivity,
-        ],
-      },
+    TemporalModule.registerAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService): TemporalOptions => ({
+        connection: {
+          address: config.getOrThrow<string>('TEMPORAL_HOST'),
+          namespace: config.getOrThrow<string>('TEMPORAL_NAMESPACE'),
+        },
+        taskQueue: WorkFlowTaskQueue.ORDER,
+        worker: {
+          activityClasses: [
+            CreateOrderActivity,
+            DeleteOrderActivity,
+            SavePaymentIdActivity,
+            UpdateOrderStatusActivity,
+            GetOrderTotalAmountActivity,
+            GetOrderItemsActivity,
+            GetPaymentIdActivity,
+          ],
+        },
+      }),
     }),
   ],
   providers: [

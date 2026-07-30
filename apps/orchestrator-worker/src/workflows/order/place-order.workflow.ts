@@ -1,19 +1,19 @@
 import { ICreateOrderDto, IOrderItem, OrderStatus } from '@libs/contract/order';
-import type {
-  IChargePaymentActivity,
-  IConfirmInventoryActivity,
-  ICreateOrderActivity,
-  ICreateShipmentActivity,
-  IGetOrderTotalAmountActivity,
-  IGetProductPricesActivity,
-  IRefundPaymentActivity,
-  IReleaseInventoryActivity,
-  IReserveInventoryActivity,
-  ISavePaymentIdActivity,
-  IUpdateOrderStatusActivity,
-  IValidateProductsActivity,
-} from '@libs/temporal/activity';
-import { WorkFlowTaskQueue } from '@libs/temporal/queue';
+import {
+  type IChargePaymentActivity,
+  type IConfirmInventoryActivity,
+  type ICreateOrderActivity,
+  type ICreateShipmentActivity,
+  type IGetOrderTotalAmountActivity,
+  type IGetProductPricesActivity,
+  type IRefundPaymentActivity,
+  type IReleaseInventoryActivity,
+  type IReserveInventoryActivity,
+  type ISavePaymentIdActivity,
+  type IUpdateOrderStatusActivity,
+  type IValidateProductsActivity,
+  WorkFlowTaskQueue,
+} from '@libs/temporal';
 import { ActivityInterfaceFor, ApplicationFailure, proxyActivities } from '@temporalio/workflow';
 
 const productActivities: ActivityInterfaceFor<{

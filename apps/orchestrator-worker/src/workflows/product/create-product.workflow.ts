@@ -4,8 +4,8 @@ import {
   IDeleteProductActivity,
   IInitializeInventoryActivity,
   IValidateProductMetadataActivity,
-} from '@libs/temporal/activity';
-import { WorkFlowTaskQueue } from '@libs/temporal/queue';
+  WorkFlowTaskQueue,
+} from '@libs/temporal';
 import { proxyActivities } from '@temporalio/workflow';
 
 const productActivities = proxyActivities<{
