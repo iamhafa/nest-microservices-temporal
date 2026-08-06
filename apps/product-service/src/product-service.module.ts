@@ -19,8 +19,8 @@ import { ProductModule } from './modules/product/product.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     ClsModule.forRoot({ global: true }),
-    ConfigModule.forRoot(),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
@@ -39,9 +39,6 @@ import { ProductModule } from './modules/product/product.module';
       }),
     }),
 
-    // Custom dynamic modules
-    SharedRabbitMQModule,
-    SharedLoggerModule,
     TemporalModule.registerAsync({
       isGlobal: true, // ProductService is in ProductModule (child module) → TemporalService must be global
       inject: [ConfigService],
@@ -62,6 +59,10 @@ import { ProductModule } from './modules/product/product.module';
         },
       }),
     }),
+
+    // Custom dynamic modules
+    SharedRabbitMQModule,
+    SharedLoggerModule,
 
     // Feature modules
     ProductModule,

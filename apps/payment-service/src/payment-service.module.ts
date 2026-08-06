@@ -15,8 +15,9 @@ import { PaymentTransactionRepository } from './repository/payment-transaction.r
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     ClsModule.forRoot({ global: true }),
-    ConfigModule.forRoot(),
+
     StripeModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService): StripeModuleConfig => ({
@@ -46,9 +47,6 @@ import { PaymentTransactionRepository } from './repository/payment-transaction.r
       }),
     }),
 
-    // Custom dynamic modules
-    SharedRabbitMQModule,
-    SharedLoggerModule,
     TemporalModule.registerAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService): TemporalOptions => ({
@@ -66,6 +64,10 @@ import { PaymentTransactionRepository } from './repository/payment-transaction.r
         },
       }),
     }),
+
+    // Custom dynamic modules
+    SharedRabbitMQModule,
+    SharedLoggerModule,
   ],
   providers: [
     {

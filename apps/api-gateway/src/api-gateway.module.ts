@@ -1,10 +1,9 @@
-import { JwtAuthGuard } from '@libs/auth';
+import { SharedAuthModule } from '@libs/auth';
 import { IdempotencyInterceptor, SharedLoggerModule } from '@libs/common';
 import { RedisConnectionConfig, RedisModule } from '@nestjs-redis/client';
 import { ExecutionContext, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
-import { JwtModule } from '@nestjs/jwt';
 import { ThrottlerGuard, ThrottlerModule, ThrottlerModuleOptions } from '@nestjs/throttler';
 import { randomUUID } from 'crypto';
 import { Request, Response } from 'express';
@@ -18,8 +17,7 @@ import { UserModule } from './modules/user/user.module';
 @Module({
   imports: [
     // Core Modules
-    ConfigModule.forRoot(),
-    JwtModule.register({ global: true }),
+    ConfigModule.forRoot({ isGlobal: true }),
     ClsModule.forRoot({
       global: true,
       middleware: {
@@ -56,12 +54,14 @@ import { UserModule } from './modules/user/user.module';
         options: {
           name: 'default',
           url: config.getOrThrow<string>('REDIS_URL'),
+          disableOfflineQueue: true,
         },
       }),
     }),
 
     // Custom dynamic modules
     SharedLoggerModule,
+    SharedAuthModule,
 
     // Feature Modules
     UserModule,
@@ -71,10 +71,6 @@ import { UserModule } from './modules/user/user.module';
     ShippingModule,
   ],
   providers: [
-    {
-      provide: APP_GUARD,
-      useClass: JwtAuthGuard,
-    },
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,

@@ -4,8 +4,8 @@ import { CanActivate, ExecutionContext, HttpStatus, Injectable, Logger } from '@
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { JsonWebTokenError, JwtService, TokenExpiredError } from '@nestjs/jwt';
-import { Request } from 'express';
 import { ClsService } from 'nestjs-cls';
+import { ExtractJwt } from 'passport-jwt';
 import { IS_PUBLIC_KEY } from '../decorator/public.decorator';
 import { IAuthRequest, IJwtPayload } from '../interface/jwt.interface';
 
@@ -21,6 +21,9 @@ export class JwtAuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    // Only execute HTTP JWT guard for HTTP REST requests (skip for RPC / AMQP / Workers)
+    if (context.getType() !== 'http') return true;
+
     // Check if the route is public
     const isPublic: boolean = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
@@ -29,7 +32,7 @@ export class JwtAuthGuard implements CanActivate {
     if (isPublic) return true;
 
     const request: IAuthRequest = context.switchToHttp().getRequest();
-    const token: string = this.extractTokenFromHeader(request);
+    const token: string | null = ExtractJwt.fromAuthHeaderAsBearerToken()(request);
 
     if (!token) {
       throw new AppException({
@@ -41,7 +44,10 @@ export class JwtAuthGuard implements CanActivate {
 
     try {
       const secret: string = this.configService.getOrThrow<string>('JWT_SECRET');
-      const payload: IJwtPayload = await this.jwtService.verifyAsync(token, { secret });
+      const payload: IJwtPayload = await this.jwtService.verifyAsync(token, {
+        secret,
+        issuer: 'ecommerce',
+      });
 
       // Assign payload to request object so downstream handlers can use it
       request.user = payload;
@@ -69,10 +75,5 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     return true;
-  }
-
-  private extractTokenFromHeader(request: Request): string {
-    const [type, token] = request.headers.authorization?.split(' ') ?? [];
-    return type === 'Bearer' ? token : '';
   }
 }

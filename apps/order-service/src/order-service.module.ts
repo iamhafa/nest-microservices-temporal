@@ -22,8 +22,8 @@ import { OrderRepository } from './repository/order.repository';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     ClsModule.forRoot({ global: true }),
-    ConfigModule.forRoot(),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
@@ -42,9 +42,6 @@ import { OrderRepository } from './repository/order.repository';
       }),
     }),
 
-    // Custom dynamic modules
-    SharedRabbitMQModule,
-    SharedLoggerModule,
     TemporalModule.registerAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService): TemporalOptions => ({
@@ -66,6 +63,9 @@ import { OrderRepository } from './repository/order.repository';
         },
       }),
     }),
+    // Custom dynamic modules
+    SharedRabbitMQModule,
+    SharedLoggerModule,
   ],
   providers: [
     {

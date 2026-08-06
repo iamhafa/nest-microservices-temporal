@@ -1,13 +1,12 @@
 import { defaultNackErrorHandler, MessageHandlerErrorBehavior, RabbitMQConfig, RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 import { RmqExchange } from '../enum/exchange/rmq-exchange.enum';
 import { RmqPublisherService } from '../publisher/rmq-publisher.service';
 
 @Module({
   imports: [
     RabbitMQModule.forRootAsync({
-      imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService): RabbitMQConfig => ({
         uri: configService.getOrThrow<string>('RABBITMQ_URL'),

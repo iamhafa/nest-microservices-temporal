@@ -18,14 +18,10 @@ import { InventoryRepository } from './repository/inventory.repository';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     ClsModule.forRoot({ global: true }),
-    ConfigModule.forRoot(),
 
-    // Custom dynamic modules
-    SharedRabbitMQModule,
-    SharedLoggerModule,
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
@@ -62,6 +58,10 @@ import { InventoryRepository } from './repository/inventory.repository';
         },
       }),
     }),
+
+    // Custom dynamic modules
+    SharedRabbitMQModule,
+    SharedLoggerModule,
   ],
   providers: [
     {

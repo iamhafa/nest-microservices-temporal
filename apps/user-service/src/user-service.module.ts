@@ -1,9 +1,9 @@
+import { SharedAuthModule } from '@libs/auth';
 import { RpcExceptionFilter, SharedLoggerModule } from '@libs/common';
 import { RmqContextInterceptor, SharedRabbitMQModule } from '@libs/messaging';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
-import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ClsModule } from 'nestjs-cls';
 import { UserEntity } from './entity/user.entity';
@@ -13,8 +13,8 @@ import { UserService } from './user-service.service';
 @Module({
   imports: [
     // Core Modules
+    ConfigModule.forRoot({ isGlobal: true }),
     ClsModule.forRoot({ global: true }),
-    ConfigModule.forRoot(),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
@@ -33,20 +33,8 @@ import { UserService } from './user-service.service';
       }),
     }),
 
-    // Auth Core
-    JwtModule.registerAsync({
-      global: true,
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService): JwtModuleOptions => ({
-        secret: configService.getOrThrow<string>('JWT_SECRET'),
-        signOptions: {
-          issuer: 'user-service',
-          expiresIn: configService.get('JWT_EXPIRES_IN', '1h'),
-        },
-      }),
-    }),
-
     // Custom dynamic modules
+    SharedAuthModule,
     SharedRabbitMQModule,
     SharedLoggerModule,
   ],

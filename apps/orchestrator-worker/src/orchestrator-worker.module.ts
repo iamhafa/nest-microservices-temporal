@@ -10,11 +10,8 @@ import { join } from 'path';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     ClsModule.forRoot({ global: true }),
-    ConfigModule.forRoot(),
-
-    // Custom dynamic modules
-    SharedLoggerModule,
     TemporalModule.registerAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService): TemporalOptions => ({
@@ -34,6 +31,9 @@ import { join } from 'path';
         ],
       }),
     }),
+
+    // Custom dynamic modules
+    SharedLoggerModule,
   ],
   providers: [
     {
