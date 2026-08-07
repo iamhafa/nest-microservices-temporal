@@ -1,5 +1,6 @@
 import { SharedAuthModule } from '@libs/auth';
 import { IdempotencyInterceptor, SharedLoggerModule } from '@libs/common';
+import { SharedRabbitMQModule } from '@libs/messaging';
 import { RedisConnectionConfig, RedisModule } from '@nestjs-redis/client';
 import { ExecutionContext, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -60,6 +61,7 @@ import { UserModule } from './modules/user/user.module';
     }),
 
     // Custom dynamic modules
+    SharedRabbitMQModule,
     SharedLoggerModule,
     SharedAuthModule,
 

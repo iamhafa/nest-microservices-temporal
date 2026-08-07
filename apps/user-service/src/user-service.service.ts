@@ -1,7 +1,6 @@
 import { RabbitPayload, RabbitRPC } from '@golevelup/nestjs-rabbitmq';
 import { IJwtPayload } from '@libs/auth';
 import { AppException } from '@libs/common';
-import { RmqExchange, RmqQueue, UserRoutingKey } from '@libs/messaging';
 import {
   type IAuthResponseDto,
   type ILoginUserDto,
@@ -9,6 +8,7 @@ import {
   type IUserResponseDto,
   UserErrorCode,
 } from '@libs/contract/user';
+import { RmqExchange, RmqQueue, UserRoutingKey } from '@libs/messaging';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { compare, hash } from 'bcrypt';
@@ -18,8 +18,8 @@ import { UserRepository } from './repository/user.repository';
 @Injectable()
 export class UserService {
   constructor(
-    private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
+    private readonly userRepository: UserRepository,
   ) {}
 
   @RabbitRPC({
@@ -67,7 +67,14 @@ export class UserService {
         email,
         is_active: true,
       },
-      select: ['id', 'email', 'password_hash', 'first_name', 'last_name', 'role'],
+      select: {
+        id: true,
+        email: true,
+        password_hash: true,
+        first_name: true,
+        last_name: true,
+        role: true,
+      },
     });
 
     if (!user) {
@@ -96,10 +103,19 @@ export class UserService {
     queue: RmqQueue.USER_QUEUE,
   })
   async getUserById(@RabbitPayload() id: number): Promise<IUserResponseDto> {
-    const user = await this.userRepository.findOneBy({
-      id,
-      is_active: true,
+    const user = await this.userRepository.findOne({
+      where: {
+        id,
+        is_active: true,
+      },
+      select: {
+        id: true,
+        email: true,
+        first_name: true,
+        last_name: true,
+      },
     });
+
     if (!user) {
       throw new AppException({
         code: UserErrorCode.NOT_FOUND,

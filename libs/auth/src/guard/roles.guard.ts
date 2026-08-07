@@ -1,5 +1,7 @@
+import { AppException } from '@libs/common';
+import { SystemErrorCode } from '@libs/contract/base';
 import { UserRole } from '@libs/contract/user/enum/user-role.enum';
-import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
+import { CanActivate, ContextType, ExecutionContext, HttpStatus, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '../decorator/roles.decorator';
 import { IAuthRequest } from '../interface/jwt.interface';
@@ -10,7 +12,7 @@ export class RolesGuard implements CanActivate {
 
   canActivate(context: ExecutionContext): boolean {
     // if context type is not http, return true
-    if (context.getType() !== 'http') return true;
+    if (context.getType<ContextType>() !== 'http') return true;
 
     const requiredRoles: UserRole[] = this.reflector.getAllAndOverride<UserRole[]>(ROLES_KEY, [
       context.getHandler(),
@@ -24,12 +26,20 @@ export class RolesGuard implements CanActivate {
     const { user }: IAuthRequest = context.switchToHttp().getRequest();
 
     if (!user || !user.role) {
-      throw new ForbiddenException('User role not found');
+      throw new AppException({
+        code: SystemErrorCode.FORBIDDEN,
+        status: HttpStatus.FORBIDDEN,
+        message: 'User role not found',
+      });
     }
 
     const hasRole: boolean = requiredRoles.includes(user.role);
     if (!hasRole) {
-      throw new ForbiddenException('You do not have permission to access this resource');
+      throw new AppException({
+        code: SystemErrorCode.FORBIDDEN,
+        status: HttpStatus.FORBIDDEN,
+        message: 'You do not have permission to access this resource',
+      });
     }
 
     return true;

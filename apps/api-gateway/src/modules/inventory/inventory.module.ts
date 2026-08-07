@@ -1,9 +1,8 @@
-import { SharedRabbitMQModule } from '@libs/messaging';
 import { Module } from '@nestjs/common';
 import { InventoryController } from './inventory.controller';
 
 @Module({
-  imports: [SharedRabbitMQModule],
+  imports: [],
   controllers: [InventoryController],
 })
 export class InventoryModule {}
