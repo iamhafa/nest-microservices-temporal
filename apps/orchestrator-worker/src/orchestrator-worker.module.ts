@@ -23,10 +23,16 @@ import { join } from 'path';
           {
             taskQueue: WorkFlowTaskQueue.ORDER,
             workflowsPath: join(__dirname, 'workflows/order'),
+            workerOptions: {
+              maxConcurrentWorkflowTaskExecutions: 50, // Giới hạn 50 Workflow Task xử lý đồng thời cho Order Saga
+            },
           },
           {
             taskQueue: WorkFlowTaskQueue.PRODUCT,
             workflowsPath: join(__dirname, 'workflows/product'),
+            workerOptions: {
+              maxConcurrentWorkflowTaskExecutions: 50, // Giới hạn 50 Workflow Task xử lý đồng thời cho Product Workflow
+            },
           },
         ],
       }),

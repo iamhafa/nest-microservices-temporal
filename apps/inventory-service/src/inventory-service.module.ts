@@ -55,6 +55,9 @@ import { InventoryRepository } from './repository/inventory.repository';
             RestoreInventoryActivity,
             InitializeInventoryActivity,
           ],
+          workerOptions: {
+            maxConcurrentActivityTaskExecutions: 20, // Giới hạn 20 activity xử lý đồng thời để tránh làm kiệt quệ Connection Pool DB và DB Lock
+          },
         },
       }),
     }),

@@ -48,6 +48,10 @@ import { ShippingService } from './shipping-service.service';
         taskQueue: WorkFlowTaskQueue.SHIPPING,
         worker: {
           activityClasses: [CreateShipmentActivity],
+          workerOptions: {
+            maxConcurrentActivityTaskExecutions: 15, // Giới hạn 15 activity xử lý đồng thời
+            maxActivitiesPerSecond: 5, // Khống chế 5 activity/giây để bảo vệ API đơn vị vận chuyển khỏi Rate Limit
+          },
         },
       }),
     }),

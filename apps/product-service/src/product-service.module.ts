@@ -56,6 +56,9 @@ import { ProductModule } from './modules/product/product.module';
             DeleteProductActivity,
             GetProductPricesActivity,
           ],
+          workerOptions: {
+            maxConcurrentActivityTaskExecutions: 30, // Giới hạn 30 activity validation & price calculation đồng thời
+          },
         },
       }),
     }),

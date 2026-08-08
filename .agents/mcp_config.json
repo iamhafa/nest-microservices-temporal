@@ -48,9 +48,12 @@
         "postgresql://postgres:postgres@localhost:5432/nest-temporal-shipping-service"
       ]
     },
+    "mcp-redis-db": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-redis", "redis://localhost:6379"]
+    },
     "mcp-stripe": {
       "command": "npx",
-      // Uses dotenv-cli to load STRIPE_SECRET_KEY from root .env without hardcoding secrets
       "args": ["-y", "dotenv-cli", "-e", ".env", "--", "npx", "-y", "@stripe/mcp"]
     }
   }

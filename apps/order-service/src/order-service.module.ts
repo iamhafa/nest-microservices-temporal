@@ -60,6 +60,9 @@ import { OrderRepository } from './repository/order.repository';
             GetOrderItemsActivity,
             GetPaymentIdActivity,
           ],
+          workerOptions: {
+            maxConcurrentActivityTaskExecutions: 25, // Giới hạn 25 activity xử lý đơn hàng đồng thời
+          },
         },
       }),
     }),
