@@ -1,45 +1,11 @@
 services:
-  postgres-temporal:
-    image: postgres:16-alpine
-    container_name: temporal-postgres
-    environment:
-      POSTGRES_USER: temporal
-      POSTGRES_PASSWORD: temporal
-    ports:
-      - "5435:5432"
-    volumes:
-      - temporal-postgres-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U temporal"]
-      interval: 5s
-      timeout: 5s
-      retries: 20
-
   temporal:
-    image: temporalio/auto-setup:latest
+    image: temporalio/temporal:latest
     container_name: temporal
-    depends_on:
-      postgres-temporal:
-        condition: service_healthy
+    command: ["server", "start-dev", "--ip", "0.0.0.0", "--ui-port", "8233"]
     ports:
       - "7233:7233"
-    environment:
-      DB: postgres12
-      DB_PORT: 5432
-      POSTGRES_SEEDS: postgres-temporal
-      POSTGRES_USER: temporal
-      POSTGRES_PWD: temporal
-
-  temporal-ui:
-    image: temporalio/ui:latest
-    container_name: temporal-ui
-    depends_on:
-      - temporal
-    environment:
-      TEMPORAL_ADDRESS: temporal:7233
-      TEMPORAL_UI_PORT: 8080
-    ports:
-      - "8233:8080"
+      - "8233:8233"
 
   database:
     image: pgvector/pgvector:pg16
@@ -120,6 +86,5 @@ services:
       - ./.infrastructure/grafana/grafana-config.yml:/etc/grafana/provisioning/datasources/datasource.yaml:ro
 
 volumes:
-  temporal-postgres-data:
   database-data:
   loki-data:
