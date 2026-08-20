@@ -61,8 +61,8 @@ import { UserModule } from './modules/user/user.module';
     }),
 
     // Custom dynamic modules
+    SharedLoggerModule.forRoot({ serviceName: 'api-gateway' }),
     SharedRabbitMQModule,
-    SharedLoggerModule,
     SharedAuthModule,
 
     // Feature Modules

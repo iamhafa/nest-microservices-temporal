@@ -9,7 +9,7 @@ import {
   UserErrorCode,
 } from '@libs/contract/user';
 import { RmqExchange, RmqQueue, UserRoutingKey } from '@libs/messaging';
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { compare, hash } from 'bcrypt';
 import { UserEntity } from './entity/user.entity';
@@ -17,6 +17,8 @@ import { UserRepository } from './repository/user.repository';
 
 @Injectable()
 export class UserService {
+  private readonly logger = new Logger(UserService.name);
+
   constructor(
     private readonly jwtService: JwtService,
     private readonly userRepository: UserRepository,
@@ -61,6 +63,7 @@ export class UserService {
   })
   async loginUser(@RabbitPayload() loginUserDto: ILoginUserDto): Promise<IAuthResponseDto> {
     const { email, password } = loginUserDto;
+    this.logger.log(`Processing login for email: ${email}`);
 
     const user = await this.userRepository.findOne({
       where: {

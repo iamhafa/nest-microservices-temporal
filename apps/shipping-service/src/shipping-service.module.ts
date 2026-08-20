@@ -34,10 +34,6 @@ import { ShippingService } from './shipping-service.service';
         },
       }),
     }),
-
-    // Custom dynamic modules
-    SharedRabbitMQModule,
-    SharedLoggerModule,
     TemporalModule.registerAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService): TemporalOptions => ({
@@ -55,6 +51,10 @@ import { ShippingService } from './shipping-service.service';
         },
       }),
     }),
+
+    // Custom dynamic modules
+    SharedLoggerModule.forRoot({ serviceName: 'shipping-service' }),
+    SharedRabbitMQModule,
   ],
   providers: [
     {

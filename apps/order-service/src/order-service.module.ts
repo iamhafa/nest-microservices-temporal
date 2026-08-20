@@ -67,8 +67,8 @@ import { OrderRepository } from './repository/order.repository';
       }),
     }),
     // Custom dynamic modules
+    SharedLoggerModule.forRoot({ serviceName: 'order-service' }),
     SharedRabbitMQModule,
-    SharedLoggerModule,
   ],
   providers: [
     {

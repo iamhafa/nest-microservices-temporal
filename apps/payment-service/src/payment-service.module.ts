@@ -66,8 +66,8 @@ import { PaymentTransactionRepository } from './repository/payment-transaction.r
     }),
 
     // Custom dynamic modules
+    SharedLoggerModule.forRoot({ serviceName: 'payment-service' }),
     SharedRabbitMQModule,
-    SharedLoggerModule,
   ],
   providers: [
     {

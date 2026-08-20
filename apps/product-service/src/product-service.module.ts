@@ -64,8 +64,8 @@ import { ProductModule } from './modules/product/product.module';
     }),
 
     // Custom dynamic modules
+    SharedLoggerModule.forRoot({ serviceName: 'product-service' }),
     SharedRabbitMQModule,
-    SharedLoggerModule,
 
     // Feature modules
     ProductModule,

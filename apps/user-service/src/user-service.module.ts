@@ -34,9 +34,9 @@ import { UserService } from './user-service.service';
     }),
 
     // Custom dynamic modules
+    SharedLoggerModule.forRoot({ serviceName: 'user-service' }),
     SharedAuthModule,
     SharedRabbitMQModule,
-    SharedLoggerModule,
   ],
   providers: [
     {

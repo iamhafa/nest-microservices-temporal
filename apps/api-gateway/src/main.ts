@@ -1,4 +1,4 @@
-import { AppException, AppExceptionOptions, EnvService, HttpExceptionFilter, ResponseInterceptor } from '@libs/common';
+import { AppException, AppExceptionOptions, HttpExceptionFilter, ResponseInterceptor } from '@libs/common';
 import { SystemErrorCode } from '@libs/contract/base';
 import { HttpStatus, ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
@@ -11,7 +11,6 @@ import { ApiGatewayModule } from './api-gateway.module';
 async function bootstrap() {
   // Kìm các log khởi tạo vào buffer để chờ custom logger (Pino) format
   const app: NestExpressApplication = await NestFactory.create(ApiGatewayModule, { bufferLogs: true });
-  const envService: EnvService = app.get(EnvService);
 
   // Trust 1 layer of proxies (e.g., Nginx, Load Balancer) to get the correct client IP for rate limiting
   app.set('trust proxy', 1);
@@ -69,7 +68,7 @@ async function bootstrap() {
     swaggerOptions: {
       persistAuthorization: true,
     },
-    swaggerUiEnabled: envService.isDevelopment(),
+    swaggerUiEnabled: true, // disable in production
     // Add custom js to swagger (auto login)
     customJsStr: `
       window.addEventListener('load', () => {

@@ -63,8 +63,8 @@ import { InventoryRepository } from './repository/inventory.repository';
     }),
 
     // Custom dynamic modules
+    SharedLoggerModule.forRoot({ serviceName: 'inventory-service' }),
     SharedRabbitMQModule,
-    SharedLoggerModule,
   ],
   providers: [
     {

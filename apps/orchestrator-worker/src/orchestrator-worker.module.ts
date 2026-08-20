@@ -39,7 +39,7 @@ import { join } from 'path';
     }),
 
     // Custom dynamic modules
-    SharedLoggerModule,
+    SharedLoggerModule.forRoot({ serviceName: 'orchestrator-worker' }),
   ],
   providers: [
     {
