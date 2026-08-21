@@ -30,6 +30,9 @@ export class SharedLoggerModule {
                 genReqId: (req: Request) => req.headers['X-Correlation-Id'] as string,
                 msgPrefix: `[${options.serviceName}] `,
                 level: envService.isDevelopment() ? 'debug' : 'info',
+                autoLogging: {
+                  ignore: (req: Request) => req.url.includes('/metrics') ?? false,
+                },
                 mixin: () => addCorrelationId(),
                 customProps: () => addCorrelationId(),
                 customSuccessMessage: (req: Request, res: Response, responseTime: number) => {

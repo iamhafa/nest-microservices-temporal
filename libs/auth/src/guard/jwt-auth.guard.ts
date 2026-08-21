@@ -4,6 +4,7 @@ import { ContextType, ExecutionContext, HttpStatus, Injectable, Logger } from '@
 import { Reflector } from '@nestjs/core';
 import { JsonWebTokenError, TokenExpiredError, WrongSecretProviderError } from '@nestjs/jwt';
 import { AuthGuard } from '@nestjs/passport';
+import { Request } from 'express';
 import { ClsService } from 'nestjs-cls';
 import { Observable } from 'rxjs';
 import { IS_PUBLIC_KEY } from '../decorator/public.decorator';
@@ -24,7 +25,10 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     // Only execute HTTP JWT guard for HTTP REST requests (skip for RPC / AMQP / Workers)
     if (context.getType<ContextType>() !== 'http') return true;
 
-    // Check if the route is marked @Public()
+    // Check if the route is marked @Public() or is a public infrastructure endpoint (/metrics)
+    const request: Request = context.switchToHttp().getRequest();
+    if (request.url.includes('/metrics')) return true;
+
     const isPublic: boolean = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),

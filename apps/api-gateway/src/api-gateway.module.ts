@@ -1,11 +1,12 @@
 import { SharedAuthModule } from '@libs/auth';
-import { IdempotencyInterceptor, SharedLoggerModule } from '@libs/common';
+import { EnvModule, EnvService, IdempotencyInterceptor, SharedLoggerModule } from '@libs/common';
 import { SharedRabbitMQModule } from '@libs/messaging';
 import { RedisConnectionConfig, RedisModule } from '@nestjs-redis/client';
 import { ExecutionContext, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule, ThrottlerModuleOptions } from '@nestjs/throttler';
+import { PrometheusModule, PrometheusOptions } from '@willsoto/nestjs-prometheus';
 import { randomUUID } from 'crypto';
 import { Request, Response } from 'express';
 import { ClsModule, ClsService } from 'nestjs-cls';
@@ -42,9 +43,12 @@ import { UserModule } from './modules/user/user.module';
           },
         ],
         skipIf: (context: ExecutionContext): boolean => {
-          // Skip rate limiting for health check
+          // Skip rate limiting for health check and metrics
           const request: Request = context.switchToHttp().getRequest();
-          return request.url === '/health';
+          const isHealthCheck: boolean = request.url === '/health';
+          const isPrometheus: boolean = request.url.includes('/metrics');
+
+          return isHealthCheck || isPrometheus;
         },
         errorMessage: 'Too Many Requests',
       }),
@@ -56,6 +60,16 @@ import { UserModule } from './modules/user/user.module';
           name: 'default',
           url: config.getOrThrow<string>('REDIS_URL'),
           disableOfflineQueue: true,
+        },
+      }),
+    }),
+    PrometheusModule.registerAsync({
+      imports: [EnvModule],
+      inject: [EnvService],
+      useFactory: (envService: EnvService): PrometheusOptions => ({
+        path: '/metrics',
+        defaultMetrics: {
+          enabled: envService.isProduction(), // only prometheus metrics when production
         },
       }),
     }),
