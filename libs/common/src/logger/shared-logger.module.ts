@@ -6,10 +6,6 @@ import { LoggerModule, Params } from 'nestjs-pino';
 import { EnvModule } from '../env/env.module';
 import { EnvService } from '../env/env.service';
 
-type SharedLoggerModuleOptions = {
-  serviceName: string;
-};
-
 @Module({})
 export class SharedLoggerModule {
   static forRoot(options: SharedLoggerModuleOptions): DynamicModule {
@@ -23,7 +19,7 @@ export class SharedLoggerModule {
           useFactory: (clsService: ClsService, configService: ConfigService, envService: EnvService): Params => {
             const addCorrelationId = (): Record<string, string> => {
               if (clsService.isActive()) {
-                const correlationId = clsService.get('correlationId');
+                const correlationId: string = clsService.get('correlationId');
                 return correlationId ? { correlationId } : {};
               }
               return {};
@@ -32,6 +28,26 @@ export class SharedLoggerModule {
             return {
               pinoHttp: {
                 genReqId: (req: Request) => req.headers['X-Correlation-Id'] as string,
+                msgPrefix: `[${options.serviceName}] `,
+                level: envService.isDevelopment() ? 'debug' : 'info',
+                mixin: () => addCorrelationId(),
+                customProps: () => addCorrelationId(),
+                customSuccessMessage: (req: Request, res: Response, responseTime: number) => {
+                  return `Request ${req.method} ${req.url} completed in ${responseTime}ms`;
+                },
+                serializers: {
+                  req: (req: Request) => ({
+                    method: req.method,
+                    url: req.url,
+                  }),
+                  res: (res: any) => {
+                    const response = res.raw as Response; // Pino wrap response object, we need to cast it to Response to access response.locals
+                    return {
+                      statusCode: response.statusCode,
+                      responseBody: response.locals?.responseBody,
+                    };
+                  },
+                },
                 transport: {
                   targets: [
                     envService.isDevelopment()
@@ -57,22 +73,6 @@ export class SharedLoggerModule {
                         },
                   ],
                 },
-                level: envService.isDevelopment() ? 'debug' : 'info',
-                customProps: () => addCorrelationId(),
-                mixin: () => addCorrelationId(),
-                serializers: {
-                  req: (req: Request) => ({
-                    method: req.method,
-                    url: req.url,
-                  }),
-                  res: (res: any) => {
-                    const response = res.raw as Response; // Pino wrap response object, we need to cast it to Response to access response.locals
-                    return {
-                      statusCode: response.statusCode,
-                      responseBody: response.locals?.responseBody,
-                    };
-                  },
-                },
               },
             };
           },
@@ -81,3 +81,7 @@ export class SharedLoggerModule {
     };
   }
 }
+
+type SharedLoggerModuleOptions = {
+  serviceName: string;
+};
