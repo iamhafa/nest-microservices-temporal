@@ -3,8 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { Request, Response } from 'express';
 import { ClsModule, ClsService } from 'nestjs-cls';
 import { LoggerModule, Params } from 'nestjs-pino';
-import { EnvModule } from '../env/env.module';
-import { EnvService } from '../env/env.service';
+import { EnvironmentModule } from '../environment/environment.module';
+import { EnvironmentService } from '../environment/environment.service';
 
 @Module({})
 export class SharedLoggerModule {
@@ -14,9 +14,9 @@ export class SharedLoggerModule {
       module: SharedLoggerModule,
       imports: [
         LoggerModule.forRootAsync({
-          imports: [ClsModule, EnvModule],
-          inject: [ClsService, ConfigService, EnvService],
-          useFactory: (clsService: ClsService, configService: ConfigService, envService: EnvService): Params => {
+          imports: [ClsModule, EnvironmentModule],
+          inject: [ClsService, ConfigService, EnvironmentService],
+          useFactory: (clsService: ClsService, configService: ConfigService, envService: EnvironmentService): Params => {
             const addCorrelationId = (): Record<string, string> => {
               if (clsService.isActive()) {
                 const correlationId: string = clsService.get('correlationId');

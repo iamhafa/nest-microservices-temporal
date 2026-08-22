@@ -1,5 +1,5 @@
 import { SharedAuthModule } from '@libs/auth';
-import { EnvService, IdempotencyInterceptor, SharedLoggerModule } from '@libs/common';
+import { EnvironmentModule, EnvironmentService, IdempotencyInterceptor, SharedLoggerModule } from '@libs/common';
 import { SharedRabbitMQModule } from '@libs/messaging';
 import { RedisConnectionConfig, RedisModule } from '@nestjs-redis/client';
 import { ExecutionContext, Module } from '@nestjs/common';
@@ -64,8 +64,9 @@ import { UserModule } from './modules/user/user.module';
       }),
     }),
     PrometheusModule.registerAsync({
-      inject: [EnvService],
-      useFactory: (envService: EnvService): PrometheusOptions => ({
+      imports: [EnvironmentModule],
+      inject: [EnvironmentService],
+      useFactory: (envService: EnvironmentService): PrometheusOptions => ({
         path: '/metrics',
         defaultMetrics: {
           enabled: envService.isProduction(), // only prometheus metrics when production

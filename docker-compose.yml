@@ -59,15 +59,6 @@ services:
     volumes:
       - ./.infrastructure/loki/loki-config.yml:/etc/loki/loki-config.yml:ro
       - loki-data:/loki
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "wget --quiet --tries=1 --output-document=- http://localhost:3100/ready | grep -q ready || exit 1",
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 10
 
   prometheus:
     image: prom/prometheus:latest
@@ -75,7 +66,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./.infrastructure/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./.infrastructure/prometheus/prometheus-config.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus-data:/prometheus
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -102,4 +93,3 @@ volumes:
   database-data:
   loki-data:
   prometheus-data:
-

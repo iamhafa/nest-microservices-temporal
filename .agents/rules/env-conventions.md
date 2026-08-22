@@ -30,7 +30,7 @@ These rules govern how environment variables and configuration properties are or
 
 ## 🛡️ 3. Access & Validation Rules
 
-1. **No Raw `process.env` in Logic**: Never access `process.env.VARIABLE_NAME` directly inside services, controllers, or handlers. Always inject NestJS `ConfigService` (or `EnvService` from `@libs/common`).
+1. **No Raw `process.env` in Logic**: Never access `process.env.VARIABLE_NAME` directly inside services, controllers, or handlers. Always inject NestJS `ConfigService` (or `EnvironmentService` from `@libs/common`).
 2. **Fail-Fast for Mandatory Keys (`getOrThrow`)**:
    - For required credentials and endpoints (DB, RabbitMQ, JWT, Redis), use `configService.getOrThrow<T>('KEY_NAME')` during bootstrap so the app fails immediately if a key is missing.
 3. **Explicit Fallbacks for Optional Keys**:
@@ -42,6 +42,6 @@ These rules govern how environment variables and configuration properties are or
 
 1. Initialize `ConfigModule` at the root module level (`apps/<service>/*.module.ts`) cleanly:
    ```typescript
-   ConfigModule.forRoot()
+   ConfigModule.forRoot();
    ```
 2. By default, NestJS `ConfigModule` loads `/.env` at the root scope.
