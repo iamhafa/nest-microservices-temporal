@@ -28,7 +28,7 @@ export class OrderService {
     const workflowId: string = `place-order:${correlationId}`;
 
     // Get userId from CLS
-    const userId = this.clsService.get('userId');
+    const userId: number = this.clsService.get('userId');
 
     const workFlowResponse: WorkflowExecutionResult = await this.temporalService.startWorkflow(
       'placeOrderWorkflow',
@@ -107,7 +107,14 @@ export class OrderService {
     );
 
     if (!workFlowResponse.success) {
-      throw workFlowResponse.error ?? new Error('Failed to start cancel workflow');
+      throw (
+        workFlowResponse.error ??
+        new AppException({
+          code: OrderErrorCode.WORKFLOW_FAILED,
+          message: 'Failed to start cancel workflow',
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+        })
+      );
     }
 
     return {

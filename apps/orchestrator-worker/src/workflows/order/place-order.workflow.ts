@@ -83,7 +83,7 @@ const orderActivities: ActivityInterfaceFor<{
   },
 });
 
-export async function placeOrderWorkflow(createOrderDto: ICreateOrderDto, userId?: number) {
+export async function placeOrderWorkflow(createOrderDto: ICreateOrderDto, userId: number) {
   console.log('Payload:', createOrderDto);
   const { items, address } = createOrderDto;
   let orderId: number | undefined;

@@ -87,10 +87,10 @@ export class RefundPaymentActivity implements IRefundPaymentActivity {
             message: 'Stripe service is temporarily unavailable (Circuit Breaker)',
             status: HttpStatus.SERVICE_UNAVAILABLE,
           });
-        } else {
-          this.logger.error(`[Order ${orderId}] Refund failed: ${error}`);
-          throw error;
         }
+
+        this.logger.error(`[Order ${orderId}] Refund failed: ${error}`);
+        throw error;
       }
     } else {
       // Transaction record was not found in our DB.
@@ -102,7 +102,6 @@ export class RefundPaymentActivity implements IRefundPaymentActivity {
         throw new AppException({
           code: PaymentErrorCode.PROCESSING_FAILED,
           message: `Transaction not found in DB for order ${orderId} and totalAmount was not provided for lookup.`,
-          status: HttpStatus.BAD_REQUEST,
         });
       }
 
@@ -174,13 +173,13 @@ export class RefundPaymentActivity implements IRefundPaymentActivity {
         if (error instanceof BrokenCircuitError) {
           throw new AppException({
             code: PaymentErrorCode.PROCESSING_FAILED,
-            message: 'Stripe service is temporarily unavailable (Circuit Breaker)',
             status: HttpStatus.SERVICE_UNAVAILABLE,
+            message: 'Stripe service is temporarily unavailable (Circuit Breaker)',
           });
-        } else {
-          this.logger.error(`[Order ${orderId}] Refund failed: ${error}`);
-          throw error;
         }
+
+        this.logger.error(`[Order ${orderId}] Refund failed: ${error}`);
+        throw error;
       }
     }
   }

@@ -12,13 +12,16 @@ export class InitializeInventoryActivity implements IInitializeInventoryActivity
 
   @ActivityMethod({ name: 'initializeInventory' })
   async execute(productId: number, quantity: number): Promise<void> {
-    this.logger.log(`Initializing inventory for product ${productId} with quantity ${quantity}`);
+    this.logger.log(`[Inventory] Initializing inventory for product ${productId} with quantity ${quantity}`);
 
-    const inventory = this.entityManager.create(InventoryEntity, {
+    const inventory: InventoryEntity = this.entityManager.create(InventoryEntity, {
       product_id: productId,
       stock: quantity,
       reserved_quantity: 0,
     });
+
     await this.entityManager.save(inventory);
+
+    this.logger.log(`Inventory for product ${productId} initialized successfully`);
   }
 }

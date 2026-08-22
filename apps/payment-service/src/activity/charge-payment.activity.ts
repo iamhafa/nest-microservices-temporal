@@ -75,8 +75,11 @@ export class ChargePaymentActivity implements IChargePaymentActivity {
       });
 
       if (paymentIntent.status !== 'succeeded') {
+        this.logger.error(`[Order ${orderId}] Payment failed: ${paymentIntent.status}`);
+
         throw new AppException({
           code: PaymentErrorCode.PROCESSING_FAILED,
+          status: HttpStatus.BAD_REQUEST,
           message: `[Order ${orderId}] Payment failed: ${paymentIntent.status}`,
         });
       }
@@ -102,6 +105,11 @@ export class ChargePaymentActivity implements IChargePaymentActivity {
           status: HttpStatus.SERVICE_UNAVAILABLE,
         });
       }
+
+      this.logger.error(
+        `[Order ${orderId}] Failed to charge payment: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+
       throw error;
     }
   }

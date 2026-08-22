@@ -32,11 +32,15 @@ export class ReleaseInventoryActivity implements IReleaseInventoryActivity {
           .execute();
 
         if (result.affected === 0) {
+          this.logger.error(`[Order ${orderId}] Failed to release inventory for product ${orderItem.product_id}`);
+
           throw new AppException({
             code: InventoryErrorCode.ADJUSTMENT_FAILED,
             message: `Product ${orderItem.product_id} out of stock.`,
           });
         }
+
+        this.logger.log(`[Order ${orderId}] Released inventory for product ${orderItem.product_id}`);
       }
     });
   }

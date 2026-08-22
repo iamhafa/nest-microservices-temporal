@@ -13,17 +13,24 @@ export class GetProductPricesActivity implements IGetProductPricesActivity {
 
   @ActivityMethod({ name: 'getProductPrices' })
   async execute(productIds: number[]): Promise<Record<number, number>> {
-    this.logger.log(`Fetching prices for products: ${productIds.join(', ')}`);
+    this.logger.log(`[Product] Fetching prices for products: ${productIds.join(', ')}`);
 
     const products: ProductEntity[] = await this.productRepository.find({
-      where: { id: In(productIds), is_active: true },
-      select: { id: true, price: true },
+      where: {
+        id: In(productIds),
+        is_active: true,
+      },
+      select: {
+        id: true,
+        price: true,
+      },
     });
 
     const productPrices: Record<number, number> = {};
     for (const product of products) {
       productPrices[product.id] = product.price;
     }
+    this.logger.log(`[Product] Fetched prices for products: ${productIds.join(', ')}`);
 
     return productPrices;
   }

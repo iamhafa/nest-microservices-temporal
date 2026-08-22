@@ -38,6 +38,8 @@ export class CreateProductActivity implements ICreateProductActivity {
     });
 
     const savedProduct: ProductEntity = await this.productRepository.save(product);
+    this.logger.log(`Product created: ${savedProduct.name} with ID: ${savedProduct.id}`);
+
     return savedProduct.id;
   }
 }

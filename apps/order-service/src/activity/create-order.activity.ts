@@ -18,7 +18,7 @@ export class CreateOrderActivity implements ICreateOrderActivity {
   ) {}
 
   @ActivityMethod({ name: 'createOrder' })
-  async execute(createOrderDto: ICreateOrderDto, productPrices: Record<number, number>, userId?: number): Promise<number> {
+  async execute(createOrderDto: ICreateOrderDto, productPrices: Record<number, number>, userId: number): Promise<number> {
     const { items, address, email } = createOrderDto;
 
     // calculate total amount of order

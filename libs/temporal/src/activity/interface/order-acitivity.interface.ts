@@ -2,7 +2,7 @@ import { ICreateOrderDto, IOrderItem, OrderStatus } from '@libs/contract/order';
 
 // Tạo đơn hàng
 export interface ICreateOrderActivity {
-  execute(dto: ICreateOrderDto, productPrices: Record<number, number>, userId?: number): Promise<number>;
+  execute(dto: ICreateOrderDto, productPrices: Record<number, number>, userId: number): Promise<number>;
 }
 
 // Xóa đơn hàng

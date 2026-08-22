@@ -28,6 +28,8 @@ export class ValidateProductMetadataActivity implements IValidateProductMetadata
     if (category_id) {
       const category = await this.productCategoryRepository.findOneBy({ id: category_id });
       if (!category) {
+        this.logger.error(`[Product] Category ${category_id} not found`);
+
         throw new AppException({
           code: ProductErrorCode.CATEGORY_NOT_FOUND,
           message: `Category #${category_id} not found`,
@@ -39,6 +41,8 @@ export class ValidateProductMetadataActivity implements IValidateProductMetadata
     if (brand_id) {
       const brand = await this.productBrandRepository.findOneBy({ id: brand_id });
       if (!brand) {
+        this.logger.error(`[Product] Brand ${brand_id} not found`);
+
         throw new AppException({
           code: ProductErrorCode.BRAND_NOT_FOUND,
           message: `Brand #${brand_id} not found`,
@@ -56,6 +60,8 @@ export class ValidateProductMetadataActivity implements IValidateProductMetadata
       const missingIds: number[] = tag_ids.filter((tagId) => !foundIds.has(tagId));
 
       if (missingIds.length > 0) {
+        this.logger.error(`[Product] Tags not found: ${missingIds.join(', ')}`);
+
         throw new AppException({
           code: ProductErrorCode.TAG_NOT_FOUND,
           message: `Tags not found: ${missingIds.join(', ')}`,

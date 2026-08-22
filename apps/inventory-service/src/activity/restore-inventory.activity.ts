@@ -30,11 +30,15 @@ export class RestoreInventoryActivity implements IRestoreInventoryActivity {
           .execute();
 
         if (result.affected === 0) {
+          this.logger.error(`[Order ${orderId}] Failed to restore inventory for product ${orderItem.product_id}`);
+
           throw new AppException({
             code: InventoryErrorCode.RESTORE_FAILED,
             message: `Restore inventory failed for order ${orderId} and product ${orderItem.product_id}`,
           });
         }
+
+        this.logger.log(`[Order ${orderId}] Restored inventory for product ${orderItem.product_id}`);
       }
     });
   }

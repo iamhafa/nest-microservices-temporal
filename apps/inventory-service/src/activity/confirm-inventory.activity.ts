@@ -4,7 +4,7 @@ import { IOrderItem } from '@libs/contract/order';
 import { IConfirmInventoryActivity } from '@libs/temporal';
 import { HttpStatus, Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
-import { EntityManager } from 'typeorm';
+import { EntityManager, UpdateResult } from 'typeorm';
 import { InventoryEntity } from '../entity/inventory.entity';
 
 @Activity({ name: 'confirm-inventory-activity' })
@@ -19,7 +19,7 @@ export class ConfirmInventoryActivity implements IConfirmInventoryActivity {
 
     return this.entityManager.transaction(async (manager: EntityManager) => {
       for (const orderItem of orderItems) {
-        const result = await manager
+        const result: UpdateResult = await manager
           .createQueryBuilder()
           .update(InventoryEntity)
           .set({
@@ -32,12 +32,16 @@ export class ConfirmInventoryActivity implements IConfirmInventoryActivity {
           .execute();
 
         if (result.affected === 0) {
+          this.logger.error(`[Order ${orderId}] Failed to confirm inventory deduction for product ${orderItem.product_id}`);
+
           throw new AppException({
             code: InventoryErrorCode.ADJUSTMENT_FAILED,
             message: `Inventory reconciliation error for product ${orderItem.product_id}`,
             status: HttpStatus.INTERNAL_SERVER_ERROR,
           });
         }
+
+        this.logger.log(`[Order ${orderId}] Confirmed inventory deduction for product ${orderItem.product_id}`);
       }
     });
   }
