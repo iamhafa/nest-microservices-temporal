@@ -44,7 +44,7 @@ flowchart TD
 ```
 
 1. **Client ↔ API Gateway**: HTTP/REST endpoints with JWT Authentication & Rate Limiting.
-2. **API Gateway ↔ Microservices**: RabbitMQ RPC (`RmqPublisherService.request<T>`) & Event Publishing (`RmqPublisherService.publish`).
+2. **API Gateway ↔ Microservices**: RabbitMQ RPC via `RmqPublisherService.request<T>` (request/response only; no event publish/subscribe implemented yet).
 3. **Orchestrator ↔ Microservices**: Temporal Activities with dedicated task queues per service.
 
 ---
@@ -58,6 +58,15 @@ flowchart TD
 
 ---
 
+## 📈 Observability
+
+- **Logs**: `nestjs-pino` -> `pino-pretty` (dev) / `pino-loki` (non-dev, `LOKI_URL`) -> **Loki** -> **Grafana**. Every log carries `correlationId` + `serviceName`.
+- **Metrics**: `@willsoto/nestjs-prometheus` -> **Prometheus** -> **Grafana**. Currently only `api-gateway` exposes `/metrics` (HTTP). RPC/worker services have no HTTP server, so they are not scrapeable without opening a dedicated metrics port.
+- **Temporal** uses its own SDK logger (separate from Pino); `correlationId` does not automatically propagate into workflow/activity code (only embedded in `workflowId`).
+- See `.agents/rules/observability-conventions.md` and `.agents/rules/centralized-log-conventions.md` for details.
+
+---
+
 ## 🤖 MCP (Model Context Protocol) Configuration
 
 Local MCP servers are configured in `.agents/mcp_config.json`:
@@ -67,6 +76,7 @@ Local MCP servers are configured in `.agents/mcp_config.json`:
 - `mcp-payment-service-db`
 - `mcp-user-service-db`
 - `mcp-shipping-service-db`
+- `mcp-redis-db`
 - `mcp-stripe` (Loads `STRIPE_SECRET_KEY` automatically from `/.env` via `dotenv-cli`)
 
 ---
@@ -75,9 +85,11 @@ Local MCP servers are configured in `.agents/mcp_config.json`:
 
 ### 1. Infrastructure Setup
 ```bash
-# Start PostgreSQL, RabbitMQ, Redis, and Temporal
+# Start PostgreSQL, RabbitMQ, Redis, Temporal (dev server + UI on :8233),
+# and the observability stack: Loki, Prometheus, Grafana (:3001)
 docker-compose up -d
 ```
+
 
 ### 2. Environment Setup
 ```bash

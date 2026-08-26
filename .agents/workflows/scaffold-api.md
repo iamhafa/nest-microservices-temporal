@@ -23,9 +23,10 @@ When asked to "create a feature" or scaffold an API (e.g., "Create a Category fe
 - Inject the `@RabbitPayload` in the method argument, validate the payload, and perform business logic.
 
 **4. Implement Core Logic, Temporal & Database (`apps/<target-service>`)**
-- **For direct DB updates:** Add methods inside the service to interact with the TypeORM repository. Update TypeORM `Entity` in `apps/<target-service>/src/entity/`.
-- **For CQRS (Product Service):** Dispatch commands or queries using `CommandBus`/`QueryBus` inside the service.
+- **For direct DB updates:** Add methods inside the service to interact with the TypeORM repository. Update TypeORM `Entity` in `apps/<target-service>/src/entity/` (hoặc trong `modules/<feature>/entity/` với service phức tạp như `product-service`).
+- **For complex services (e.g. `product-service`):** Tổ chức theo feature modules trong `apps/<target-service>/src/modules/<feature>/` (module + service + repository + entity). Business logic nằm trong service, gọi repository trực tiếp. (LƯU Ý: repo hiện KHÔNG dùng CQRS/`CommandBus`/`QueryBus` — đừng scaffold theo CQRS.)
 - **For workflow orchestration:** If the feature requires distributed transactions (Saga), inject `TemporalService` and call `this.temporalService.startWorkflow()`. Create Temporal Activities inside `apps/<target-service>/src/activity/` to perform database modifications.
+
 
 > 💡 **AI Instruction:** When generating a feature, present your plan to the user mirroring these 4 steps explicitly before generating the code to confirm the approach.
 

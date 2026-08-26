@@ -1,7 +1,7 @@
 import { RabbitPayload, RabbitRPC } from '@golevelup/nestjs-rabbitmq';
 import { AppException } from '@libs/common';
-import { InventoryRoutingKey, RmqExchange, RmqQueue } from '@libs/messaging';
 import { type IAdjustInventoryDto, InventoryErrorCode } from '@libs/contract/inventory';
+import { InventoryRoutingKey, RmqExchange, RmqQueue } from '@libs/messaging';
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { UpdateResult } from 'typeorm';
 import { InventoryEntity } from './entity/inventory.entity';
@@ -17,10 +17,6 @@ export class InventoryService {
     exchange: RmqExchange.ECOMMERCE,
     routingKey: InventoryRoutingKey.ADJUST,
     queue: RmqQueue.INVENTORY_QUEUE,
-    queueOptions: {
-      deadLetterExchange: RmqExchange.ECOMMERCE_DLX,
-      deadLetterRoutingKey: 'inventory.failed',
-    },
   })
   async adjustInventory(@RabbitPayload() adjustInventoryDto: IAdjustInventoryDto): Promise<InventoryEntity> {
     this.logger.log(`Adjusting inventory for product ${adjustInventoryDto.product_id}`);
@@ -51,10 +47,6 @@ export class InventoryService {
     exchange: RmqExchange.ECOMMERCE,
     routingKey: InventoryRoutingKey.GET_ALL,
     queue: RmqQueue.INVENTORY_QUEUE,
-    queueOptions: {
-      deadLetterExchange: RmqExchange.ECOMMERCE_DLX,
-      deadLetterRoutingKey: 'inventory.failed',
-    },
   })
   getAllInventories(): Promise<InventoryEntity[]> {
     return this.inventoryRepository.find();
@@ -64,10 +56,6 @@ export class InventoryService {
     exchange: RmqExchange.ECOMMERCE,
     routingKey: InventoryRoutingKey.GET_AVAILABLE_STOCK,
     queue: RmqQueue.INVENTORY_QUEUE,
-    queueOptions: {
-      deadLetterExchange: RmqExchange.ECOMMERCE_DLX,
-      deadLetterRoutingKey: 'inventory.failed',
-    },
   })
   async getAvailableStock(@RabbitPayload() productId: number): Promise<{ productId: number; availableQuantity: number }> {
     const inventory = await this.inventoryRepository.findOneBy({ product_id: productId });

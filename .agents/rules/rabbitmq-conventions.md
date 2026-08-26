@@ -13,20 +13,33 @@ description: Conventions for RabbitMQ communication, SharedRabbitMQModule, RmqPu
 
 ## 🏷 Message Naming Convention (Quy tắc đặt tên Routing Key)
 
-Để dễ quản lý và phân biệt mục đích của các message trong hệ thống phân tán, BẮT BUỘC tuân thủ định dạng sau cho Routing Key:
+Routing Key được định nghĩa dưới dạng **enum** trong `libs/messaging/src/enum/routing-key/<domain>-routing-key.enum.ts` (mỗi domain 1 file), KHÔNG dùng string literal rải rác trong code.
 
-**Format:** `<domain>.<action>.<type>`
+**Format thực tế:** `<domain>.<action>`
 
 Trong đó:
-1. **`<domain>`**: Tên của domain/feature (ví dụ: `order`, `product`, `user`, `inventory`, `cart`). Luôn viết thường (camelCase).
-2. **`<action>`**: Hành động đang được thực hiện (ví dụ: `create`, `updateStatus`, `getMyOrders`). Dùng camelCase.
-3. **`<type>`**: Bắt buộc phải là 1 trong 3 loại sau:
-   - **`command`**: Khi yêu cầu thay đổi trạng thái hệ thống (CUD - Create/Update/Delete). Thường kỳ vọng một action được thực thi.
-     - *Ví dụ:* `order.create.command`, `inventory.adjust.command`
-   - **`query`**: Khi yêu cầu đọc dữ liệu mà không thay đổi hệ thống.
-     - *Ví dụ:* `order.getMyOrders.query`, `product.getAll.query`
-   - **`event`**: Khi thông báo một sự kiện đã xảy ra để các service khác lắng nghe (Publish/Subscribe).
-     - *Ví dụ:* `order.created.event`, `payment.failed.event`
+1. **`<domain>`**: Tên domain/feature, viết thường (ví dụ: `order`, `product`, `user`, `inventory`, `shipping`, `payment`).
+2. **`<action>`**: Hành động, viết **kebab-case** khi có nhiều từ.
+
+Ví dụ theo đúng code hiện tại (`OrderRoutingKey`, `UserRoutingKey`):
+
+```typescript
+export enum OrderRoutingKey {
+  CREATE = 'order.create',
+  CANCEL = 'order.cancel',
+  GET_BY_ID = 'order.get-by-id',
+  GET_MY_ORDERS = 'order.get-my-orders',
+  UPDATE_STATUS = 'order.update-status',
+}
+
+export enum UserRoutingKey {
+  REGISTER = 'user.register',
+  LOGIN = 'user.login',
+  GET_BY_ID = 'user.get-by-id',
+}
+```
+
+> ⚠️ **Lưu ý:** Hệ thống hiện tại **chỉ dùng RPC request/response** (`RmqPublisherService.request()`). Chưa có cơ chế event publish/subscribe (`RmqPublisherService.publish` / routing key hậu tố `.event` CHƯA được implement). Một số enum có giá trị dạng quá khứ (vd `OrderRoutingKey.CREATED = 'order.created'`) được dùng như RPC handler, không phải event bus. Nếu sau này thêm event-driven, cập nhật rule này kèm code.
 
 ## 🔗 SharedRabbitMQModule & RmqPublisherService
 
@@ -38,12 +51,14 @@ Tất cả các kết nối đến RabbitMQ (cho cả Consumer và Producer) **B
   - Việc dùng `RmqPublisherService` đảm bảo mọi gói tin gửi đi đều tự động được nhúng `X-Correlation-Id` vào trong Headers phục vụ cho Distributed Tracing.
   
   ```typescript
+  import { RmqPublisherService, UserRoutingKey } from '@libs/messaging';
+
   export class UserController {
     constructor(private readonly rmqPublisher: RmqPublisherService) {}
 
     @Post('register')
-    registerUser(@Body() dto: CreateUserDto): Promise<any> {
-      return this.rmqPublisher.request('user.register.command', dto); // <- Naming Convention
+    registerUser(@Body() dto: RegisterUserDto): Promise<AuthResponseDto> {
+      return this.rmqPublisher.request(UserRoutingKey.REGISTER, dto); // <- dùng enum, KHÔNG string literal
     }
   }
   ```
@@ -53,14 +68,17 @@ Tất cả các kết nối đến RabbitMQ (cho cả Consumer và Producer) **B
   - Message handler được định nghĩa trực tiếp trong file `*.service.ts` bằng decorator `@RabbitRPC`.
   
   ```typescript
+  import { RabbitRPC, RabbitPayload } from '@golevelup/nestjs-rabbitmq';
+  import { RmqExchange, RmqQueue, UserRoutingKey } from '@libs/messaging';
+
   @Injectable()
   export class UserService {
     @RabbitRPC({
       exchange: RmqExchange.ECOMMERCE,
-      routingKey: 'user.register.command', // <- Naming Convention
-      queue: 'user-register-queue',
+      routingKey: UserRoutingKey.REGISTER, // <- dùng enum
+      queue: RmqQueue.USER_QUEUE,          // <- dùng enum RmqQueue, KHÔNG hardcode string
     })
-    async registerUser(dto: CreateUserDto) {
+    async registerUser(@RabbitPayload() dto: RegisterUserDto) {
       // Logic
     }
   }
@@ -73,7 +91,7 @@ Hệ thống của chúng ta sử dụng `nestjs-cls` để tạo ra một **Tra
 **LUẬT BẤT THÀNH VĂN:** 
 - **Tuyệt đối KHÔNG** gán đè `clsService.getId()` vào thuộc tính `correlationId` mặc định của AMQP (`amqpConnection.request({ correlationId: ... })`).
 - `correlationId` của AMQP được thư viện dùng riêng biệt cho cơ chế gửi/nhận RPC (nó phải Unique cho mỗi lệnh gọi RPC).
-- `X-Correlation-Id` của chúng ta phải được truyền thông qua `headers: { 'X-Correlation-Id': ... }`. Ở phía Microservice, `RmqCorrelationIdInterceptor` sẽ tự động hứng Header này và lưu lại vào CLS để ghi log.
+- `X-Correlation-Id` của chúng ta phải được truyền thông qua `headers: { 'X-Correlation-Id': ... }`. Ở phía Microservice, `RmqContextInterceptor` sẽ tự động hứng Header này và lưu lại vào CLS để ghi log.
 
 ## 🚫 Lệnh cấm
 1. CẤM tạo file `*.controller.ts` ở các Microservices.
@@ -92,7 +110,7 @@ Hệ thống của chúng ta sử dụng `nestjs-cls` để tạo ra một **Tra
 - Seeing `import { ClientProxy }` or `import { ClientsModule }` anywhere.
 - Hardcoding or manually generating IDs for `correlationId` in `amqpConnection.request(...)`.
 - Services directly returning HTTP status codes (e.g., `HttpStatus.OK`) from `@RabbitRPC` handlers instead of returning raw data or custom RPC response objects.
-- Routing keys not following the `<domain>.<action>.<type>` pattern.
+- Routing keys not following the `<domain>.<action>` pattern or not using enums.
 
 ## ✅ Verification Gates
 
@@ -100,4 +118,5 @@ Before completing a RabbitMQ integration, verify:
 - [ ] Is `SharedRabbitMQModule` imported instead of defining a new RabbitMQ connection?
 - [ ] Is `RmqPublisherService` injected for sending messages (in API Gateway)?
 - [ ] Is `@RabbitRPC` used for receiving messages (in Microservices)?
-- [ ] Does the routing key follow the `domain.action.type` naming convention?
+- [ ] Does the routing key use the dedicated domain routing key enum?
+
