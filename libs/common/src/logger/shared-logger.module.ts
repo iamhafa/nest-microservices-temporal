@@ -15,6 +15,7 @@ export class SharedLoggerModule {
       imports: [
         LoggerModule.forRootAsync({
           imports: [ClsModule, EnvironmentModule],
+          providers: [],
           inject: [ClsService, ConfigService, EnvironmentService],
           useFactory: (clsService: ClsService, configService: ConfigService, envService: EnvironmentService): Params => {
             const addCorrelationId = (): Record<string, string> => {

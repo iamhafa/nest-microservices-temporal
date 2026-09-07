@@ -34,6 +34,7 @@ import { UserModule } from './modules/user/user.module';
       },
     }),
     ThrottlerModule.forRootAsync({
+      imports: [],
       inject: [ConfigService],
       useFactory: (config: ConfigService): ThrottlerModuleOptions => ({
         throttlers: [
