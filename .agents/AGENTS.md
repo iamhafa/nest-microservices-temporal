@@ -81,13 +81,29 @@ Local MCP servers are configured in `.agents/mcp_config.json`:
 
 ---
 
+## 🧱 Infrastructure Services (`docker-compose.yaml`)
+
+| Container / Service | Image | Description & Ports |
+| :--- | :--- | :--- |
+| `postgres-database` | `postgres:16` | PostgreSQL database (`:5432`) serving microservices and Temporal persistence |
+| `temporal-init` | `temporalio/admin-tools:latest` | One-shot migration tool initializing `temporal` and `temporal_visibility` schemas |
+| `temporal-server` | `temporalio/server:latest` | Production-ready Temporal Core Server gRPC (`:7233`) |
+| `temporal-ui` | `temporalio/ui:latest` | Temporal Web UI dashboard (`:8233`) |
+| `temporal-admin-tools` | `temporalio/admin-tools:latest` | CLI admin container for Temporal troubleshooting |
+| `rabbitmq` | `rabbitmq:4-management-alpine` | Message broker RPC & Management UI (`:5672`, `:15672`) |
+| `redis` | `redis:7-alpine` | Shared cache layer (`:6379`) |
+| `loki` | `grafana/loki:3.5.0` | Centralized log ingestion (`:3100`) |
+| `prometheus` | `prom/prometheus:latest` | Metrics scraping & time-series storage (`:9090`) |
+| `grafana` | `grafana/grafana:12.0.0` | Centralized observability dashboards (`:3001`) |
+
+---
+
 ## 📦 Run the Project
 
 ### 1. Infrastructure Setup
 ```bash
-# Start PostgreSQL, RabbitMQ, Redis, Temporal (dev server + UI on :8233),
-# and the observability stack: Loki, Prometheus, Grafana (:3001)
-docker-compose up -d
+# Start all infrastructure containers (PostgreSQL, Temporal Cluster, RabbitMQ, Redis, Observability Stack)
+docker compose up -d
 ```
 
 

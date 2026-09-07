@@ -10,4 +10,3 @@ scrape_configs:
         labels:
           service: 'api-gateway'
           env: 'development'
-

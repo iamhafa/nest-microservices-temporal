@@ -10,7 +10,7 @@ description: Monorepo layout, service responsibilities, and shared libraries str
 ```
 ├── apps/                    ← Microservices (each is a standalone NestJS app)
 ├── libs/                    ← Shared libraries across services
-├── docker-compose.yml       ← Infrastructure services (PostgreSQL, Temporal, RabbitMQ...)
+├── docker-compose.yaml      ← Infrastructure services (PostgreSQL, Temporal, RabbitMQ...)
 ├── nest-cli.json            ← Monorepo project definitions
 └── package.json             ← Shared dependencies & scripts
 ```

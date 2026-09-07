@@ -1,0 +1,164 @@
+services:
+  # One-shot container: Khởi tạo database và chạy migration schemas cho Temporal vào PostgreSQL
+  temporal-init:
+    image: temporalio/admin-tools:latest
+    container_name: temporal-init
+    depends_on:
+      postgres-database:
+        condition: service_healthy
+    environment:
+      - SQL_PASSWORD=postgres
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        echo "--> Setting up 'temporal' database and schema..."
+        temporal-sql-tool --plugin postgres12 --ep postgres-database -p 5432 -u postgres --pw postgres --db temporal create-database || true
+        temporal-sql-tool --plugin postgres12 --ep postgres-database -p 5432 -u postgres --pw postgres --db temporal setup-schema -v 0.0 || true
+        temporal-sql-tool --plugin postgres12 --ep postgres-database -p 5432 -u postgres --pw postgres --db temporal update-schema -d /etc/temporal/schema/postgresql/v12/temporal/versioned || true
+
+        echo "--> Setting up 'temporal_visibility' database and schema..."
+        temporal-sql-tool --plugin postgres12 --ep postgres-database -p 5432 -u postgres --pw postgres --db temporal_visibility create-database || true
+        temporal-sql-tool --plugin postgres12 --ep postgres-database -p 5432 -u postgres --pw postgres --db temporal_visibility setup-schema -v 0.0 || true
+        temporal-sql-tool --plugin postgres12 --ep postgres-database -p 5432 -u postgres --pw postgres --db temporal_visibility update-schema -d /etc/temporal/schema/postgresql/v12/visibility/versioned || true
+
+        echo "--> Temporal schemas successfully initialized!"
+    restart: "no"
+
+  # Temporal Core Cluster Server: Xử lý orchestration workflows, state machines và gRPC API (:7233)
+  temporal-server:
+    image: temporalio/server:latest
+    container_name: temporal-server
+    depends_on:
+      temporal-init:
+        condition: service_completed_successfully
+    environment:
+      - DB=postgres12
+      - DB_PORT=5432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PWD=postgres
+      - POSTGRES_SEEDS=postgres-database
+      - DBNAME=temporal
+      - VISIBILITY_DBNAME=temporal_visibility
+      - BIND_ON_IP=0.0.0.0
+    ports:
+      - "7233:7233"
+    volumes:
+      - ./.infrastructure/temporal/temporal-config.yaml:/etc/temporal/config/dynamicconfig/docker.yaml:ro
+
+  # Temporal Web UI: Giao diện web trực quan theo dõi workflows, schedules, namespaces (:8233)
+  temporal-ui:
+    image: temporalio/ui:latest
+    container_name: temporal-ui
+    depends_on:
+      - temporal-server
+    environment:
+      - TEMPORAL_ADDRESS=temporal-server:7233
+      - TEMPORAL_CORS_ORIGINS=http://localhost:8233,http://127.0.0.1:8233,http://localhost:3000
+      - TEMPORAL_CSRF_COOKIE_INSECURE=true
+    ports:
+      - "8233:8080"
+
+  # CLI Admin Container: Cung cấp CLI (temporal/tctl) cho developer troubleshooting & quản trị
+  temporal-admin-tools:
+    image: temporalio/admin-tools:latest
+    container_name: temporal-admin-tools
+    depends_on:
+      - temporal-server
+    environment:
+      - TEMPORAL_ADDRESS=temporal-server:7233
+      - TEMPORAL_CLI_ADDRESS=temporal-server:7233
+    stdin_open: true
+    tty: true
+
+  # PostgreSQL Database: Lưu trữ dữ liệu microservices và state persistence của Temporal (:5432)
+  postgres-database:
+    image: postgres:16
+    container_name: postgres-database
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - database-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  # Message Broker: Xử lý giao tiếp nội bộ RPC & Events giữa các microservices (:5672, UI :15672)
+  rabbitmq:
+    image: rabbitmq:4-management-alpine
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # Caching Layer: Bộ nhớ đệm phân tán chia sẻ giữa các microservices (:6379)
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # Log Aggregation: Thu thập và lưu trữ tập trung logs từ các microservices (:3100)
+  loki:
+    image: grafana/loki:3.5.0
+    container_name: loki
+    command: -config.file=/etc/loki/loki-config.yaml
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./.infrastructure/loki/loki-config.yaml:/etc/loki/loki-config.yaml:ro
+      - loki-data:/loki
+
+  # Metrics Storage: Thu thập (scrape) và lưu trữ time-series metrics từ hệ thống (:9090)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./.infrastructure/prometheus/prometheus-config.yaml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # Observability Dashboard: Trực quan hóa metrics từ Prometheus và logs từ Loki (:3001)
+  grafana:
+    image: grafana/grafana:12.0.0
+    container_name: grafana
+    depends_on:
+      loki:
+        condition: service_started
+      prometheus:
+        condition: service_started
+    ports:
+      - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: 12345
+      GF_AUTH_ANONYMOUS_ENABLED: true
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+    volumes:
+      - ./.infrastructure/grafana/grafana-config.yaml:/etc/grafana/provisioning/datasources/datasource.yaml:ro
+
+volumes:
+  database-data:
+  loki-data:
+  prometheus-data:

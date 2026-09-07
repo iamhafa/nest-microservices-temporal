@@ -7,15 +7,15 @@ description: Observability stack conventions - Pino logging to Loki, Prometheus 
 
 This project ships a self-hosted observability stack. `correlationId` propagation is covered in `centralized-log-conventions.md`; this rule covers the logging/metrics infrastructure and its architectural constraints.
 
-## 🧱 Infrastructure (docker-compose.yml)
+## 🧱 Infrastructure (docker-compose.yaml)
 
 | Container | Purpose | Host port |
 | --------- | ------- | --------- |
 | `loki` | Log aggregation backend | 3100 |
-| `prometheus` | Metrics scraping/storage (config: `.infrastructure/prometheus/prometheus-config.yml`) | 9090 |
-| `grafana` | Dashboards for logs + metrics (datasources provisioned in `.infrastructure/grafana/grafana-config.yml`) | 3001 |
+| `prometheus` | Metrics scraping/storage (config: `.infrastructure/prometheus/prometheus-config.yaml`) | 9090 |
+| `grafana` | Dashboards for logs + metrics (datasources provisioned in `.infrastructure/grafana/grafana-config.yaml`) | 3001 |
 
-- Grafana/Prometheus/Loki talk to each other by **service name** on the Docker network (e.g. `http://prometheus:9090`, `http://loki:3100`, `database:5432`), NEVER `localhost` (localhost inside a container = the container itself).
+- Grafana/Prometheus/Loki talk to each other by **service name** on the Docker network (e.g. `http://prometheus:9090`, `http://loki:3100`, `postgres-database:5432`), NEVER `localhost` (localhost inside a container = the container itself).
 - Grafana does NOT need outbound internet. Import dashboards by pasting/uploading JSON, not by grafana.com ID (blocked behind corporate proxy).
 
 ## 📝 Logging (Pino to Loki)

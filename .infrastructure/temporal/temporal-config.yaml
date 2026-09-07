@@ -1,0 +1,67 @@
+# ==============================================================================
+# Temporal Server Dynamic Configuration
+# File này được Temporal Server theo dõi và tự động nạp lại (hot-reload)
+# sau mỗi chu kỳ polling mà không cần restart cluster.
+# Format chuẩn:
+#   <setting_name>:
+#     - value: <gia_tri>
+#       constraints: {}
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. Payload Size Limits (Giới hạn kích thước dữ liệu trao đổi trong Workflow/Activity)
+# ------------------------------------------------------------------------------
+# Kích thước payload tối đa cho tham số đầu vào và kết quả trả về của Activity/Workflow
+# Mặc định là 2MB (2097152), nâng lên 4MB để tránh lỗi khi truyền dữ liệu đơn hàng/sản phẩm lớn
+limit.blobSize.error:
+  - value: 4194304  # 4MB
+    constraints: {}
+
+# Mức cảnh báo (Warning) trong log khi payload vượt ngưỡng
+limit.blobSize.warn:
+  - value: 2097152  # 2MB
+    constraints: {}
+
+# ------------------------------------------------------------------------------
+# 2. Workflow History Limits (Giới hạn lịch sử thực thi để bảo vệ Database)
+# ------------------------------------------------------------------------------
+# Cảnh báo khi số lượng events trong 1 workflow execution đạt ngưỡng
+limit.historyCount.warn:
+  - value: 10000
+    constraints: {}
+
+# Giới hạn tối đa số lượng events trong 1 workflow (vượt quá sẽ buộc fail, cần dùng ContinueAsNew)
+limit.historyCount.error:
+  - value: 50000
+    constraints: {}
+
+# Cảnh báo khi tổng dung lượng lịch sử của 1 workflow vượt ngưỡng
+limit.historySize.warn:
+  - value: 10485760  # 10MB
+    constraints: {}
+
+# Giới hạn dung lượng lịch sử tối đa của 1 workflow
+limit.historySize.error:
+  - value: 52428800  # 50MB
+    constraints: {}
+
+# ------------------------------------------------------------------------------
+# 3. Frontend & Throughput (Điều phối lưu lượng truy cập)
+# ------------------------------------------------------------------------------
+# Số lượng Namespace tối đa mà cluster có thể quản lý
+frontend.namespaceCount:
+  - value: 5000
+    constraints: {}
+
+# Giới hạn số lượng Request mỗi giây (RPS) trên toàn cụm cho mỗi namespace
+frontend.globalNamespaceRPS:
+  - value: 2400
+    constraints: {}
+
+# ------------------------------------------------------------------------------
+# 4. Search Attributes & Visibility (Tối ưu tìm kiếm và lọc Workflow)
+# ------------------------------------------------------------------------------
+# Tự động làm mới cache của Search Attributes khi đọc, giúp các custom attributes mới tạo hiển thị ngay
+system.forceSearchAttributesCacheRefreshOnRead:
+  - value: true
+    constraints: {}
