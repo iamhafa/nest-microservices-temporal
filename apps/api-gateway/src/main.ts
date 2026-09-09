@@ -1,6 +1,6 @@
-import { AppException, AppExceptionOptions, HttpExceptionFilter, ResponseInterceptor } from '@libs/common';
+import { HttpExceptionFilter, ResponseInterceptor } from '@libs/common';
 import { SystemErrorCode } from '@libs/contract/base';
-import { HttpStatus, ValidationPipe, VersioningType } from '@nestjs/common';
+import { UnprocessableEntityException, ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -35,16 +35,19 @@ async function bootstrap() {
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
-      exceptionFactory(errors: ValidationError[]): AppExceptionOptions {
-        throw new AppException({
-          status: HttpStatus.UNPROCESSABLE_ENTITY,
-          code: SystemErrorCode.VALIDATION_FAILED,
-          message: 'Validation error',
-          details: errors.map((err: ValidationError) => ({
-            field: err.property,
-            message: Object.values(err.constraints ?? {})[0] as string,
-          })),
-        });
+      exceptionFactory: (errors: ValidationError[]) => {
+        throw new UnprocessableEntityException(
+          {
+            message: 'Validation error',
+            details: errors.map((err: ValidationError) => ({
+              field: err.property,
+              message: Object.values(err.constraints ?? {})[0],
+            })),
+          },
+          {
+            errorCode: SystemErrorCode.VALIDATION_FAILED,
+          },
+        );
       },
     }),
   );

@@ -1,8 +1,7 @@
 import { InjectStripeClient } from '@golevelup/nestjs-stripe';
-import { AppException } from '@libs/common';
 import { PaymentErrorCode } from '@libs/contract/payment/error/payment-code.error';
 import { IChargePaymentActivity } from '@libs/temporal';
-import { HttpStatus, Logger } from '@nestjs/common';
+import { BadRequestException, Logger, ServiceUnavailableException } from '@nestjs/common';
 import {
   BrokenCircuitError,
   circuitBreaker,
@@ -77,10 +76,8 @@ export class ChargePaymentActivity implements IChargePaymentActivity {
       if (paymentIntent.status !== 'succeeded') {
         this.logger.error(`[Order ${orderId}] Payment failed: ${paymentIntent.status}`);
 
-        throw new AppException({
-          code: PaymentErrorCode.PROCESSING_FAILED,
-          status: HttpStatus.BAD_REQUEST,
-          message: `[Order ${orderId}] Payment failed: ${paymentIntent.status}`,
+        throw new BadRequestException(`[Order ${orderId}] Payment failed: ${paymentIntent.status}`, {
+          errorCode: PaymentErrorCode.PROCESSING_FAILED,
         });
       }
 
@@ -99,10 +96,8 @@ export class ChargePaymentActivity implements IChargePaymentActivity {
     } catch (error) {
       if (error instanceof BrokenCircuitError) {
         this.logger.error(`[Order ${orderId}] Stripe API is failing fast due to Broken Circuit.`);
-        throw new AppException({
-          code: PaymentErrorCode.PROCESSING_FAILED,
-          message: 'Stripe service is temporarily unavailable (Circuit Breaker)',
-          status: HttpStatus.SERVICE_UNAVAILABLE,
+        throw new ServiceUnavailableException('Stripe service is temporarily unavailable (Circuit Breaker)', {
+          errorCode: PaymentErrorCode.PROCESSING_FAILED,
         });
       }
 

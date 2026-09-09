@@ -1,6 +1,6 @@
-import { AppException } from '@libs/common';
 import { SystemErrorCode } from '@libs/contract/base';
-import { ContextType, ExecutionContext, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { ContextType, ExecutionContext, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+
 import { Reflector } from '@nestjs/core';
 import { JsonWebTokenError, TokenExpiredError, WrongSecretProviderError } from '@nestjs/jwt';
 import { AuthGuard } from '@nestjs/passport';
@@ -40,13 +40,13 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
   /**
    * Phương thức handleRequest được Passport tự động gọi sau khi hoàn tất quá trình xác thực JWT Strategy.
-   * Hàm này được ghi đè (override) để chuyển đổi các lỗi xác thực của Passport/jsonwebtoken thành AppException chuẩn hóa của hệ thống.
+   * Hàm này được ghi đè (override) để chuyển đổi các lỗi xác thực của Passport/jsonwebtoken thành UnauthorizedException chuẩn hóa của hệ thống.
    *
    * @param err Lỗi hệ thống / crash mã nguồn nếu có xảy ra trong quá trình chạy Strategy (null nếu không có lỗi).
    * @param user Đối tượng payload người dùng nếu xác thực thành công, hoặc boolean `false` nếu xác thực thất bại.
    * @param info Thông tin chi tiết nguyên nhân thất bại do Passport/jsonwebtoken cung cấp (ví dụ: JsonWebTokenError, TokenExpiredError).
    * @returns TUser Payload người dùng được trả về và tự động gán vào đối tượng `request.user`.
-   * @throws AppException Ngoại lệ chuẩn hóa với mã SYS_001 (UNAUTHORIZED) khi xác thực thất bại.
+   * @throws UnauthorizedException Ngoại lệ chuẩn hóa với mã SYS_001 (UNAUTHORIZED) khi xác thực thất bại.
    */
   override handleRequest<TUser = IJwtPayload>(err: any, user: any, info: any): TUser {
     if (err || !user) {
@@ -68,10 +68,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
 
       this.logger.error(`JWT Authentication Failed: ${message}`, err || info);
 
-      throw new AppException({
-        code: SystemErrorCode.UNAUTHORIZED,
-        status: HttpStatus.UNAUTHORIZED,
-        message,
+      throw new UnauthorizedException(message, {
+        errorCode: SystemErrorCode.UNAUTHORIZED,
       });
     }
 

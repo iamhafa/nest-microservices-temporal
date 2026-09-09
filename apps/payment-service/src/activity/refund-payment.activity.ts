@@ -1,8 +1,7 @@
 import { InjectStripeClient } from '@golevelup/nestjs-stripe';
-import { AppException } from '@libs/common';
 import { PaymentErrorCode } from '@libs/contract/payment/error/payment-code.error';
 import { IRefundPaymentActivity } from '@libs/temporal';
-import { HttpStatus, Logger } from '@nestjs/common';
+import { BadRequestException, InternalServerErrorException, Logger, ServiceUnavailableException } from '@nestjs/common';
 import {
   BrokenCircuitError,
   circuitBreaker,
@@ -68,9 +67,8 @@ export class RefundPaymentActivity implements IRefundPaymentActivity {
         });
 
         if (refund.status !== 'succeeded') {
-          throw new AppException({
-            code: PaymentErrorCode.PROCESSING_FAILED,
-            message: `[Order ${orderId}] Refund failed: ${refund.status}`,
+          throw new InternalServerErrorException(`[Order ${orderId}] Refund failed: ${refund.status}`, {
+            errorCode: PaymentErrorCode.PROCESSING_FAILED,
           });
         }
 
@@ -82,10 +80,8 @@ export class RefundPaymentActivity implements IRefundPaymentActivity {
       } catch (error) {
         if (error instanceof BrokenCircuitError) {
           this.logger.error(`[Order ${orderId}] Stripe API is failing fast due to Broken Circuit.`);
-          throw new AppException({
-            code: PaymentErrorCode.PROCESSING_FAILED,
-            message: 'Stripe service is temporarily unavailable (Circuit Breaker)',
-            status: HttpStatus.SERVICE_UNAVAILABLE,
+          throw new ServiceUnavailableException('Stripe service is temporarily unavailable (Circuit Breaker)', {
+            errorCode: PaymentErrorCode.PROCESSING_FAILED,
           });
         }
 
@@ -99,10 +95,12 @@ export class RefundPaymentActivity implements IRefundPaymentActivity {
         this.logger.error(
           `[Order ${orderId}] Transaction not found in DB and totalAmount is not provided. Cannot verify Stripe intent.`,
         );
-        throw new AppException({
-          code: PaymentErrorCode.PROCESSING_FAILED,
-          message: `Transaction not found in DB for order ${orderId} and totalAmount was not provided for lookup.`,
-        });
+        throw new BadRequestException(
+          `Transaction not found in DB for order ${orderId} and totalAmount was not provided for lookup.`,
+          {
+            errorCode: PaymentErrorCode.PROCESSING_FAILED,
+          },
+        );
       }
 
       this.logger.log(`[Order ${orderId}] Transaction not found in DB. Checking Stripe intent via idempotency key...`);
@@ -150,9 +148,8 @@ export class RefundPaymentActivity implements IRefundPaymentActivity {
         });
 
         if (refund.status !== 'succeeded') {
-          throw new AppException({
-            code: PaymentErrorCode.PROCESSING_FAILED,
-            message: `[Order ${orderId}] Stripe refund failed: ${refund.status}`,
+          throw new InternalServerErrorException(`[Order ${orderId}] Stripe refund failed: ${refund.status}`, {
+            errorCode: PaymentErrorCode.PROCESSING_FAILED,
           });
         }
 
@@ -171,10 +168,8 @@ export class RefundPaymentActivity implements IRefundPaymentActivity {
         );
       } catch (error) {
         if (error instanceof BrokenCircuitError) {
-          throw new AppException({
-            code: PaymentErrorCode.PROCESSING_FAILED,
-            status: HttpStatus.SERVICE_UNAVAILABLE,
-            message: 'Stripe service is temporarily unavailable (Circuit Breaker)',
+          throw new ServiceUnavailableException('Stripe service is temporarily unavailable (Circuit Breaker)', {
+            errorCode: PaymentErrorCode.PROCESSING_FAILED,
           });
         }
 

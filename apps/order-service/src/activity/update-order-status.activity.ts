@@ -1,7 +1,6 @@
-import { AppException } from '@libs/common';
 import { OrderErrorCode, OrderStatus } from '@libs/contract/order';
 import { IUpdateOrderStatusActivity } from '@libs/temporal';
-import { HttpStatus, Logger } from '@nestjs/common';
+import { Logger, NotFoundException } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { UpdateResult } from 'typeorm';
 import { OrderRepository } from '../repository/order.repository';
@@ -22,10 +21,8 @@ export class UpdateOrderStatusActivity implements IUpdateOrderStatusActivity {
     if (result.affected === 0) {
       this.logger.error(`[Order ${orderId}] Failed to update status to ${status}`);
 
-      throw new AppException({
-        code: OrderErrorCode.UPDATE_ORDER_FAILED,
-        status: HttpStatus.NOT_FOUND,
-        message: `Update order ${orderId} failed`,
+      throw new NotFoundException(`Update order ${orderId} failed`, {
+        errorCode: OrderErrorCode.UPDATE_ORDER_FAILED,
       });
     }
 

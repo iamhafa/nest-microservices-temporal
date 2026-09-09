@@ -1,7 +1,6 @@
-import { AppException } from '@libs/common';
 import { OrderErrorCode } from '@libs/contract/order';
 import { IDeleteOrderActivity } from '@libs/temporal';
-import { HttpStatus, Logger } from '@nestjs/common';
+import { Logger, NotFoundException } from '@nestjs/common';
 import { isNumber } from 'lodash';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { DeleteResult } from 'typeorm';
@@ -21,10 +20,8 @@ export class DeleteOrderActivity implements IDeleteOrderActivity {
     if (!isNumber(result.affected) || result.affected <= 0) {
       this.logger.error(`Compensating: Delete order ${orderId} failed`);
 
-      throw new AppException({
-        code: OrderErrorCode.DELETE_ORDER_FAILED,
-        status: HttpStatus.NOT_FOUND,
-        message: `Delete order ${orderId} failed`,
+      throw new NotFoundException(`Delete order ${orderId} failed`, {
+        errorCode: OrderErrorCode.DELETE_ORDER_FAILED,
       });
     }
 

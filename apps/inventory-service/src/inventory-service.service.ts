@@ -1,8 +1,7 @@
 import { RabbitPayload, RabbitRPC } from '@golevelup/nestjs-rabbitmq';
-import { AppException } from '@libs/common';
 import { type IAdjustInventoryDto, InventoryErrorCode } from '@libs/contract/inventory';
 import { InventoryRoutingKey, RmqExchange, RmqQueue } from '@libs/messaging';
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { UpdateResult } from 'typeorm';
 import { InventoryEntity } from './entity/inventory.entity';
 import { InventoryRepository } from './repository/inventory.repository';
@@ -34,10 +33,12 @@ export class InventoryService {
       .execute();
 
     if (result.affected === 0) {
-      throw new AppException({
-        code: InventoryErrorCode.ADJUSTMENT_FAILED,
-        message: `Cannot adjust stock for product ${product_id}. It may not exist or the adjustment results in negative stock.`,
-      });
+      throw new BadRequestException(
+        `Cannot adjust stock for product ${product_id}. It may not exist or the adjustment results in negative stock.`,
+        {
+          errorCode: InventoryErrorCode.ADJUSTMENT_FAILED,
+        },
+      );
     } else {
       return this.inventoryRepository.findOneByOrFail({ product_id });
     }
@@ -60,10 +61,8 @@ export class InventoryService {
   async getAvailableStock(@RabbitPayload() productId: number): Promise<{ productId: number; availableQuantity: number }> {
     const inventory = await this.inventoryRepository.findOneBy({ product_id: productId });
     if (!inventory) {
-      throw new AppException({
-        code: InventoryErrorCode.NOT_FOUND, // Assuming this exists or falls back to generic error
-        message: `Inventory for product #${productId} not found`,
-        status: HttpStatus.NOT_FOUND,
+      throw new NotFoundException(`Inventory for product #${productId} not found`, {
+        errorCode: InventoryErrorCode.NOT_FOUND,
       });
     }
     return {

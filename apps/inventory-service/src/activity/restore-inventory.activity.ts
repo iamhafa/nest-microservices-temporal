@@ -1,8 +1,7 @@
-import { AppException } from '@libs/common';
 import { InventoryErrorCode } from '@libs/contract/inventory';
 import { IOrderItem } from '@libs/contract/order';
 import { IRestoreInventoryActivity } from '@libs/temporal';
-import { Logger } from '@nestjs/common';
+import { InternalServerErrorException, Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { EntityManager, UpdateResult } from 'typeorm';
 import { InventoryEntity } from '../entity/inventory.entity';
@@ -32,10 +31,12 @@ export class RestoreInventoryActivity implements IRestoreInventoryActivity {
         if (result.affected === 0) {
           this.logger.error(`[Order ${orderId}] Failed to restore inventory for product ${orderItem.product_id}`);
 
-          throw new AppException({
-            code: InventoryErrorCode.RESTORE_FAILED,
-            message: `Restore inventory failed for order ${orderId} and product ${orderItem.product_id}`,
-          });
+          throw new InternalServerErrorException(
+            `Restore inventory failed for order ${orderId} and product ${orderItem.product_id}`,
+            {
+              errorCode: InventoryErrorCode.RESTORE_FAILED,
+            },
+          );
         }
 
         this.logger.log(`[Order ${orderId}] Restored inventory for product ${orderItem.product_id}`);

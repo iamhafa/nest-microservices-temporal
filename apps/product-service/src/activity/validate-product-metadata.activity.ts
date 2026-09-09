@@ -1,8 +1,7 @@
-import { AppException } from '@libs/common';
 import type { ICreateProductDto, IUpdateProductDto } from '@libs/contract/product';
 import { ProductErrorCode } from '@libs/contract/product';
 import { IValidateProductMetadataActivity } from '@libs/temporal';
-import { HttpStatus, Logger } from '@nestjs/common';
+import { Logger, NotFoundException } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { In } from 'typeorm';
 import { ProductBrandRepository } from '../modules/product-brand/repository/product-brand.repository';
@@ -30,10 +29,8 @@ export class ValidateProductMetadataActivity implements IValidateProductMetadata
       if (!category) {
         this.logger.error(`[Product] Category ${category_id} not found`);
 
-        throw new AppException({
-          code: ProductErrorCode.CATEGORY_NOT_FOUND,
-          message: `Category #${category_id} not found`,
-          status: HttpStatus.NOT_FOUND,
+        throw new NotFoundException(`Category #${category_id} not found`, {
+          errorCode: ProductErrorCode.CATEGORY_NOT_FOUND,
         });
       }
     }
@@ -43,10 +40,8 @@ export class ValidateProductMetadataActivity implements IValidateProductMetadata
       if (!brand) {
         this.logger.error(`[Product] Brand ${brand_id} not found`);
 
-        throw new AppException({
-          code: ProductErrorCode.BRAND_NOT_FOUND,
-          message: `Brand #${brand_id} not found`,
-          status: HttpStatus.NOT_FOUND,
+        throw new NotFoundException(`Brand #${brand_id} not found`, {
+          errorCode: ProductErrorCode.BRAND_NOT_FOUND,
         });
       }
     }
@@ -62,10 +57,8 @@ export class ValidateProductMetadataActivity implements IValidateProductMetadata
       if (missingIds.length > 0) {
         this.logger.error(`[Product] Tags not found: ${missingIds.join(', ')}`);
 
-        throw new AppException({
-          code: ProductErrorCode.TAG_NOT_FOUND,
-          message: `Tags not found: ${missingIds.join(', ')}`,
-          status: HttpStatus.NOT_FOUND,
+        throw new NotFoundException(`Tags not found: ${missingIds.join(', ')}`, {
+          errorCode: ProductErrorCode.TAG_NOT_FOUND,
         });
       }
     }

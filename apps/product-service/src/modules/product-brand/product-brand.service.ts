@@ -1,8 +1,7 @@
 import { RabbitPayload, RabbitRPC } from '@golevelup/nestjs-rabbitmq';
-import { AppException } from '@libs/common';
 import { ProductBrandRoutingKey, RmqExchange, RmqQueue } from '@libs/messaging';
 import { type ICreateProductBrandDto, type IUpdateProductBrandDto, ProductErrorCode } from '@libs/contract/product';
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ProductBrandEntity } from './entity/product-brand.entity';
 import { ProductBrandRepository } from './repository/product-brand.repository';
 
@@ -37,10 +36,8 @@ export class ProductBrandService {
   async getProductBrand(@RabbitPayload() id: number): Promise<ProductBrandEntity> {
     const brand = await this.productBrandRepository.findOne({ where: { id } });
     if (!brand) {
-      throw new AppException({
-        code: ProductErrorCode.BRAND_NOT_FOUND,
-        message: `Product brand #${id} not found`,
-        status: HttpStatus.NOT_FOUND,
+      throw new NotFoundException(`Product brand #${id} not found`, {
+        errorCode: ProductErrorCode.BRAND_NOT_FOUND,
       });
     }
     return brand;
@@ -55,10 +52,8 @@ export class ProductBrandService {
     const { id, ...updateData } = dto;
     const result = await this.productBrandRepository.update(id, updateData);
     if (result.affected === 0) {
-      throw new AppException({
-        code: ProductErrorCode.BRAND_NOT_FOUND,
-        message: `Product brand #${id} not found`,
-        status: HttpStatus.NOT_FOUND,
+      throw new NotFoundException(`Product brand #${id} not found`, {
+        errorCode: ProductErrorCode.BRAND_NOT_FOUND,
       });
     }
   }

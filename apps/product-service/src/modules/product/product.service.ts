@@ -1,10 +1,9 @@
 import { RabbitPayload, RabbitRPC } from '@golevelup/nestjs-rabbitmq';
-import { AppException } from '@libs/common';
 import type { ICreateProductDto, IUpdateProductDto } from '@libs/contract/product';
 import { ProductErrorCode } from '@libs/contract/product';
 import { ProductRoutingKey, RmqExchange, RmqQueue } from '@libs/messaging';
 import { WorkFlowTaskQueue } from '@libs/temporal';
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { ClsService } from 'nestjs-cls';
 import { TemporalService, WorkflowExecutionResult } from 'nestjs-temporal-core';
 import { In } from 'typeorm';
@@ -32,8 +31,8 @@ export class ProductService {
     queue: RmqQueue.PRODUCT_QUEUE,
   })
   async createProduct(@RabbitPayload() createProductDto: ICreateProductDto): Promise<{ message: string; workflowId: string }> {
-    const correlationId: string = this.clsService.get('correlationId');
-    const workflowId: string = `create-product:${correlationId}`;
+    const correlationId = this.clsService.get('correlationId');
+    const workflowId = `create-product-${correlationId}`;
 
     const workFlowResponse: WorkflowExecutionResult = await this.temporalService.startWorkflow(
       'createProductWorkflow',
@@ -47,10 +46,8 @@ export class ProductService {
     if (!workFlowResponse.success) {
       throw (
         workFlowResponse.error ??
-        new AppException({
-          code: ProductErrorCode.NOT_FOUND,
-          message: 'Failed to start workflow',
-          status: HttpStatus.INTERNAL_SERVER_ERROR,
+        new InternalServerErrorException('Failed to start workflow', {
+          errorCode: ProductErrorCode.NOT_FOUND,
         })
       );
     }
@@ -126,10 +123,8 @@ export class ProductService {
     });
 
     if (!product) {
-      throw new AppException({
-        code: ProductErrorCode.NOT_FOUND,
-        message: `Product #${id} not found`,
-        status: HttpStatus.NOT_FOUND,
+      throw new NotFoundException(`Product #${id} not found`, {
+        errorCode: ProductErrorCode.NOT_FOUND,
       });
     }
 
@@ -154,9 +149,8 @@ export class ProductService {
     if (category_id) {
       const category = await this.productCategoryRepository.findOneBy({ id: category_id });
       if (!category) {
-        throw new AppException({
-          code: ProductErrorCode.CATEGORY_NOT_FOUND,
-          message: `Category #${category_id} not found`,
+        throw new NotFoundException(`Category #${category_id} not found`, {
+          errorCode: ProductErrorCode.CATEGORY_NOT_FOUND,
         });
       }
     }
@@ -165,9 +159,8 @@ export class ProductService {
     if (brand_id) {
       const brand = await this.productBrandRepository.findOneBy({ id: brand_id });
       if (!brand) {
-        throw new AppException({
-          code: ProductErrorCode.BRAND_NOT_FOUND,
-          message: `Brand #${brand_id} not found`,
+        throw new NotFoundException(`Brand #${brand_id} not found`, {
+          errorCode: ProductErrorCode.BRAND_NOT_FOUND,
         });
       }
     }
@@ -185,9 +178,8 @@ export class ProductService {
       const missingIds = tag_ids.filter((id: number) => !foundIds.has(id));
 
       if (missingIds.length > 0) {
-        throw new AppException({
-          code: ProductErrorCode.TAG_NOT_FOUND,
-          message: `Tags not found: ${missingIds.join(', ')}`,
+        throw new NotFoundException(`Tags not found: ${missingIds.join(', ')}`, {
+          errorCode: ProductErrorCode.TAG_NOT_FOUND,
         });
       }
 
@@ -206,10 +198,8 @@ export class ProductService {
     });
 
     if (!productToUpdate) {
-      throw new AppException({
-        code: ProductErrorCode.NOT_FOUND,
-        message: `Product #${id} not found`,
-        status: HttpStatus.NOT_FOUND,
+      throw new NotFoundException(`Product #${id} not found`, {
+        errorCode: ProductErrorCode.NOT_FOUND,
       });
     }
 

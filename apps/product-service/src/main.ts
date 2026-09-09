@@ -1,4 +1,4 @@
-import { RpcExceptionFilter } from '@libs/common';
+import { RmqRpcExceptionFilter } from '@libs/messaging';
 import { NestFactory } from '@nestjs/core';
 import { Logger } from 'nestjs-pino';
 import { ProductServiceModule } from './product-service.module';
@@ -9,7 +9,7 @@ async function bootstrap() {
   const logger = app.get(Logger);
   app.useLogger(logger);
   app.flushLogs(); // Xả toàn bộ log trong buffer ra màn hình bằng custom logger
-  app.useGlobalFilters(new RpcExceptionFilter());
+  app.useGlobalFilters(new RmqRpcExceptionFilter());
   app.enableShutdownHooks();
   await app.init();
 }

@@ -1,6 +1,14 @@
 import { SystemErrorCode } from '@libs/contract/base';
 import { InjectRedis } from '@nestjs-redis/client';
-import { CallHandler, ExecutionContext, HttpStatus, Injectable, Logger, NestInterceptor } from '@nestjs/common';
+import {
+  BadRequestException,
+  CallHandler,
+  ConflictException,
+  ExecutionContext,
+  Injectable,
+  Logger,
+  NestInterceptor,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { isUUID } from 'class-validator';
 import { createHash } from 'crypto';
@@ -9,7 +17,6 @@ import type { RedisClientType } from 'redis';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { IDEMPOTENT_KEY } from '../decorator/idempotent.decorator';
-import { AppException } from '../filter/exception/app-exception';
 
 /**
  * Intercepts HTTP requests to ensure idempotency using Redis.
@@ -62,19 +69,15 @@ export class IdempotencyInterceptor implements NestInterceptor {
   private validateIdempotencyHeader(idempotencyKey?: string): string {
     if (!idempotencyKey) {
       this.logger.warn('X-Idempotency-Key header is required');
-      throw new AppException({
-        code: SystemErrorCode.IDEMPOTENCY_KEY_REQUIRED,
-        status: HttpStatus.BAD_REQUEST,
-        message: 'X-Idempotency-Key header is required',
+      throw new BadRequestException('X-Idempotency-Key header is required', {
+        errorCode: SystemErrorCode.IDEMPOTENCY_KEY_REQUIRED,
       });
     }
 
     if (!isUUID(idempotencyKey, 4)) {
       this.logger.warn('X-Idempotency-Key header is invalid');
-      throw new AppException({
-        code: SystemErrorCode.IDEMPOTENCY_KEY_INVALID,
-        status: HttpStatus.BAD_REQUEST,
-        message: 'X-Idempotency-Key header is invalid',
+      throw new BadRequestException('X-Idempotency-Key header is invalid', {
+        errorCode: SystemErrorCode.IDEMPOTENCY_KEY_INVALID,
       });
     }
 
@@ -111,19 +114,15 @@ export class IdempotencyInterceptor implements NestInterceptor {
 
     if (!cachedValue) {
       this.logger.warn('Please retry your request');
-      throw new AppException({
-        code: SystemErrorCode.IDEMPOTENCY_KEY_NOT_FOUND,
-        message: 'Please retry your request',
-        status: HttpStatus.BAD_REQUEST,
+      throw new BadRequestException('Please retry your request', {
+        errorCode: SystemErrorCode.IDEMPOTENCY_KEY_NOT_FOUND,
       });
     }
 
     if (cachedValue === 'PROCESSING') {
       this.logger.warn('Request is already being processed');
-      throw new AppException({
-        code: SystemErrorCode.IDEMPOTENCY_KEY_CONFLICT,
-        message: 'Request is already being processed',
-        status: HttpStatus.CONFLICT,
+      throw new ConflictException('Request is already being processed', {
+        errorCode: SystemErrorCode.IDEMPOTENCY_KEY_CONFLICT,
       });
     }
 
@@ -131,10 +130,8 @@ export class IdempotencyInterceptor implements NestInterceptor {
 
     if (parsedCache.bodyHash !== bodyHash) {
       this.logger.error('Payload mismatch: You cannot change the request body for an existing Idempotency-Key');
-      throw new AppException({
-        code: SystemErrorCode.IDEMPOTENCY_KEY_PAYLOAD_MISMATCH,
-        message: 'Payload mismatch: You cannot change the request body for an existing Idempotency-Key',
-        status: HttpStatus.BAD_REQUEST,
+      throw new BadRequestException('Payload mismatch: You cannot change the request body for an existing Idempotency-Key', {
+        errorCode: SystemErrorCode.IDEMPOTENCY_KEY_PAYLOAD_MISMATCH,
       });
     }
 

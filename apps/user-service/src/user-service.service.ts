@@ -1,6 +1,5 @@
 import { RabbitPayload, RabbitRPC } from '@golevelup/nestjs-rabbitmq';
 import { IJwtPayload } from '@libs/auth';
-import { AppException } from '@libs/common';
 import {
   type IAuthResponseDto,
   type ILoginUserDto,
@@ -9,7 +8,7 @@ import {
   UserErrorCode,
 } from '@libs/contract/user';
 import { RmqExchange, RmqQueue, UserRoutingKey } from '@libs/messaging';
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { ConflictException, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { compare, hash } from 'bcrypt';
 import { UserEntity } from './entity/user.entity';
@@ -34,10 +33,8 @@ export class UserService {
 
     const existingUser: boolean = await this.userRepository.existsBy({ email });
     if (existingUser) {
-      throw new AppException({
-        code: UserErrorCode.EMAIL_EXISTS,
-        message: 'Email already exists',
-        status: HttpStatus.CONFLICT,
+      throw new ConflictException('Email already exists', {
+        errorCode: UserErrorCode.EMAIL_EXISTS,
       });
     }
 
@@ -81,19 +78,15 @@ export class UserService {
     });
 
     if (!user) {
-      throw new AppException({
-        code: UserErrorCode.INVALID_CREDENTIALS,
-        message: 'Invalid credentials',
-        status: HttpStatus.UNAUTHORIZED,
+      throw new UnauthorizedException('Invalid credentials', {
+        errorCode: UserErrorCode.INVALID_CREDENTIALS,
       });
     }
 
     const isPasswordValid: boolean = await compare(password, user.password_hash);
     if (!isPasswordValid) {
-      throw new AppException({
-        code: UserErrorCode.INVALID_CREDENTIALS,
-        message: 'Invalid credentials',
-        status: HttpStatus.UNAUTHORIZED,
+      throw new UnauthorizedException('Invalid credentials', {
+        errorCode: UserErrorCode.INVALID_CREDENTIALS,
       });
     }
 
@@ -120,10 +113,8 @@ export class UserService {
     });
 
     if (!user) {
-      throw new AppException({
-        code: UserErrorCode.NOT_FOUND,
-        message: 'User not found',
-        status: HttpStatus.NOT_FOUND,
+      throw new NotFoundException('User not found', {
+        errorCode: UserErrorCode.NOT_FOUND,
       });
     }
     return user;

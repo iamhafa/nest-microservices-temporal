@@ -1,9 +1,8 @@
 import { SharedAuthModule } from '@libs/auth';
-import { RpcExceptionFilter, SharedLoggerModule } from '@libs/common';
-import { RmqContextInterceptor, SharedRabbitMQModule } from '@libs/messaging';
+import { SharedLoggerModule } from '@libs/common';
+import { SharedRabbitMQModule } from '@libs/messaging';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ClsModule } from 'nestjs-cls';
 import { UserEntity } from './entity/user.entity';
@@ -38,17 +37,6 @@ import { UserService } from './user-service.service';
     SharedAuthModule,
     SharedRabbitMQModule,
   ],
-  providers: [
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: RmqContextInterceptor,
-    },
-    {
-      provide: APP_FILTER,
-      useClass: RpcExceptionFilter,
-    },
-    UserService,
-    UserRepository,
-  ],
+  providers: [UserService, UserRepository],
 })
 export class UserServiceModule {}

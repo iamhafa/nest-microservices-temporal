@@ -1,8 +1,7 @@
-import { AppException } from '@libs/common';
 import { InventoryErrorCode } from '@libs/contract/inventory';
 import { IOrderItem } from '@libs/contract/order';
 import { IConfirmInventoryActivity } from '@libs/temporal';
-import { HttpStatus, Logger } from '@nestjs/common';
+import { InternalServerErrorException, Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { EntityManager, UpdateResult } from 'typeorm';
 import { InventoryEntity } from '../entity/inventory.entity';
@@ -34,10 +33,8 @@ export class ConfirmInventoryActivity implements IConfirmInventoryActivity {
         if (result.affected === 0) {
           this.logger.error(`[Order ${orderId}] Failed to confirm inventory deduction for product ${orderItem.product_id}`);
 
-          throw new AppException({
-            code: InventoryErrorCode.ADJUSTMENT_FAILED,
-            message: `Inventory reconciliation error for product ${orderItem.product_id}`,
-            status: HttpStatus.INTERNAL_SERVER_ERROR,
+          throw new InternalServerErrorException(`Inventory reconciliation error for product ${orderItem.product_id}`, {
+            errorCode: InventoryErrorCode.ADJUSTMENT_FAILED,
           });
         }
 

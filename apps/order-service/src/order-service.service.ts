@@ -1,9 +1,8 @@
 import { RabbitPayload, RabbitRPC } from '@golevelup/nestjs-rabbitmq';
-import { AppException } from '@libs/common';
-import { type ICancelOrderDto, type ICreateOrderDto, type IUpdateOrderStatusDto, OrderErrorCode } from '@libs/contract/order';
+import { OrderErrorCode, type ICancelOrderDto, type ICreateOrderDto, type IUpdateOrderStatusDto } from '@libs/contract/order';
 import { OrderRoutingKey, RmqExchange, RmqQueue } from '@libs/messaging';
 import { WorkFlowTaskQueue } from '@libs/temporal';
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { ClsService } from 'nestjs-cls';
 import { TemporalService, WorkflowExecutionResult } from 'nestjs-temporal-core';
 import { OrderEntity } from './entity/order.entity';
@@ -42,10 +41,8 @@ export class OrderService {
     if (!workFlowResponse.success) {
       throw (
         workFlowResponse.error ??
-        new AppException({
-          code: OrderErrorCode.WORKFLOW_FAILED,
-          message: 'Failed to start workflow',
-          status: HttpStatus.INTERNAL_SERVER_ERROR,
+        new InternalServerErrorException('Failed to start workflow', {
+          errorCode: OrderErrorCode.WORKFLOW_FAILED,
         })
       );
     }
@@ -63,15 +60,17 @@ export class OrderService {
   })
   async getOrder(@RabbitPayload() orderId: number): Promise<OrderEntity> {
     const order = await this.orderRepository.findOne({
-      where: { id: orderId },
-      relations: { items: true },
+      where: {
+        id: orderId,
+      },
+      relations: {
+        items: true,
+      },
     });
 
     if (!order) {
-      throw new AppException({
-        code: OrderErrorCode.NOT_FOUND,
-        message: `Order #${orderId} not found`,
-        status: HttpStatus.NOT_FOUND,
+      throw new NotFoundException(`Order #${orderId} not found`, {
+        errorCode: OrderErrorCode.NOT_FOUND,
       });
     }
 
@@ -87,9 +86,8 @@ export class OrderService {
     const order: OrderEntity = await this.getOrder(cancelOrderDto.order_id);
 
     if (!order.isCancelable) {
-      throw new AppException({
-        code: OrderErrorCode.NOT_CANCELABLE,
-        message: `Order ${order.id} cannot be cancelled because it is in ${order.status} status.`,
+      throw new BadRequestException(`Order ${order.id} cannot be cancelled because it is in ${order.status} status.`, {
+        errorCode: OrderErrorCode.NOT_CANCELABLE,
       });
     }
 
@@ -109,10 +107,8 @@ export class OrderService {
     if (!workFlowResponse.success) {
       throw (
         workFlowResponse.error ??
-        new AppException({
-          code: OrderErrorCode.WORKFLOW_FAILED,
-          message: 'Failed to start cancel workflow',
-          status: HttpStatus.INTERNAL_SERVER_ERROR,
+        new InternalServerErrorException('Failed to start cancel workflow', {
+          errorCode: OrderErrorCode.WORKFLOW_FAILED,
         })
       );
     }

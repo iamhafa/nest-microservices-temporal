@@ -1,9 +1,7 @@
 import { SharedLoggerModule } from '@libs/common';
-import { RmqContextInterceptor } from '@libs/messaging';
 import { WorkFlowTaskQueue } from '@libs/temporal';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ClsModule } from 'nestjs-cls';
 import { TemporalModule, TemporalOptions } from 'nestjs-temporal-core';
 import { join } from 'path';
@@ -41,11 +39,6 @@ import { join } from 'path';
     // Custom dynamic modules
     SharedLoggerModule.forRoot({ serviceName: 'orchestrator-worker' }),
   ],
-  providers: [
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: RmqContextInterceptor,
-    },
-  ],
+  providers: [],
 })
 export class OrchestratorWorkerModule {}

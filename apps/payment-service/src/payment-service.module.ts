@@ -1,10 +1,9 @@
 import { StripeModule, StripeModuleConfig } from '@golevelup/nestjs-stripe';
 import { SharedLoggerModule } from '@libs/common';
-import { RmqContextInterceptor, SharedRabbitMQModule } from '@libs/messaging';
+import { SharedRabbitMQModule } from '@libs/messaging';
 import { WorkFlowTaskQueue } from '@libs/temporal';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ClsModule } from 'nestjs-cls';
 import { TemporalModule, TemporalOptions } from 'nestjs-temporal-core';
@@ -69,14 +68,6 @@ import { PaymentTransactionRepository } from './repository/payment-transaction.r
     SharedLoggerModule.forRoot({ serviceName: 'payment-service' }),
     SharedRabbitMQModule,
   ],
-  providers: [
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: RmqContextInterceptor,
-    },
-    ChargePaymentActivity,
-    RefundPaymentActivity,
-    PaymentTransactionRepository,
-  ],
+  providers: [ChargePaymentActivity, RefundPaymentActivity, PaymentTransactionRepository],
 })
 export class PaymentServiceModule {}

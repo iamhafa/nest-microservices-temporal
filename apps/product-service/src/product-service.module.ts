@@ -1,9 +1,8 @@
 import { SharedLoggerModule } from '@libs/common/logger/shared-logger.module';
-import { RmqContextInterceptor, SharedRabbitMQModule } from '@libs/messaging';
+import { SharedRabbitMQModule } from '@libs/messaging';
 import { WorkFlowTaskQueue } from '@libs/temporal';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ClsModule } from 'nestjs-cls';
 import { TemporalModule, TemporalOptions } from 'nestjs-temporal-core';
@@ -75,10 +74,6 @@ import { ProductModule } from './modules/product/product.module';
   ],
   controllers: [],
   providers: [
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: RmqContextInterceptor,
-    },
     ValidateProductMetadataActivity,
     ValidateProductsActivity,
     CreateProductActivity,

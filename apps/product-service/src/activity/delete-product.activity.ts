@@ -1,7 +1,6 @@
-import { AppException } from '@libs/common';
 import { ProductErrorCode } from '@libs/contract/product';
 import { IDeleteProductActivity } from '@libs/temporal';
-import { HttpStatus, Logger } from '@nestjs/common';
+import { BadRequestException, Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { ProductRepository } from '../modules/product/repository/product.repository';
 
@@ -19,10 +18,8 @@ export class DeleteProductActivity implements IDeleteProductActivity {
     if (result.affected === 0) {
       this.logger.error(`[Product ${productId}] Failed to delete product`);
 
-      throw new AppException({
-        code: ProductErrorCode.DELETE_PRODUCT_FAILED,
-        status: HttpStatus.BAD_REQUEST,
-        message: `Delete product ${productId} failed`,
+      throw new BadRequestException(`Delete product ${productId} failed`, {
+        errorCode: ProductErrorCode.DELETE_PRODUCT_FAILED,
       });
     }
 

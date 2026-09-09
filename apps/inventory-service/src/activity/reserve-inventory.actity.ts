@@ -1,8 +1,7 @@
-import { AppException } from '@libs/common';
 import { InventoryErrorCode } from '@libs/contract/inventory';
 import { IOrderItem } from '@libs/contract/order';
 import { IReserveInventoryActivity } from '@libs/temporal';
-import { HttpStatus, Logger } from '@nestjs/common';
+import { BadRequestException, Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { EntityManager, UpdateResult } from 'typeorm';
 import { InventoryEntity } from '../entity/inventory.entity';
@@ -34,10 +33,8 @@ export class ReserveInventoryActity implements IReserveInventoryActivity {
         if (result.affected === 0) {
           this.logger.error(`[Order ${orderId}] Failed to reserve inventory for product ${orderItem.product_id}`);
 
-          throw new AppException({
-            code: InventoryErrorCode.ADJUSTMENT_FAILED,
-            status: HttpStatus.BAD_REQUEST,
-            message: `Product ${orderItem.product_id} out of stock.`,
+          throw new BadRequestException(`Product ${orderItem.product_id} out of stock.`, {
+            errorCode: InventoryErrorCode.ADJUSTMENT_FAILED,
           });
         }
 

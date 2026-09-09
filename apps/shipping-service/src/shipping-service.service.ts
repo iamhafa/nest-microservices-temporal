@@ -1,8 +1,7 @@
 import { RabbitPayload, RabbitRPC } from '@golevelup/nestjs-rabbitmq';
-import { AppException } from '@libs/common';
 import { RmqExchange, RmqQueue, ShippingRoutingKey } from '@libs/messaging';
 import { type IUpdateDeliveryStatusDto, ShippingErrorCode } from '@libs/contract/shipping';
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ShippingEntity } from './entity/shipping.entity';
 import { ShippingRepository } from './repository/shipping.repository';
 
@@ -28,10 +27,8 @@ export class ShippingService {
     const { id, status } = updateDeliveryStatusDto;
     const shipping = await this.shippingRepository.findOneBy({ id });
     if (!shipping) {
-      throw new AppException({
-        code: ShippingErrorCode.NOT_FOUND,
-        message: `Shipping not found with id: ${id}`,
-        status: HttpStatus.NOT_FOUND,
+      throw new NotFoundException(`Shipping not found with id: ${id}`, {
+        errorCode: ShippingErrorCode.NOT_FOUND,
       });
     }
     shipping.status = status;
