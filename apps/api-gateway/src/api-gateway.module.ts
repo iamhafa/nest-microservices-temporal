@@ -1,4 +1,4 @@
-import { SharedAuthModule } from '@libs/auth';
+import { JwtAuthGuard, RolesGuard, SharedAuthModule } from '@libs/auth';
 import { EnvironmentModule, EnvironmentService, IdempotencyInterceptor, SharedLoggerModule } from '@libs/common';
 import { SharedRabbitMQModule } from '@libs/messaging';
 import { RedisConnectionConfig, RedisModule } from '@nestjs-redis/client';
@@ -91,6 +91,14 @@ import { UserModule } from './modules/user/user.module';
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
     },
     {
       provide: APP_INTERCEPTOR,

@@ -28,7 +28,7 @@ export class SharedLoggerModule {
 
             return {
               pinoHttp: {
-                genReqId: (req: Request) => req.headers['X-Correlation-Id'] as string,
+                genReqId: (req: Request) => req.headers['x-correlation-id'] as string,
                 msgPrefix: `[${options.serviceName}] `,
                 level: envService.isDevelopment() ? 'debug' : 'info',
                 autoLogging: {

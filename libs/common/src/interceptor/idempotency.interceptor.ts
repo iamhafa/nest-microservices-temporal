@@ -13,9 +13,10 @@ import { Reflector } from '@nestjs/core';
 import { isUUID } from 'class-validator';
 import { createHash } from 'crypto';
 import { Request, Response } from 'express';
+import { ClsService } from 'nestjs-cls';
 import type { RedisClientType } from 'redis';
-import { Observable, of, throwError } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { Observable, of } from 'rxjs';
+import { catchError, concatMap } from 'rxjs/operators';
 import { IDEMPOTENT_KEY } from '../decorator/idempotent.decorator';
 
 /**
@@ -32,6 +33,7 @@ export class IdempotencyInterceptor implements NestInterceptor {
 
   constructor(
     private readonly reflector: Reflector,
+    private readonly clsService: ClsService,
     @InjectRedis() private readonly redisClient: RedisClientType,
   ) {}
 
@@ -88,7 +90,8 @@ export class IdempotencyInterceptor implements NestInterceptor {
    * Generates a Redis cache key and SHA-256 hash of the request body.
    */
   private createCacheKeyAndHash(request: Request, idempotencyKey: string): { cacheKey: string; bodyHash: string } {
-    const cacheKey: string = `idempotency:${request.method}:${request.url}:${idempotencyKey}`;
+    const userId: number | undefined = this.clsService.get<number | undefined>('userId');
+    const cacheKey: string = `idempotency:${userId}:${request.method}:${request.url}:${idempotencyKey}`;
     const stringifiedBody: string = JSON.stringify(request.body ?? {});
 
     /**
@@ -152,27 +155,32 @@ export class IdempotencyInterceptor implements NestInterceptor {
     response.setHeader('X-Idempotency-Key', idempotencyKey);
 
     return next.handle().pipe(
-      tap(async (responseData: any) => {
+      concatMap(async (responseData: any) => {
         const cachePayload: TCachePayload = {
           bodyHash,
           body: responseData,
         };
         this.logger.log(`Cache payload: ${cachePayload.bodyHash}`);
 
-        // Cache completed response for 24 hours (86,400 seconds)
-        const redisResponse: string | null = await this.redisClient.set(cacheKey, JSON.stringify(cachePayload), {
-          condition: 'XX', // Chỉ set nếu key đã tồn tại (chính là key đang được xử lý)
-          expiration: {
-            type: 'EX', // Loại thời gian sống (expiration time)
-            value: 86400, // 24 hours in seconds
-          },
-        });
+        try {
+          // Cache completed response for 24 hours (86,400 seconds)
+          const redisResponse: string | null = await this.redisClient.set(cacheKey, JSON.stringify(cachePayload), {
+            condition: 'XX', // Chỉ set nếu key đã tồn tại (chính là key đang được xử lý)
+            expiration: {
+              type: 'EX', // Loại thời gian sống (expiration time)
+              value: 86400, // 24 hours in seconds
+            },
+          });
 
-        this.logger.log(`Cache completed response: ${redisResponse}`);
-
-        if (redisResponse === null) {
-          this.logger.error('Error: Cache completed response failed');
+          this.logger.log(`Cache completed response: ${redisResponse}`);
+          if (redisResponse === null) {
+            this.logger.error('Error: Cache completed response failed');
+          }
+        } catch (err: unknown) {
+          this.logger.error('Redis cache set error:', err);
         }
+
+        return responseData;
       }),
       catchError(async (err: unknown) => {
         // Release Redis lock on failure so client can retry
@@ -182,7 +190,8 @@ export class IdempotencyInterceptor implements NestInterceptor {
         } catch (error: unknown) {
           this.logger.error('Redis delete error:', error);
         }
-        return throwError(() => err);
+
+        throw err;
       }),
     );
   }
@@ -190,5 +199,5 @@ export class IdempotencyInterceptor implements NestInterceptor {
 
 type TCachePayload = {
   bodyHash: string;
-  body: Record<string, string>;
+  body: any;
 };

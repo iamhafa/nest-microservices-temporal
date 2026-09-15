@@ -3,6 +3,7 @@ import { IRpcResponse, SystemErrorCode } from '@libs/contract/base';
 import { GatewayTimeoutException, HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { MessagePropertyHeaders } from 'amqplib';
 import { ClsService } from 'nestjs-cls';
+import { randomUUID } from 'crypto';
 
 import { RmqExchange } from '../enum/exchange/rmq-exchange.enum';
 import { InventoryRoutingKey } from '../enum/routing-key/inventory-routing-key.enum';
@@ -34,9 +35,10 @@ export class RmqPublisherService {
    */
   async request<T>(routingKey: RoutingKey, payload: any): Promise<T> {
     const userId = this.clsService.get<number | undefined>('userId');
+    const correlationId = this.clsService.get<string>('correlationId') ?? this.clsService.getId() ?? randomUUID();
 
     const headers: MessagePropertyHeaders = {
-      'X-Correlation-Id': this.clsService.getId(), // must be attach correlationId via headers of RabbitMQ,
+      'X-Correlation-Id': correlationId,
       'X-User-Id': userId,
     };
 
