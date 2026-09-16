@@ -1,6 +1,6 @@
 import { SharedAuthModule } from '@libs/auth';
 import { SharedLoggerModule } from '@libs/common';
-import { SharedRabbitMQModule } from '@libs/messaging';
+import { rmqClsModuleConfig, SharedRabbitMQModule } from '@libs/messaging';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -13,7 +13,7 @@ import { UserService } from './user-service.service';
   imports: [
     // Core Modules
     ConfigModule.forRoot({ isGlobal: true }),
-    ClsModule.forRoot({ global: true }),
+    ClsModule.forRoot(rmqClsModuleConfig),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({

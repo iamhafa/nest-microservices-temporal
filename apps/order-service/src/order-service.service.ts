@@ -128,8 +128,9 @@ export class OrderService {
   })
   getOrders(): Promise<OrderEntity[]> {
     return this.orderRepository.find({
-      relations: { items: true },
-      order: { created_at_utc: 'DESC' },
+      relations: {
+        items: true,
+      },
     });
   }
 
@@ -140,10 +141,14 @@ export class OrderService {
   })
   getMyOrders(): Promise<OrderEntity[]> {
     const userId: number = this.clsService.get('userId');
+
     return this.orderRepository.find({
-      where: { user_id: userId },
-      relations: { items: true },
-      order: { created_at_utc: 'DESC' },
+      where: {
+        user_id: userId,
+      },
+      relations: {
+        items: true,
+      },
     });
   }
 

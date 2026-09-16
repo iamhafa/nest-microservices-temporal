@@ -8,7 +8,7 @@ export * from './enum/routing-key/product-routing-key.enum';
 export * from './enum/routing-key/shipping-routing-key.enum';
 export * from './enum/routing-key/user-routing-key.enum';
 export * from './filter/rmq-rpc-exception.filter';
-export * from './interceptor/rmq-context.interceptor';
 export * from './interceptor/rmq-rpc-response.interceptor';
 export * from './module/shared-rabbitmq.module';
 export * from './publisher/rmq-publisher.service';
+export * from './config/rmq-cls-module.config';

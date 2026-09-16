@@ -1,10 +1,7 @@
 import { defaultNackErrorHandler, MessageHandlerErrorBehavior, RabbitMQConfig, RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import { Global, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { APP_INTERCEPTOR } from '@nestjs/core';
 import { RmqExchange } from '../enum/exchange/rmq-exchange.enum';
-import { RmqContextInterceptor } from '../interceptor/rmq-context.interceptor';
-import { RmqRpcResponseInterceptor } from '../interceptor/rmq-rpc-response.interceptor';
 import { RmqPublisherService } from '../publisher/rmq-publisher.service';
 
 @Global()
@@ -44,17 +41,7 @@ import { RmqPublisherService } from '../publisher/rmq-publisher.service';
       }),
     }),
   ],
-  providers: [
-    RmqPublisherService,
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: RmqRpcResponseInterceptor,
-    },
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: RmqContextInterceptor,
-    },
-  ],
+  providers: [RmqPublisherService],
   exports: [RmqPublisherService],
 })
 export class SharedRabbitMQModule {}

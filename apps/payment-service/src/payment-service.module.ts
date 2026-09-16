@@ -1,6 +1,6 @@
 import { StripeModule, StripeModuleConfig } from '@golevelup/nestjs-stripe';
 import { SharedLoggerModule } from '@libs/common';
-import { SharedRabbitMQModule } from '@libs/messaging';
+import { rmqClsModuleConfig, SharedRabbitMQModule } from '@libs/messaging';
 import { WorkFlowTaskQueue } from '@libs/temporal';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -15,7 +15,7 @@ import { PaymentTransactionRepository } from './repository/payment-transaction.r
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    ClsModule.forRoot({ global: true }),
+    ClsModule.forRoot(rmqClsModuleConfig),
 
     StripeModule.forRootAsync({
       inject: [ConfigService],
