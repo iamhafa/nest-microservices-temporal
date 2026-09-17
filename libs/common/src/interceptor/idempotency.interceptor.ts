@@ -10,6 +10,7 @@ import {
   NestInterceptor,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import canonicalize from 'canonicalize';
 import { isUUID } from 'class-validator';
 import { createHash } from 'crypto';
 import { Request, Response } from 'express';
@@ -45,10 +46,15 @@ export class IdempotencyInterceptor implements NestInterceptor {
     const response: Response = context.switchToHttp().getResponse();
 
     const idempotencyKey: string = this.validateIdempotencyHeader(request.header('X-Idempotency-Key'));
-    const { cacheKey, bodyHash } = this.createCacheKeyAndHash(request, idempotencyKey);
+    const { cacheKey, bodyHashed } = this.createCacheKeyAndHash(request, idempotencyKey);
 
-    // Atomic Lock: Set key with value "PROCESSING" and TTL 120s if key does not exist
-    const isNewRequest: string | null = await this.redisClient.set(cacheKey, 'PROCESSING', {
+    const initialPayload: TIdempotencyCache = {
+      status: IdempotencyStatus.PROCESSING,
+      bodyHashed,
+    };
+
+    // Atomic Lock: Set key with status "PROCESSING", bodyHashed, and TTL 120s if key does not exist
+    const isNewRequest: string | null = await this.redisClient.set(cacheKey, JSON.stringify(initialPayload), {
       condition: 'NX', // Only set the key if it does not already exist
       expiration: {
         type: 'EX', // Expire the key after 120 seconds
@@ -57,12 +63,12 @@ export class IdempotencyInterceptor implements NestInterceptor {
     });
 
     if (isNewRequest !== 'OK') {
-      this.logger.log(`Duplicate place order request with key ${idempotencyKey} and return cached response`);
-      return this.handleDuplicateRequest(cacheKey, bodyHash, idempotencyKey, response);
+      this.logger.log(`Duplicate request with key ${idempotencyKey}`);
+      return this.handleDuplicateRequest(cacheKey, bodyHashed, idempotencyKey, response);
     }
 
-    this.logger.log(`New place order request with key ${idempotencyKey}`);
-    return this.executeAndCacheNewRequest(next, cacheKey, bodyHash, idempotencyKey, response);
+    this.logger.log(`New request with key ${idempotencyKey}`);
+    return this.executeAndCacheNewRequest(next, cacheKey, bodyHashed, idempotencyKey, response);
   }
 
   /**
@@ -89,19 +95,21 @@ export class IdempotencyInterceptor implements NestInterceptor {
   /**
    * Generates a Redis cache key and SHA-256 hash of the request body.
    */
-  private createCacheKeyAndHash(request: Request, idempotencyKey: string): { cacheKey: string; bodyHash: string } {
+  private createCacheKeyAndHash(request: Request, idempotencyKey: string): { cacheKey: string; bodyHashed: string } {
     const userId: number | undefined = this.clsService.get<number | undefined>('userId');
     const cacheKey: string = `idempotency:${userId}:${request.method}:${request.url}:${idempotencyKey}`;
-    const stringifiedBody: string = JSON.stringify(request.body ?? {});
 
     /**
-     * @description Why we need bodyHash?
-     * - To check if the request body is the same
-     * - If the request body is different, the bodyHash will be different
+     * @description Chuẩn hóa chuỗi JSON của request body theo đặc tả RFC 8785 (JSON Canonicalization Scheme):
+     * 1. Sắp xếp các key theo thứ tự cố định để 2 payload cùng ngữ nghĩa nhưng khác thứ tự key
+     *    (ví dụ: `{ a: 1, b: 2 }` và `{ b: 2, a: 1 }`) luôn tạo ra chuỗi đồng nhất, tránh báo sai lỗi Payload Mismatch.
+     * 2. `request.body ?? {}`: Đảm bảo luôn truyền vào một object hợp lệ kể cả khi client gửi request rỗng / không có body.
+     * 3. `?? '{}'`: Phòng vệ an toàn (defensive programming) nếu `canonicalize` trả về `undefined`, tránh gây crash hàm `crypto.createHash().update()`.
      */
-    const bodyHash: string = createHash('sha256').update(stringifiedBody).digest('hex');
+    const canonicalBody: string = canonicalize(request.body ?? {}) ?? '{}';
+    const bodyHashed: string = createHash('sha256').update(canonicalBody).digest('hex');
 
-    return { cacheKey, bodyHash };
+    return { cacheKey, bodyHashed };
   }
 
   /**
@@ -109,7 +117,7 @@ export class IdempotencyInterceptor implements NestInterceptor {
    */
   private async handleDuplicateRequest(
     cacheKey: string,
-    bodyHash: string,
+    bodyHashed: string,
     idempotencyKey: string,
     response: Response,
   ): Promise<Observable<any>> {
@@ -122,24 +130,40 @@ export class IdempotencyInterceptor implements NestInterceptor {
       });
     }
 
-    if (cachedValue === 'PROCESSING') {
+    let parsedCache: TIdempotencyCache;
+    try {
+      parsedCache = JSON.parse(cachedValue);
+    } catch {
+      // Fallback in case of legacy string format
+      if (cachedValue === 'PROCESSING') {
+        throw new ConflictException('Request is already being processed', {
+          errorCode: SystemErrorCode.IDEMPOTENCY_KEY_CONFLICT,
+        });
+      }
+      throw new BadRequestException('Please retry your request', {
+        errorCode: SystemErrorCode.IDEMPOTENCY_KEY_NOT_FOUND,
+      });
+    }
+
+    // 1. Prioritize payload mismatch check
+    if (parsedCache.bodyHashed !== bodyHashed) {
+      this.logger.error('Payload mismatch: You cannot change the request body for an existing Idempotency-Key');
+      throw new ConflictException('Payload mismatch: You cannot change the request body for an existing Idempotency-Key', {
+        errorCode: SystemErrorCode.IDEMPOTENCY_KEY_PAYLOAD_MISMATCH,
+      });
+    }
+
+    // 2. Check if request is currently being processed
+    if (parsedCache.status === IdempotencyStatus.PROCESSING) {
       this.logger.warn('Request is already being processed');
       throw new ConflictException('Request is already being processed', {
         errorCode: SystemErrorCode.IDEMPOTENCY_KEY_CONFLICT,
       });
     }
 
-    const parsedCache: TCachePayload = JSON.parse(cachedValue);
-
-    if (parsedCache.bodyHash !== bodyHash) {
-      this.logger.error('Payload mismatch: You cannot change the request body for an existing Idempotency-Key');
-      throw new BadRequestException('Payload mismatch: You cannot change the request body for an existing Idempotency-Key', {
-        errorCode: SystemErrorCode.IDEMPOTENCY_KEY_PAYLOAD_MISMATCH,
-      });
-    }
-
+    // 3. Request completed successfully, return cached response
     response.setHeader('X-Idempotency-Key', idempotencyKey);
-    return of(parsedCache.body);
+    return of(parsedCache.response);
   }
 
   /**
@@ -148,7 +172,7 @@ export class IdempotencyInterceptor implements NestInterceptor {
   private executeAndCacheNewRequest(
     next: CallHandler,
     cacheKey: string,
-    bodyHash: string,
+    bodyHashed: string,
     idempotencyKey: string,
     response: Response,
   ): Observable<any> {
@@ -156,11 +180,12 @@ export class IdempotencyInterceptor implements NestInterceptor {
 
     return next.handle().pipe(
       concatMap(async (responseData: any) => {
-        const cachePayload: TCachePayload = {
-          bodyHash,
-          body: responseData,
+        const cachePayload: TIdempotencyCache = {
+          status: IdempotencyStatus.COMPLETED,
+          bodyHashed,
+          response: responseData,
         };
-        this.logger.log(`Cache payload: ${cachePayload.bodyHash}`);
+        this.logger.log(`Cache payload: ${cachePayload.bodyHashed}`);
 
         try {
           // Cache completed response for 24 hours (86,400 seconds)
@@ -197,7 +222,13 @@ export class IdempotencyInterceptor implements NestInterceptor {
   }
 }
 
-type TCachePayload = {
-  bodyHash: string;
-  body: any;
+enum IdempotencyStatus {
+  PROCESSING = 'PROCESSING',
+  COMPLETED = 'COMPLETED',
+}
+
+type TIdempotencyCache = {
+  status: IdempotencyStatus;
+  bodyHashed: string;
+  response?: any;
 };

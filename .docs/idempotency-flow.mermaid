@@ -1,22 +1,46 @@
-sequenceDiagram
-    autonumber
-    actor Client
-    participant Gateway as API Gateway (IdempotencyInterceptor)
-    participant Redis
-    participant Saga as Temporal Saga / Worker
+flowchart TD
+    Start([Client gửi Request kèm X-Idempotency-Key]) --> ValHeader{X-Idempotency-Key<br/>hợp lệ & là UUIDv4?}
+    
+    ValHeader -- Không --> Err400[Throw 400 Bad Request<br/>IDEMPOTENCY_KEY_INVALID/REQUIRED]
+    ValHeader -- Có --> GenHash[Tạo cacheKey & tính bodyHash từ body]
 
-    Note over Client,Saga: ─── LẦN 1: ĐẶT HÀNG BAN ĐẦU ───
-    Client->>Gateway: POST /orders/place (Header: X-Idempotency-Key)
-    Gateway->>Redis: SETNX idempotency:POST:... "PROCESSING" (120s)
-    Redis-->>Gateway: OK (Key mới)
-    Gateway->>Saga: Kích hoạt Workflow place-order:...
-    Saga-->>Gateway: Phản hồi { success: true, workflowId: "place-order:..." }
-    Gateway->>Redis: Lưu kết quả Response + BodyHash vào Redis
-    Gateway-->>Client: 201 Created
+    GenHash --> TryLock["Atomic Redis SET NX (TTL: 120s)<br/>Value: { status: 'PROCESSING', bodyHash }"]
 
-    Note over Client,Saga: ─── LẦN 2: GỬI LẠI VỚI CÙNG KEY (DUPLICATE) ───
-    Client->>Gateway: POST /orders/place (Cùng Header X-Idempotency-Key)
-    Gateway->>Redis: GET idempotency:POST:...
-    Redis-->>Gateway: Trả về Cached Response từ Lần 1
-    Note over Gateway: CHẶN LẠI! Không gọi sang RabbitMQ / Temporal
-    Gateway-->>Client: Trả về ngay lập tức Cached Response (1ms)
+    TryLock -- "Thành công (isNewRequest == 'OK')" --> ExecHandler[Chuyển tiếp xử lý business logic / workflow downstream]
+
+    %% Nhánh xử lý Request mới
+    subgraph S1 [Xử lý Request Mới]
+        ExecHandler --> IsSuccess{Xử lý thành công?}
+        IsSuccess -- "Thành công (200/201)" --> CacheCompleted["Redis SET XX (TTL: 24h)<br/>Value: { status: 'COMPLETED', bodyHash, response }"]
+        CacheCompleted --> ReturnRes([Trả Response cho Client + Header X-Idempotency-Key])
+
+        IsSuccess -- "Thất bại (Exception)" --> ReleaseLock["Redis DEL cacheKey<br/>(Cho phép client retry sau)"]
+        ReleaseLock --> ThrowErr([Throw Exception ban đầu])
+    end
+
+    %% Nhánh xử lý Request trùng lặp (Duplicate)
+    TryLock -- "Thất bại (Key đã tồn tại)" --> GetCache[Redis GET cacheKey]
+
+    subgraph S2 [Xử lý Duplicate Request]
+        GetCache --> CheckCacheExist{Dữ liệu cache<br/>có tồn tại?}
+        CheckCacheExist -- Không --> ErrNotFound[Throw 400 Bad Request<br/>IDEMPOTENCY_KEY_NOT_FOUND]
+        
+        CheckCacheExist -- Có --> CheckHash{cached.bodyHash == current.bodyHash ?}
+        
+        CheckHash -- "Khác bodyHash<br/>(Request C)" --> Err409Mismatch["Throw 409 Conflict<br/>IDEMPOTENCY_KEY_PAYLOAD_MISMATCH<br/>(Từ chối vì body không khớp)"]
+
+        CheckHash -- "Trùng bodyHash" --> CheckStatus{cached.status}
+        
+        CheckStatus -- "PROCESSING<br/>(Request B đến khi A chưa xong)" --> Err409Processing["Throw 409 Conflict<br/>IDEMPOTENCY_KEY_CONFLICT<br/>(Đang xử lý, vui lòng chờ)"]
+        
+        CheckStatus -- "COMPLETED<br/>(Request B đến khi A đã xong)" --> ReturnCachedRes([Trả cached.response ngay lập tức<br/>+ Header X-Idempotency-Key])
+    end
+
+    %% Styling
+    classDef success fill:#e6f4ea,stroke:#137333,stroke-width:2px;
+    classDef error fill:#fce8e6,stroke:#c5221f,stroke-width:2px;
+    classDef process fill:#e8f0fe,stroke:#1a73e8,stroke-width:2px;
+    
+    class ReturnRes,ReturnCachedRes success;
+    class Err400,ErrNotFound,Err409Mismatch,Err409Processing,ThrowErr error;
+    class TryLock,CacheCompleted,ReleaseLock,GetCache process;
