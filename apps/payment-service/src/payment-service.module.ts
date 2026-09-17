@@ -1,11 +1,10 @@
 import { StripeModule, StripeModuleConfig } from '@golevelup/nestjs-stripe';
-import { SharedLoggerModule } from '@libs/common';
-import { rmqClsModuleConfig, SharedRabbitMQModule } from '@libs/messaging';
+import { SharedClsModule, SharedLoggerModule } from '@libs/common';
+import { SharedRabbitMQModule } from '@libs/messaging';
 import { WorkFlowTaskQueue } from '@libs/temporal';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ClsModule } from 'nestjs-cls';
 import { TemporalModule, TemporalOptions } from 'nestjs-temporal-core';
 import { ChargePaymentActivity } from './activity/charge-payment.activity';
 import { RefundPaymentActivity } from './activity/refund-payment.activity';
@@ -15,8 +14,6 @@ import { PaymentTransactionRepository } from './repository/payment-transaction.r
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    ClsModule.forRoot(rmqClsModuleConfig),
-
     StripeModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService): StripeModuleConfig => ({
@@ -67,6 +64,7 @@ import { PaymentTransactionRepository } from './repository/payment-transaction.r
     // Custom dynamic modules
     SharedLoggerModule.forRoot({ serviceName: 'payment-service' }),
     SharedRabbitMQModule,
+    SharedClsModule.forRoot(),
   ],
   providers: [ChargePaymentActivity, RefundPaymentActivity, PaymentTransactionRepository],
 })

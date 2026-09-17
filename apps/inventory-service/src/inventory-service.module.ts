@@ -1,10 +1,9 @@
-import { SharedLoggerModule } from '@libs/common';
-import { rmqClsModuleConfig, SharedRabbitMQModule } from '@libs/messaging';
+import { SharedClsModule, SharedLoggerModule } from '@libs/common';
+import { SharedRabbitMQModule } from '@libs/messaging';
 import { WorkFlowTaskQueue } from '@libs/temporal';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ClsModule } from 'nestjs-cls';
 import { TemporalModule, TemporalOptions } from 'nestjs-temporal-core';
 import { ConfirmInventoryActivity } from './activity/confirm-inventory.activity';
 import { InitializeInventoryActivity } from './activity/initialize-inventory.activity';
@@ -18,8 +17,6 @@ import { InventoryRepository } from './repository/inventory.repository';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    ClsModule.forRoot(rmqClsModuleConfig),
-
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
@@ -64,6 +61,7 @@ import { InventoryRepository } from './repository/inventory.repository';
     // Custom dynamic modules
     SharedLoggerModule.forRoot({ serviceName: 'inventory-service' }),
     SharedRabbitMQModule,
+    SharedClsModule.forRoot(),
   ],
   providers: [
     ReserveInventoryActity,

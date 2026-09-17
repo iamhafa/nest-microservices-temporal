@@ -1,10 +1,9 @@
-import { SharedLoggerModule } from '@libs/common/logger/shared-logger.module';
-import { rmqClsModuleConfig, SharedRabbitMQModule } from '@libs/messaging';
+import { SharedClsModule, SharedLoggerModule } from '@libs/common';
+import { SharedRabbitMQModule } from '@libs/messaging';
 import { WorkFlowTaskQueue } from '@libs/temporal';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ClsModule } from 'nestjs-cls';
 import { TemporalModule, TemporalOptions } from 'nestjs-temporal-core';
 import { CreateProductActivity } from './activity/create-product.activity';
 import { DeleteProductActivity } from './activity/delete-product.activity';
@@ -19,7 +18,6 @@ import { ProductModule } from './modules/product/product.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    ClsModule.forRoot(rmqClsModuleConfig),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
@@ -65,6 +63,7 @@ import { ProductModule } from './modules/product/product.module';
     // Custom dynamic modules
     SharedLoggerModule.forRoot({ serviceName: 'product-service' }),
     SharedRabbitMQModule,
+    SharedClsModule.forRoot(),
 
     // Feature modules
     ProductModule,

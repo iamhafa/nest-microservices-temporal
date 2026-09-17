@@ -1,10 +1,9 @@
-import { SharedLoggerModule } from '@libs/common';
-import { rmqClsModuleConfig, SharedRabbitMQModule } from '@libs/messaging';
+import { SharedClsModule, SharedLoggerModule } from '@libs/common';
+import { SharedRabbitMQModule } from '@libs/messaging';
 import { WorkFlowTaskQueue } from '@libs/temporal';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ClsModule } from 'nestjs-cls';
 import { TemporalModule, TemporalOptions } from 'nestjs-temporal-core';
 import { CreateOrderActivity } from './activity/create-order.activity';
 import { DeleteOrderActivity } from './activity/delete-order.activity';
@@ -22,7 +21,6 @@ import { OrderRepository } from './repository/order.repository';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    ClsModule.forRoot(rmqClsModuleConfig),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
@@ -68,6 +66,7 @@ import { OrderRepository } from './repository/order.repository';
     // Custom dynamic modules
     SharedLoggerModule.forRoot({ serviceName: 'order-service' }),
     SharedRabbitMQModule,
+    SharedClsModule.forRoot(),
   ],
   providers: [
     OrderService,

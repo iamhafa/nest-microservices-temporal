@@ -1,10 +1,9 @@
-import { SharedLoggerModule } from '@libs/common/logger/shared-logger.module';
-import { rmqClsModuleConfig, SharedRabbitMQModule } from '@libs/messaging';
+import { SharedClsModule, SharedLoggerModule } from '@libs/common';
+import { SharedRabbitMQModule } from '@libs/messaging';
 import { WorkFlowTaskQueue } from '@libs/temporal';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ClsModule } from 'nestjs-cls';
 import { TemporalModule, TemporalOptions } from 'nestjs-temporal-core';
 import { CreateShipmentActivity } from './activity/create-shipment.activity';
 import { ShippingEntity } from './entity/shipping.entity';
@@ -14,8 +13,6 @@ import { ShippingService } from './shipping-service.service';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    ClsModule.forRoot(rmqClsModuleConfig),
-
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
@@ -54,6 +51,7 @@ import { ShippingService } from './shipping-service.service';
     // Custom dynamic modules
     SharedLoggerModule.forRoot({ serviceName: 'shipping-service' }),
     SharedRabbitMQModule,
+    SharedClsModule.forRoot(),
   ],
   providers: [ShippingService, CreateShipmentActivity, ShippingRepository],
 })

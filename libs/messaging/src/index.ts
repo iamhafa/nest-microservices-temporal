@@ -11,4 +11,3 @@ export * from './filter/rmq-rpc-exception.filter';
 export * from './interceptor/rmq-rpc-response.interceptor';
 export * from './module/shared-rabbitmq.module';
 export * from './publisher/rmq-publisher.service';
-export * from './config/rmq-cls-module.config';

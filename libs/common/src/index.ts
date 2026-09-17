@@ -1,3 +1,4 @@
+export * from './context/shared-cls.module';
 export * from './decorator/idempotent.decorator';
 export * from './environment/environment.module';
 export * from './environment/environment.service';
