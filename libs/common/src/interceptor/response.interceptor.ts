@@ -1,6 +1,5 @@
 import { CallHandler, ContextType, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
 import { Request } from 'express';
-import { has, isObject } from 'lodash';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -15,13 +14,9 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, any> {
 
     return next.handle().pipe(
       map((result: T) => {
-        const hasCustomShape: boolean = isObject(result) && (has(result, 'data') || has(result, 'meta'));
-        const objResult = result as any;
-
         return {
           success: true,
-          data: hasCustomShape && objResult.data !== undefined ? objResult.data : result,
-          ...(hasCustomShape && objResult.meta ? { meta: objResult.meta } : {}),
+          data: result,
         };
       }),
     );
