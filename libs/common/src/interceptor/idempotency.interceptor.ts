@@ -10,10 +10,11 @@ import {
   NestInterceptor,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import canonicalize from 'canonicalize';
 import { isUUID } from 'class-validator';
-import { createHash } from 'crypto';
+import { hash } from 'crypto';
 import { Request, Response } from 'express';
+import { canonicalize } from 'json-canonicalize';
+import { isNull } from 'lodash';
 import { ClsService } from 'nestjs-cls';
 import type { RedisClientType } from 'redis';
 import { Observable, of } from 'rxjs';
@@ -46,15 +47,23 @@ export class IdempotencyInterceptor implements NestInterceptor {
     const response: Response = context.switchToHttp().getResponse();
 
     const idempotencyKey: string = this.validateIdempotencyHeader(request.header('X-Idempotency-Key'));
-    const { cacheKey, bodyHashed } = this.createCacheKeyAndHash(request, idempotencyKey);
+    const { cacheKey, hashedBody } = this.createCacheKeyAndHash(request, idempotencyKey);
+
+    /**
+     * Echo lại Idempotency-Key ra response header MỘT LẦN tại đây (thay vì lặp ở từng nhánh xử lý).
+     * Nhờ vậy MỌI response đều mang header này - dù là request mới, trả về từ cache, hay khi ném lỗi
+     * (conflict / payload mismatch) - giúp client luôn đối chiếu được key đã gửi.
+     */
+    response.setHeader('X-Idempotency-Key', idempotencyKey);
 
     const initialPayload: TIdempotencyCache = {
       status: IdempotencyStatus.PROCESSING,
-      bodyHashed,
+      hashedBody,
     };
+    const stringifiedInitialPayload: string = JSON.stringify(initialPayload);
 
-    // Atomic Lock: Set key with status "PROCESSING", bodyHashed, and TTL 120s if key does not exist
-    const isNewRequest: string | null = await this.redisClient.set(cacheKey, JSON.stringify(initialPayload), {
+    // Atomic Lock: Set key with status "PROCESSING", hashedBody, and TTL 120s if key does not exist
+    const isNewRequest: string | null = await this.redisClient.set(cacheKey, stringifiedInitialPayload, {
       condition: 'NX', // Only set the key if it does not already exist
       expiration: {
         type: 'EX', // Expire the key after 120 seconds
@@ -64,11 +73,11 @@ export class IdempotencyInterceptor implements NestInterceptor {
 
     if (isNewRequest !== 'OK') {
       this.logger.log(`Duplicate request with key ${idempotencyKey}`);
-      return this.handleDuplicateRequest(cacheKey, bodyHashed, idempotencyKey, response);
+      return this.handleDuplicateRequest(cacheKey, hashedBody, idempotencyKey);
     }
 
     this.logger.log(`New request with key ${idempotencyKey}`);
-    return this.executeAndCacheNewRequest(next, cacheKey, bodyHashed, idempotencyKey, response);
+    return this.executeAndCacheNewRequest(next, cacheKey, hashedBody);
   }
 
   /**
@@ -95,32 +104,29 @@ export class IdempotencyInterceptor implements NestInterceptor {
   /**
    * Generates a Redis cache key and SHA-256 hash of the request body.
    */
-  private createCacheKeyAndHash(request: Request, idempotencyKey: string): { cacheKey: string; bodyHashed: string } {
+  private createCacheKeyAndHash(
+    request: Request,
+    idempotencyKey: string,
+  ): { cacheKey: string } & Pick<TIdempotencyCache, 'hashedBody'> {
     const userId: number | undefined = this.clsService.get<number | undefined>('userId');
+    // example: idempotency:1:POST:/api/v1/orders/place:1e9a1a18-91fb-4992-94cf-f16b77f7a7a1
     const cacheKey: string = `idempotency:${userId}:${request.method}:${request.url}:${idempotencyKey}`;
 
     /**
-     * @description Chuẩn hóa chuỗi JSON của request body theo đặc tả RFC 8785 (JSON Canonicalization Scheme):
-     * 1. Sắp xếp các key theo thứ tự cố định để 2 payload cùng ngữ nghĩa nhưng khác thứ tự key
-     *    (ví dụ: `{ a: 1, b: 2 }` và `{ b: 2, a: 1 }`) luôn tạo ra chuỗi đồng nhất, tránh báo sai lỗi Payload Mismatch.
-     * 2. `request.body ?? {}`: Đảm bảo luôn truyền vào một object hợp lệ kể cả khi client gửi request rỗng / không có body.
-     * 3. `?? '{}'`: Phòng vệ an toàn (defensive programming) nếu `canonicalize` trả về `undefined`, tránh gây crash hàm `crypto.createHash().update()`.
+     * Chuẩn hóa JSON body theo RFC 8785 (JSON Canonicalization Scheme) để 2 payload cùng ngữ nghĩa
+     * nhưng khác thứ tự key vẫn tạo ra chuỗi đồng nhất, tránh báo sai lỗi Payload Mismatch.
+     * `request.body ?? {}`: đảm bảo luôn có object hợp lệ kể cả body rỗng.
      */
-    const canonicalBody: string = canonicalize(request.body ?? {}) ?? '{}';
-    const bodyHashed: string = createHash('sha256').update(canonicalBody).digest('hex');
+    const canonicalBody: string = canonicalize(request.body ?? {});
+    const hashedBody: string = hash('sha256', canonicalBody, 'hex');
 
-    return { cacheKey, bodyHashed };
+    return { cacheKey, hashedBody };
   }
 
   /**
    * Handles duplicate requests by verifying cached state or throwing conflict/mismatch errors.
    */
-  private async handleDuplicateRequest(
-    cacheKey: string,
-    bodyHashed: string,
-    idempotencyKey: string,
-    response: Response,
-  ): Promise<Observable<any>> {
+  private async handleDuplicateRequest(cacheKey: string, hashedBody: string, idempotencyKey: string): Promise<Observable<any>> {
     const cachedValue: string | null = await this.redisClient.get(cacheKey);
 
     if (!cachedValue) {
@@ -130,23 +136,11 @@ export class IdempotencyInterceptor implements NestInterceptor {
       });
     }
 
-    let parsedCache: TIdempotencyCache;
-    try {
-      parsedCache = JSON.parse(cachedValue);
-    } catch {
-      // Fallback in case of legacy string format
-      if (cachedValue === 'PROCESSING') {
-        throw new ConflictException('Request is already being processed', {
-          errorCode: SystemErrorCode.IDEMPOTENCY_KEY_CONFLICT,
-        });
-      }
-      throw new BadRequestException('Please retry your request', {
-        errorCode: SystemErrorCode.IDEMPOTENCY_KEY_NOT_FOUND,
-      });
-    }
+    // Convert stringified value to normal JSON format
+    const parsedCache: TIdempotencyCache = JSON.parse(cachedValue);
 
     // 1. Prioritize payload mismatch check
-    if (parsedCache.bodyHashed !== bodyHashed) {
+    if (parsedCache.hashedBody !== hashedBody) {
       this.logger.error('Payload mismatch: You cannot change the request body for an existing Idempotency-Key');
       throw new ConflictException('Payload mismatch: You cannot change the request body for an existing Idempotency-Key', {
         errorCode: SystemErrorCode.IDEMPOTENCY_KEY_PAYLOAD_MISMATCH,
@@ -162,43 +156,33 @@ export class IdempotencyInterceptor implements NestInterceptor {
     }
 
     // 3. Request completed successfully, return cached response
-    response.setHeader('X-Idempotency-Key', idempotencyKey);
+    this.logger.log(`Idempotent hit: returning cached response for key ${idempotencyKey}, skipping downstream handler`);
     return of(parsedCache.response);
   }
 
   /**
    * Executes the downstream handler and caches the successful response in Redis for 24 hours.
    */
-  private executeAndCacheNewRequest(
-    next: CallHandler,
-    cacheKey: string,
-    bodyHashed: string,
-    idempotencyKey: string,
-    response: Response,
-  ): Observable<any> {
-    response.setHeader('X-Idempotency-Key', idempotencyKey);
-
+  private executeAndCacheNewRequest(next: CallHandler, cacheKey: string, hashedBody: string): Observable<any> {
     return next.handle().pipe(
-      concatMap(async (responseData: any) => {
+      concatMap(async (responseData: any): Promise<any> => {
         const cachePayload: TIdempotencyCache = {
           status: IdempotencyStatus.COMPLETED,
-          bodyHashed,
+          hashedBody,
           response: responseData,
         };
-        this.logger.log(`Cache payload: ${cachePayload.bodyHashed}`);
+        const stringifiedCachePayload: string = JSON.stringify(cachePayload);
+        this.logger.log(`Cache payload: ${cachePayload.hashedBody}`);
 
         try {
           // Cache completed response for 24 hours (86,400 seconds)
-          const redisResponse: string | null = await this.redisClient.set(cacheKey, JSON.stringify(cachePayload), {
+          const redisResponse: string | null = await this.redisClient.set(cacheKey, stringifiedCachePayload, {
             condition: 'XX', // Chỉ set nếu key đã tồn tại (chính là key đang được xử lý)
-            expiration: {
-              type: 'EX', // Loại thời gian sống (expiration time)
-              value: 86400, // 24 hours in seconds
-            },
+            expiration: { type: 'EX', value: 86400 },
           });
 
           this.logger.log(`Cache completed response: ${redisResponse}`);
-          if (redisResponse === null) {
+          if (isNull(redisResponse)) {
             this.logger.error('Error: Cache completed response failed');
           }
         } catch (err: unknown) {
@@ -215,7 +199,6 @@ export class IdempotencyInterceptor implements NestInterceptor {
         } catch (error: unknown) {
           this.logger.error('Redis delete error:', error);
         }
-
         throw err;
       }),
     );
@@ -229,6 +212,6 @@ enum IdempotencyStatus {
 
 type TIdempotencyCache = {
   status: IdempotencyStatus;
-  bodyHashed: string;
+  hashedBody: string;
   response?: any;
 };

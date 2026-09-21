@@ -235,9 +235,6 @@ importers:
       bcrypt:
         specifier: ^6.0.0
         version: 6.0.0
-      canonicalize:
-        specifier: ^5.0.0
-        version: 5.0.0
       class-transformer:
         specifier: ^0.5.1
         version: 0.5.1
@@ -250,6 +247,9 @@ importers:
       helmet:
         specifier: ^8.3.0
         version: 8.3.0
+      json-canonicalize:
+        specifier: ^3.0.1
+        version: 3.0.1
       lodash:
         specifier: ^4.18.1
         version: 4.18.1
@@ -2395,11 +2395,6 @@ packages:
   caniuse-lite@1.0.30001810:
     resolution: {integrity: sha512-TITQPUkaz+aVk5GL6NhOdwk1aEaNTSDPsGFWrTuhKGtjTF70jL/Oht2W4c6rXUe5fu7Ie19VIahAXHIIiWWNeg==}
 
-  canonicalize@5.0.0:
-    resolution: {integrity: sha512-O/NCg79G0/TWoD3Fo6scOMfP4p7/TsxRXVmRo9mEfD6h/5y5o1wtVbKyBO0E2i7FEcqe5tRijyAH/IWHIHMH4w==}
-    engines: {node: '>=22'}
-    hasBin: true
-
   chalk@4.1.2:
     resolution: {integrity: sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==}
     engines: {node: '>=10'}
@@ -3250,6 +3245,10 @@ packages:
     resolution: {integrity: sha512-/sM3dO2FOzXjKQhJuo0Q173wf2KOo8t4I8vHy6lF9poUp7bKT0/NHE8fPX23PwfhnykfqnC2xRxOnVw5XuGIaA==}
     engines: {node: '>=6'}
     hasBin: true
+
+  json-canonicalize@3.0.1:
+    resolution: {integrity: sha512-xEzkTucfHhDooWOSMOvrlll9oTk6/mXZIerF2DFWA2chHZsnc2zrmAKjVOyDbSYHr0e3Djx9F89nZ3U2Bn+lSw==}
+    engines: {node: '>=8.5'}
 
   json-parse-even-better-errors@2.3.1:
     resolution: {integrity: sha512-xyFwyhro/JEof6Ghe2iz2NcXoj2sloNsWr/XsERDK/oiPCfaNhl5ONfp+jQdAZRQQ0IJWNzH9zIZF7li91kh2w==}
@@ -6608,8 +6607,6 @@ snapshots:
 
   caniuse-lite@1.0.30001810: {}
 
-  canonicalize@5.0.0: {}
-
   chalk@4.1.2:
     dependencies:
       ansi-styles: 4.3.0
@@ -7604,6 +7601,8 @@ snapshots:
       argparse: 2.0.1
 
   jsesc@3.1.0: {}
+
+  json-canonicalize@3.0.1: {}
 
   json-parse-even-better-errors@2.3.1: {}
 
