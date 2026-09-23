@@ -1,8 +1,13 @@
+import { randomBytes } from 'crypto';
+import slugify from 'slugify';
 import {
+  BeforeInsert,
+  BeforeUpdate,
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  Index,
   OneToMany,
   PrimaryGeneratedColumn,
   type Relation,
@@ -11,6 +16,7 @@ import {
 import { ProductEntity } from '../../product/entity/product.entity';
 
 @Entity('product_categories')
+@Index('idx_category_slug', ['slug'], { unique: true })
 export class ProductCategoryEntity {
   @PrimaryGeneratedColumn()
   id: number;
@@ -35,4 +41,16 @@ export class ProductCategoryEntity {
 
   @OneToMany(() => ProductEntity, (product) => product.category)
   readonly products: Relation<ProductEntity[]>;
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  updateSlug() {
+    const baseSlug: string = slugify(this.name, {
+      lower: true,
+      strict: true,
+      trim: true,
+    });
+    const randomSuffix: string = randomBytes(6).toString('hex');
+    this.slug = `${baseSlug}-${randomSuffix}`;
+  }
 }
