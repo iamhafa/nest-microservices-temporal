@@ -1,11 +1,14 @@
 import { SystemErrorCode } from '@libs/contract/base';
-import { ArgumentsHost, Catch, HttpException, HttpStatus } from '@nestjs/common';
+import { ArgumentsHost, Catch, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { HttpArgumentsHost } from '@nestjs/common/internal';
 import { BaseExceptionFilter } from '@nestjs/core';
 import { Response } from 'express';
+import { get, isString } from 'lodash';
 
 @Catch()
 export class HttpExceptionFilter extends BaseExceptionFilter {
+  private readonly logger = new Logger(HttpExceptionFilter.name);
+
   catch(exception: unknown, host: ArgumentsHost): Response {
     const context: HttpArgumentsHost = host.switchToHttp();
     const response: Response = context.getResponse();
@@ -15,13 +18,31 @@ export class HttpExceptionFilter extends BaseExceptionFilter {
 
     if (exception instanceof HttpException) {
       status = exception.getStatus();
+      const exceptionResponse = exception.getResponse();
+
+      // Extract message and details from exception response
+      // When response is an object (e.g. from ValidationPipe), extract details array
+      const message: string = isString(exceptionResponse)
+        ? exceptionResponse
+        : get(exceptionResponse, 'message', exception.message);
+
+      const details = get(exceptionResponse, 'details') as { field: string; message: string }[] | undefined;
+
       return response.status(status).json({
         success: false,
         error: {
           code: exception.errorCode ?? SystemErrorCode.UNCAUGHT_EXCEPTION,
-          message: exception.message,
+          message,
+          details,
         },
       });
+    }
+
+    // Log uncaught non-HTTP exceptions for debugging (previously swallowed silently)
+    if (exception instanceof Error) {
+      this.logger.error(`Uncaught exception: ${exception.message}`, exception.stack);
+    } else {
+      this.logger.error(`Unknown exception: ${exception}`);
     }
 
     return response.status(status).json({

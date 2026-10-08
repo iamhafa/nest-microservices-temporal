@@ -1,4 +1,4 @@
-import { HttpExceptionFilter, ResponseInterceptor } from '@libs/common';
+import { HttpExceptionFilter, HttpResponseInterceptor } from '@libs/common';
 import { SystemErrorCode } from '@libs/contract/base';
 import { UnprocessableEntityException, ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
@@ -29,7 +29,7 @@ async function bootstrap() {
   });
 
   app.useGlobalFilters(new HttpExceptionFilter());
-  app.useGlobalInterceptors(new ResponseInterceptor());
+  app.useGlobalInterceptors(new HttpResponseInterceptor());
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
