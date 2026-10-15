@@ -1,16 +1,18 @@
-import { Idempotent } from '@libs/common';
 import { OrderRoutingKey, RmqPublisherService } from '@libs/messaging';
 import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
+import { Idempotent } from '@nestjs/idempotency';
 import {
   ApiAcceptedResponse,
   ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiHeader,
   ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { randomUUID } from 'crypto';
 import { CancelOrderDto, CreateOrderDto, OrderResponseDto, UpdateOrderStatusDto, WorkflowInitiatedResponseDto } from './dto';
 
 @ApiBearerAuth('Authorization')
@@ -21,7 +23,13 @@ export class OrderController {
 
   @Post('place')
   @HttpCode(HttpStatus.ACCEPTED)
-  @Idempotent()
+  @Idempotent({ required: true, ttl: '1h' })
+  @ApiHeader({
+    name: 'X-Idempotency-Key',
+    required: true,
+    example: randomUUID(),
+    description: 'Unique UUID v4 to prevent duplicate orders',
+  })
   @ApiOperation({ summary: '⚡ [Workflow Async] Place an order' })
   @ApiAcceptedResponse({ description: 'Order placement initiated', type: WorkflowInitiatedResponseDto })
   @ApiBadRequestResponse({ description: 'Invalid request' })

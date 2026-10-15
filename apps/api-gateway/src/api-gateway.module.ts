@@ -1,10 +1,11 @@
-import { JwtAuthGuard, RolesGuard, SharedAuthModule } from '@libs/auth';
-import { EnvironmentModule, EnvironmentService, IdempotencyInterceptor, SharedLoggerModule } from '@libs/common';
+import { IAuthRequest, JwtAuthGuard, RolesGuard, SharedAuthModule } from '@libs/auth';
+import { EnvironmentModule, EnvironmentService, RedisIdempotencyStore, SharedLoggerModule } from '@libs/common';
 import { SharedRabbitMQModule } from '@libs/messaging';
 import { RedisConnectionConfig, RedisModule } from '@nestjs-redis/client';
 import { ExecutionContext, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_GUARD } from '@nestjs/core';
+import { IdempotencyModule } from '@nestjs/idempotency';
 import { ThrottlerGuard, ThrottlerModule, ThrottlerModuleOptions } from '@nestjs/throttler';
 import { PrometheusModule, PrometheusOptions } from '@willsoto/nestjs-prometheus';
 import { randomUUID } from 'crypto';
@@ -20,6 +21,14 @@ import { UserModule } from './modules/user/user.module';
   imports: [
     // Core Modules
     ConfigModule.forRoot({ isGlobal: true }),
+    IdempotencyModule.forRoot({
+      // Phân vùng namespace trong Redis key (`idem:<scope>:<key>`) theo từng user để tránh xung đột key giữa các tài khoản
+      scope: (req: IAuthRequest): string => `user-${req.user.user_id}`,
+      header: 'X-Idempotency-Key',
+      lockTtl: '45s',
+      ttl: '24h',
+      retryAfter: '2s',
+    }),
     ClsModule.forRoot({
       global: true,
       middleware: {
@@ -88,6 +97,7 @@ import { UserModule } from './modules/user/user.module';
     ShippingModule,
   ],
   providers: [
+    RedisIdempotencyStore,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
@@ -99,10 +109,6 @@ import { UserModule } from './modules/user/user.module';
     {
       provide: APP_GUARD,
       useClass: RolesGuard,
-    },
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: IdempotencyInterceptor,
     },
   ],
 })

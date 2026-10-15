@@ -31,7 +31,7 @@ export class HttpExceptionFilter extends BaseExceptionFilter {
       return response.status(status).json({
         success: false,
         error: {
-          code: exception.errorCode ?? SystemErrorCode.UNCAUGHT_EXCEPTION,
+          code: exception.errorCode ?? get(exceptionResponse, 'code') ?? SystemErrorCode.UNCAUGHT_EXCEPTION,
           message,
           details,
         },

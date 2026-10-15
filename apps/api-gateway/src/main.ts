@@ -17,9 +17,10 @@ async function bootstrap() {
   app.disable('x-powered-by');
   const logger = app.get(Logger);
   app.useLogger(logger);
-  app.flushLogs(); // Xả toàn bộ log trong buffer ra màn hình bằng custom logger
-  app.enableCors();
-  app.enableShutdownHooks();
+  app.enableCors({
+    allowedHeaders: ['Content-Type', 'Authorization', 'Idempotency-Key', 'X-Correlation-Id'],
+    exposedHeaders: ['Idempotency-Key', 'Idempotent-Replayed', 'Retry-After', 'X-Correlation-Id'],
+  });
   app.enableVersioning({
     type: VersioningType.URI,
     defaultVersion: '1',
