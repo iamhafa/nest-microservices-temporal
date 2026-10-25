@@ -13,7 +13,6 @@
     "target": "ES2023",
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": true,
@@ -24,17 +23,45 @@
     "strict": true,
     "strictPropertyInitialization": false,
     "strictFunctionTypes": false,
+    "types": ["vitest/globals", "node"],
     "paths": {
-      "@libs/auth": ["libs/auth/src"],
-      "@libs/auth/*": ["libs/auth/src/*"],
-      "@libs/common": ["libs/common/src"],
-      "@libs/common/*": ["libs/common/src/*"],
-      "@libs/contract": ["libs/contract/src"],
-      "@libs/contract/*": ["libs/contract/src/*"],
-      "@libs/messaging": ["libs/messaging/src"],
-      "@libs/messaging/*": ["libs/messaging/src/*"],
-      "@libs/temporal": ["libs/temporal/src"],
-      "@libs/temporal/*": ["libs/temporal/src/*"]
+      "@libs/auth": ["./libs/auth/src/index.ts"],
+      "@libs/auth/*": ["./libs/auth/src/*"],
+      "@libs/common": ["./libs/common/src/index.ts"],
+      "@libs/common/*": ["./libs/common/src/*"],
+      "@libs/contract": ["./libs/contract/src/index.ts"],
+      "@libs/contract/*": ["./libs/contract/src/*"],
+      "@libs/messaging": ["./libs/messaging/src/index.ts"],
+      "@libs/messaging/*": ["./libs/messaging/src/*"],
+      "@libs/temporal": ["./libs/temporal/src/index.ts"],
+      "@libs/temporal/*": ["./libs/temporal/src/*"]
     }
-  }
+  },
+  "files": [],
+  "references": [
+    {
+      "path": "./apps/api-gateway/tsconfig.app.json"
+    },
+    {
+      "path": "./apps/inventory-service/tsconfig.app.json"
+    },
+    {
+      "path": "./apps/orchestrator-worker/tsconfig.app.json"
+    },
+    {
+      "path": "./apps/order-service/tsconfig.app.json"
+    },
+    {
+      "path": "./apps/payment-service/tsconfig.app.json"
+    },
+    {
+      "path": "./apps/product-service/tsconfig.app.json"
+    },
+    {
+      "path": "./apps/shipping-service/tsconfig.app.json"
+    },
+    {
+      "path": "./apps/user-service/tsconfig.app.json"
+    }
+  ]
 }

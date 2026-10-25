@@ -26,6 +26,7 @@ export class RedisIdempotencyStore implements IdempotencyStore {
     return `${this.prefix}${key}`;
   }
 
+  // Acquires execution lock (if new key) or returns stored state/result (if key exists)
   async acquire(key: string, owner: string, fingerprint: string, lockTtl: number): Promise<IdempotencyAcquireResult> {
     const fullKey: string = this.getKey(key);
 
@@ -38,9 +39,9 @@ export class RedisIdempotencyStore implements IdempotencyStore {
 
       // Atomic lock via SET NX PX in @nestjs-redis/client
       const setResult = await this.redisClient.set(fullKey, JSON.stringify(record), {
-        condition: 'NX',
+        condition: 'NX', // Only execute SET if key does not already exist
         expiration: {
-          type: 'PX',
+          type: 'PX', // 'PX': Expiry time in milliseconds (Period in Milliseconds), matches lockTtl (ms)
           value: lockTtl,
         },
       });
@@ -73,12 +74,12 @@ export class RedisIdempotencyStore implements IdempotencyStore {
     }
 
     this.logger.error(`Idempotency key "${key}" kept changing; please retry.`);
-    throw new InternalServerErrorException(
-      `Idempotency key "${key}" kept changing; please retry.`,
-      SystemErrorCode.IDEMPOTENCY_KEY_KEPT_CHANGING,
-    );
+    throw new InternalServerErrorException(`Idempotency key "${key}" kept changing; please retry.`, {
+      errorCode: SystemErrorCode.IDEMPOTENCY_KEY_KEPT_CHANGING,
+    });
   }
 
+  // Stores completed response in Redis, transitions state to 'completed', and applies retention TTL
   async complete(key: string, owner: string, response: IdempotencyStoredPayload, ttl: number): Promise<boolean> {
     const fullKey: string = this.getKey(key);
     const rawData = await this.redisClient.get(fullKey);
@@ -102,7 +103,7 @@ export class RedisIdempotencyStore implements IdempotencyStore {
 
     const setResult = await this.redisClient.set(fullKey, JSON.stringify(completedRecord), {
       expiration: {
-        type: 'PX',
+        type: 'PX', // 'PX': Expiry time in milliseconds (Period in Milliseconds), matches ttl (ms)
         value: ttl,
       },
     });
@@ -114,6 +115,7 @@ export class RedisIdempotencyStore implements IdempotencyStore {
     return true;
   }
 
+  // Releases lock from Redis when request fails (5xx error) so client can retry immediately
   async release(key: string, owner: string): Promise<boolean> {
     const fullKey: string = this.getKey(key);
     const rawData = await this.redisClient.get(fullKey);
@@ -135,6 +137,7 @@ export class RedisIdempotencyStore implements IdempotencyStore {
     return true;
   }
 
+  // Extends lock expiration (lockTtl) for long-running handler executions
   async extend(key: string, owner: string, lockTtl: number): Promise<boolean> {
     const fullKey: string = this.getKey(key);
     const rawData = await this.redisClient.get(fullKey);
@@ -159,43 +162,40 @@ export class RedisIdempotencyStore implements IdempotencyStore {
 }
 
 /**
- * Cấu trúc dữ liệu của một bản ghi Idempotency được lưu trữ trong Redis.
+ * Data structure of an Idempotency record stored in Redis.
  */
 type TIdempotencyRecord = {
   /**
-   * Trạng thái vòng đời của request:
-   * - 'in-flight': Request đang được xử lý (đang giữ lock). Nếu có request trùng key gửi tới lúc này,
-   *                hệ thống trả về HTTP 409 (IDEMPOTENCY_KEY_IN_USE) kèm header Retry-After.
-   * - 'completed': Request đã hoàn thành thành công và có kết quả lưu trữ. Mọi request trùng key gửi
-   *                tới sau đó sẽ được replay kết quả cũ (HTTP status, headers, body) mà không chạy lại handler.
+   * Request lifecycle state:
+   * - 'in-flight': Request is being processed (holding lock). Duplicate requests receive
+   *                HTTP 409 (IDEMPOTENCY_KEY_IN_USE) with Retry-After header.
+   * - 'completed': Request completed successfully with cached response. Replay requests
+   *                receive the stored result (status, headers, body) without re-executing handler.
    */
   state: IdempotencyAcquireResult['state'];
 
   /**
-   * Fencing Token (Định danh tiến trình giữ lock):
-   * - Một chuỗi ngẫu nhiên (UUID) sinh ra cho mỗi lần gọi để phân biệt giữa các lần thử (attempt).
-   * - Dùng để ngăn chặn race condition: Một tiến trình bị lag/treo quá thời gian lockTtl sẽ bị mất quyền
-   *   sở hữu. Khi nó tỉnh lại, nó chỉ được phép extend/complete/release nếu `owner` vẫn khớp với token của nó,
-   *   tránh việc vô tình xóa hoặc ghi đè lock của một retry khác vừa chiếm quyền.
-   * - Khi request đã 'completed', owner có thể bỏ trống (undefined).
+   * Fencing Token (Lock holder process identifier):
+   * - Random token (UUID) generated per attempt to differentiate between executions.
+   * - Prevents race conditions: A stalled process losing lock after lockTtl expiry
+   *   cannot overwrite/delete a newer attempt's lock upon recovering.
+   * - Unset (undefined) once record is 'completed'.
    */
   owner?: string;
 
   /**
-   * Dấu vân tay của Request (SHA-256 hash):
-   * - Được băm từ `scope + HTTP method + URL + request body` (đã chuẩn hóa sắp xếp key).
-   * - Dùng để phát hiện Payload Mismatch: Nếu client gửi cùng 1 Idempotency-Key nhưng lại thay đổi
-   *   body hoặc gọi vào URL khác, hệ thống so sánh fingerprint thấy khác nhau và từ chối với
-   *   HTTP 422 (IDEMPOTENCY_KEY_REUSED).
+   * Request Fingerprint (SHA-256 hash):
+   * - Hashed from `scope + HTTP method + URL + request body` (with keys sorted alphabetically).
+   * - Detects Payload Mismatch: Reusing the same Idempotency-Key with different payload/URL
+   *   is rejected with HTTP 422 (IDEMPOTENCY_KEY_REUSED).
    */
   fingerprint: string;
 
   /**
-   * Snapshot kết quả phản hồi của Request:
-   * - Chứa HTTP status code, allowlisted headers, và response body từ lần gọi ban đầu (hoặc chuỗi
-   *   đã mã hóa nếu bật AES-256 encryption).
-   * - Chỉ tồn tại khi `state === 'completed'`.
-   * - Dùng để tái hiện (replay) y nguyên phản hồi cho client ở các lần retry tiếp theo.
+   * Stored Response Snapshot:
+   * - Contains HTTP status, allowlisted headers, and response body (or encrypted string).
+   * - Only present when `state === 'completed'`.
+   * - Replayed as-is to clients on subsequent retries.
    */
   response?: IdempotencyStoredPayload;
 };
