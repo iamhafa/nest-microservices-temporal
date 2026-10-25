@@ -9,23 +9,23 @@ description: Conventions and rules for Temporal workflows, activities, Saga patt
 
 - **Orchestrator Worker** (`apps/orchestrator-worker`): Hosts and runs Temporal workflows.
 - **Activity Interfaces** (`libs/temporal/src/activity/interface/`): Define contracts for each service's activities.
-- **Task Queues** (`libs/temporal/src/queue/enum/workflow-task.queue.ts`): Each microservice has its own dedicated task queue.
-- **Shared Module** (`libs/temporal/src/shared-temporal.module.ts`): `SharedTemporalModule.forRoot()` wraps `nestjs-temporal-core` with config-driven connection.
+- **Task Queues** (`libs/temporal/src/enum/queue/workflow-task.queue.ts`): Each microservice has its own dedicated task queue.
+- **Temporal Module**: Services with activities and the worker import `TemporalModule.forRootAsync()` directly from `nestjs-temporal-core`.
 
 ## 📂 File Organization Rules
 
 1. **Workflows** are placed in: `apps/orchestrator-worker/src/workflows/<domain>/`
    - Each domain folder MUST have an `index.ts` barrel file that re-exports all workflows.
-   - Workflow functions are defined in descriptive files like `process-order.workflow.ts`.
+   - Workflow functions are defined in descriptive files like `process-order.workflow.ts` or `create-product.workflow.ts`.
 
 2. **Activity Interfaces** are defined in: `libs/temporal/src/activity/interface/`
-   - Naming: `I<Service>Activity` (e.g., `IOrderActivity`, `IPaymentActivity`).
+   - Naming: `I<Action/Service>Activity` (e.g., `IOrderActivity`, `IPaymentActivity`, `IChargePaymentActivity`).
    - File naming: `<service>-activity.interface.ts`.
-   - All interfaces are re-exported from `libs/temporal/src/activity/index.ts`.
+   - All interfaces and enums are re-exported directly from `libs/temporal/src/index.ts` (`@libs/temporal`).
 
-3. **Task Queues** are defined in enum `WorkFlowTaskQueue`:
+3. **Task Queues** are defined in enum `WorkFlowTaskQueue` (`libs/temporal/src/enum/queue/workflow-task.queue.ts`):
    - Format: `<SERVICE> = '<service>-workflow-task-queue'`.
-   - One queue per service. Every new service MUST register a new enum value.
+   - One queue per service. Every new service with activities MUST register a new enum value.
 
 ## ⚙️ Workflow Implementation Rules (CRITICAL)
 

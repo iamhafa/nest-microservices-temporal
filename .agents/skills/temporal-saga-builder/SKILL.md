@@ -15,7 +15,7 @@ This skill provides step-by-step guidance and code templates for scaffolding and
 | :--- | :--- | :--- |
 | **Workflows** | `apps/orchestrator-worker/src/workflows/<domain>/` | Exported as `async function <domain>Workflow(...)` |
 | **Activity Interfaces** | `libs/temporal/src/activity/interface/` | Interface `I<Service>Activity` |
-| **Task Queue Enums** | `libs/temporal/src/queue/enum/workflow-task.queue.ts` | Enum value `<SERVICE> = '<service>-workflow-task-queue'` |
+| **Task Queue Enums** | `libs/temporal/src/enum/queue/workflow-task.queue.ts` | Enum value `<SERVICE> = '<service>-workflow-task-queue'` |
 | **Activity Implementation** | `apps/<service>-service/src/activity/` | NestJS `@Activity()` class implementing interface |
 
 ---
@@ -28,17 +28,17 @@ Define contract and compensation methods for the microservice in `libs/temporal/
 
 ```typescript
 export interface IPaymentActivity {
-  chargePayment(input: ChargePaymentDto): Promise<ChargePaymentResult>;
-  refundPayment(input: RefundPaymentDto): Promise<void>; // Compensation method
+  chargePayment(orderId: number, totalAmount: number): Promise<number>;
+  refundPayment(orderId: number, paymentId: number): Promise<void>; // Compensation method
 }
 ```
-*Don't forget to export it in `libs/temporal/src/activity/index.ts`.*
+*Don't forget to export it in `libs/temporal/src/index.ts` (`@libs/temporal`).*
 
 ---
 
 ### Step 2: Register Task Queue Enum (`libs/temporal`)
 
-Ensure your target service has a task queue entry in `libs/temporal/src/queue/enum/workflow-task.queue.ts`:
+Ensure your target service has a task queue entry in `libs/temporal/src/enum/queue/workflow-task.queue.ts`:
 
 ```typescript
 export enum WorkFlowTaskQueue {
@@ -46,6 +46,7 @@ export enum WorkFlowTaskQueue {
   PAYMENT = 'payment-workflow-task-queue',
   INVENTORY = 'inventory-workflow-task-queue',
   SHIPPING = 'shipping-workflow-task-queue',
+  PRODUCT = 'product-workflow-task-queue',
 }
 ```
 
@@ -57,9 +58,7 @@ Create `apps/orchestrator-worker/src/workflows/<domain>/<name>.workflow.ts`:
 
 ```typescript
 import { proxyActivities, ActivityInterfaceFor } from '@temporalio/workflow';
-import { WorkFlowTaskQueue } from '@libs/temporal/queue/enum/workflow-task.queue';
-import type { IPaymentActivity } from '@libs/temporal/activity/interface/payment-activity.interface';
-import type { IInventoryActivity } from '@libs/temporal/activity/interface/inventory-activity.interface';
+import { WorkFlowTaskQueue, IPaymentActivity, IInventoryActivity } from '@libs/temporal';
 
 // 1. Setup Proxy Activities per service queue
 const paymentActivities: ActivityInterfaceFor<IPaymentActivity> = proxyActivities({
@@ -123,32 +122,26 @@ export async function placeOrderWorkflow(input: PlaceOrderWorkflowInput): Promis
 Create `apps/<service>-service/src/activity/<action>.activity.ts`:
 
 ```typescript
-import { Injectable } from '@nestjs/common';
-import { Activity } from 'nestjs-temporal-core';
-import { IPaymentActivity } from '@libs/temporal/activity/interface/payment-activity.interface';
+import { Injectable, Logger } from '@nestjs/common';
+import { Activity, ActivityMethod } from 'nestjs-temporal-core';
+import { IChargePaymentActivity } from '@libs/temporal';
 
 @Injectable()
-@Activity()
-export class PaymentActivity implements IPaymentActivity {
+@Activity({ name: 'charge-payment-activity' })
+export class ChargePaymentActivity implements IChargePaymentActivity {
+  private readonly logger = new Logger(ChargePaymentActivity.name);
+
   constructor(private readonly paymentService: PaymentService) {}
 
-  async chargePayment(input: ChargePaymentDto): Promise<ChargePaymentResult> {
+  @ActivityMethod({ name: 'chargePayment' })
+  async execute(orderId: number, totalAmount: number): Promise<number> {
     // IDEMPOTENCY CHECK: Verify DB before performing charge
-    const existing = await this.paymentService.findByOrderId(input.orderId);
-    if (existing && existing.status === PaymentStatus.COMPLETED) {
-      return { paymentId: existing.id, status: existing.status };
+    const existing = await this.paymentService.findByOrderId(orderId);
+    if (existing && existing.status === PaymentStatus.SUCCESS) {
+      return existing.id;
     }
 
-    return this.paymentService.processCharge(input);
-  }
-
-  async refundPayment(input: RefundPaymentDto): Promise<void> {
-    const existing = await this.paymentService.findByOrderId(input.orderId);
-    if (!existing || existing.status === PaymentStatus.REFUNDED) {
-      return; // Already refunded or nothing to refund
-    }
-
-    await this.paymentService.processRefund(input);
+    return this.paymentService.processCharge(orderId, totalAmount);
   }
 }
 ```
@@ -166,8 +159,8 @@ export class PaymentActivity implements IPaymentActivity {
 
 ## ✅ Quality Checklist
 
-- [ ] Activity interface declared in `libs/temporal/src/activity/interface/` and exported.
-- [ ] Task Queue registered in `WorkFlowTaskQueue` enum.
+- [ ] Activity interface declared in `libs/temporal/src/activity/interface/` and exported in `libs/temporal/src/index.ts`.
+- [ ] Task Queue registered in `WorkFlowTaskQueue` enum (`libs/temporal/src/enum/queue/workflow-task.queue.ts`).
 - [ ] Workflow handles Saga compensation in a `try/catch` block (reverse order).
 - [ ] Activities implemented with idempotency checks.
 - [ ] Workflow exported in domain `index.ts` barrel file.

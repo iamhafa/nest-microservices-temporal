@@ -35,8 +35,7 @@ description: Monorepo layout, service responsibilities, and shared libraries str
 apps/<service-name>/src/
 ├── main.ts                           ← Bootstrap & connect to RabbitMQ
 ├── <service-name>.module.ts          ← Root module
-├── <service-name>.controller.ts      ← RabbitMQ message handler (nếu có)
-├── <service-name>.service.ts         ← Business logic (nếu có)
+├── <service-name>.service.ts         ← Business logic & RabbitMQ handlers (@RabbitRPC)
 ├── activity/                         ← Temporal activity implementations (nếu có)
 ├── entity/                           ← TypeORM entities (nếu có DB - hoặc trong modules/)
 ├── repository/                       ← Data access layer (nếu có DB - hoặc trong modules/)
@@ -51,7 +50,7 @@ apps/api-gateway/src/
 ├── api-gateway.module.ts             ← Root module
 └── modules/                          ← Feature modules (order, product, etc.)
     └── <feature>/
-        ├── <feature>.controller.ts   ← REST endpoints
+        ├── <feature>.controller.ts   ← REST endpoints (CHỈ gateway mới có .controller.ts)
         ├── <feature>.module.ts
         └── <feature>.service.ts      ← Proxy to internal services via RabbitMQ
 ```
@@ -60,9 +59,10 @@ apps/api-gateway/src/
 
 | Library    | Path alias       | Mục đích                                                      |
 | ---------- | ---------------- | ------------------------------------------------------------- |
-| `common`   | `@libs/common`   | Shared enums, logger, utilities, decorators                   |
-| `contract` | `@libs/contract` | DTOs (trong `/dto`) và enums (trong `/enum`) dùng chung giữa services |
-| `temporal` | `@libs/temporal` | Activity interfaces, task queue enums, shared Temporal module |
+| `common`   | `@libs/common`   | Logger, SharedClsModule, RedisIdempotencyStore, global filter |
+| `contract` | `@libs/contract` | DTOs (trong `/dto`), enums (`/enum`), error codes (`/error`)  |
+| `messaging`| `@libs/messaging`| `RmqPublisherService`, `SharedRabbitMQModule`, `RmqContextInterceptor`, routing keys |
+| `temporal` | `@libs/temporal` | Activity interfaces, TaskQueue enums                          |
 | `auth`     | `@libs/auth`     | JWT Authentication guard, Roles authorization guard, decorators |
 
 ### Key Rules

@@ -15,12 +15,12 @@ When asked to "create a feature" or scaffold an API (e.g., "Create a Category fe
 - Navigate to `apps/api-gateway/src/modules/<domain>/`.
 - Define the endpoint (`@Post`, `@Get`, etc.) in the Controller.
 - Mount `@ApiOperation`, `@ApiBody`, and target Response DTOs using `@ApiResponse`.
-- Inject `RmqPublisherService` and call `this.rmqPublisher.request('routing-key', payload)` to delegate to the target service.
+- Inject `RmqPublisherService` from `@libs/messaging` and call `this.rmqPublisher.request(DomainRoutingKey.ACTION, payload)` to delegate to the target service.
 
 **3. Handle Message at Target Service (`apps/<target-service>`)**
-- Navigate to `apps/<target-service>/src/`.
-- Microservices **MUST NOT** have controller files. Define the RabbitMQ handler directly in `<target-service>.service.ts` using the `@RabbitRPC` decorator from `@golevelup/nestjs-rabbitmq`.
-- Inject the `@RabbitPayload` in the method argument, validate the payload, and perform business logic.
+- Navigate to `apps/<target-service>/src/` (or `apps/<target-service>/src/modules/<feature>/` for complex services).
+- Microservices **MUST NOT** have controller files. Define the RabbitMQ handler directly in the service class using the `@RabbitRPC` decorator from `@golevelup/nestjs-rabbitmq`.
+- Inject `@RabbitPayload` in the method argument, validate the payload, and execute business logic.
 
 **4. Implement Core Logic, Temporal & Database (`apps/<target-service>`)**
 - **For direct DB updates:** Add methods inside the service to interact with the TypeORM repository. Update TypeORM `Entity` in `apps/<target-service>/src/entity/` (hoặc trong `modules/<feature>/entity/` với service phức tạp như `product-service`).

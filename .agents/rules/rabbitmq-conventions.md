@@ -43,12 +43,15 @@ export enum UserRoutingKey {
 
 ## 🔗 SharedRabbitMQModule & RmqPublisherService
 
-Tất cả các kết nối đến RabbitMQ (cho cả Consumer và Producer) **BẮT BUỘC** phải được import thông qua `SharedRabbitMQModule` từ `@libs/common/rabbitmq`.
+Tất cả các kết nối đến RabbitMQ (cho cả Consumer và Producer) **BẮT BUỘC** phải được import thông qua `SharedRabbitMQModule` từ `@libs/messaging`.
 
-- **Đối với API Gateway**: 
-  - Khai báo `imports: [SharedRabbitMQModule]` trong Feature Module (VD: `UserModule`).
-  - Trong Controller, tiêm (inject) `RmqPublisherService` thay vì `AmqpConnection` để gửi message đi.
-  - Việc dùng `RmqPublisherService` đảm bảo mọi gói tin gửi đi đều tự động được nhúng `X-Correlation-Id` vào trong Headers phục vụ cho Distributed Tracing.
+- **Module Configuration**:
+  - `SharedRabbitMQModule` được gắn decorator `@Global()` trong `@libs/messaging`.
+  - Được import 1 lần tại root module của **API Gateway** (`ApiGatewayModule`) và root module của từng **Microservice** (VD: `UserServiceModule`, `OrderServiceModule`).
+  
+- **Đối với API Gateway**:
+  - Trong Controller hoặc Service của Gateway, tiêm (inject) `RmqPublisherService` thay vì `AmqpConnection` để gửi message đi.
+  - Việc dùng `RmqPublisherService` đảm bảo mọi gói tin gửi đi đều tự động được nhúng `X-Correlation-Id` và `X-User-Id` (lấy từ CLS context) vào trong Headers phục vụ Distributed Tracing & User propagation.
   
   ```typescript
   import { RmqPublisherService, UserRoutingKey } from '@libs/messaging';
@@ -64,7 +67,12 @@ Tất cả các kết nối đến RabbitMQ (cho cả Consumer và Producer) **B
   ```
 
 - **Đối với Microservices**:
-  - Khai báo `imports: [SharedRabbitMQModule]` trong root Module (VD: `UserServiceModule`).
+  - Khai báo `imports: [SharedRabbitMQModule, SharedClsModule.forRoot()]` trong root Module (VD: `UserServiceModule`).
+  - Đăng ký filter và interceptor trong `main.ts` của microservice:
+    ```typescript
+    app.useGlobalFilters(new RmqRpcExceptionFilter());
+    app.useGlobalInterceptors(new RmqRpcResponseInterceptor());
+    ```
   - Message handler được định nghĩa trực tiếp trong file `*.service.ts` bằng decorator `@RabbitRPC`.
   
   ```typescript
@@ -84,14 +92,22 @@ Tất cả các kết nối đến RabbitMQ (cho cả Consumer và Producer) **B
   }
   ```
 
-## ⚠️ Cạm bẫy về Correlation ID (Distributed Tracing vs RPC)
+## ⚠️ Correlation ID & User Context Flow
 
-Hệ thống của chúng ta sử dụng `nestjs-cls` để tạo ra một **Trace ID** (`X-Correlation-Id`) xuyên suốt vòng đời của 1 HTTP Request.
+Hệ thống sử dụng `nestjs-cls` để duy trì `X-Correlation-Id` và `X-User-Id` xuyên suốt vòng đời của 1 request:
+
+1. **Tại API Gateway**: `ClsModule.forRoot()` (HTTP middleware) tự sinh `X-Correlation-Id` (UUID) và lưu `userId` khi JWT được verify qua `JwtAuthGuard`.
+2. **Khi gửi qua RabbitMQ**: `RmqPublisherService.request()` tự động lấy `correlationId` và `userId` từ CLS, đặt vào message headers (`headers: { 'X-Correlation-Id': ..., 'X-User-Id': ... }`).
+3. **Tại Microservice**: `SharedClsModule.forRoot()` (từ `@libs/common`) tự động lắng nghe RabbitMQ context (`isRabbitContext`), trích xuất headers trên và inject vào CLS context của microservice để ghi log qua `SharedLoggerModule`.
+4. **RPC Responses**:
+   - Thành công: `RmqRpcResponseInterceptor` tự bọc data thành `{ success: true, data }`.
+   - Lỗi: `RmqRpcExceptionFilter` bắt `HttpException` và trả về `{ success: false, error: { code, message, status, details } }`.
+   - Phía Gateway: `RmqPublisherService` tự giải nén, nếu `!response.success` sẽ ném lại `HttpException` chuẩn để `HttpExceptionFilter` của Gateway trả về cho client.
 
 **LUẬT BẤT THÀNH VĂN:** 
 - **Tuyệt đối KHÔNG** gán đè `clsService.getId()` vào thuộc tính `correlationId` mặc định của AMQP (`amqpConnection.request({ correlationId: ... })`).
-- `correlationId` của AMQP được thư viện dùng riêng biệt cho cơ chế gửi/nhận RPC (nó phải Unique cho mỗi lệnh gọi RPC).
-- `X-Correlation-Id` của chúng ta phải được truyền thông qua `headers: { 'X-Correlation-Id': ... }`. Ở phía Microservice, `RmqContextInterceptor` sẽ tự động hứng Header này và lưu lại vào CLS để ghi log.
+- `correlationId` của AMQP được thư viện dùng riêng biệt cho cơ chế gửi/nhận RPC nội bộ.
+- `X-Correlation-Id` của chúng ta phải được truyền thông qua `headers: { 'X-Correlation-Id': ... }`.
 
 ## 🚫 Lệnh cấm
 1. CẤM tạo file `*.controller.ts` ở các Microservices.
@@ -103,7 +119,7 @@ Hệ thống của chúng ta sử dụng `nestjs-cls` để tạo ra một **Tra
 - **"I'll use `ClientProxy` from `@nestjs/microservices` because it's the standard NestJS way."**
   - **Rebuttal**: NO. We strictly use `@golevelup/nestjs-rabbitmq` and `RmqPublisherService`. Using `ClientProxy` breaks our distributed tracing and dynamic header setup.
 - **"I will pass the Correlation ID via the payload body instead of headers."**
-  - **Rebuttal**: NO. `X-Correlation-Id` must be passed via AMQP Headers. `nestjs-cls` and our custom interceptors automatically handle it if you use `RmqPublisherService`.
+  - **Rebuttal**: NO. `X-Correlation-Id` must be passed via AMQP Headers. `RmqPublisherService` and `SharedClsModule` automatically handle it.
 
 ## 🚩 Red Flags
 
@@ -115,8 +131,9 @@ Hệ thống của chúng ta sử dụng `nestjs-cls` để tạo ra một **Tra
 ## ✅ Verification Gates
 
 Before completing a RabbitMQ integration, verify:
-- [ ] Is `SharedRabbitMQModule` imported instead of defining a new RabbitMQ connection?
+- [ ] Is `SharedRabbitMQModule` imported from `@libs/messaging`?
+- [ ] Is `SharedClsModule.forRoot()` imported in the microservice's root module?
 - [ ] Is `RmqPublisherService` injected for sending messages (in API Gateway)?
 - [ ] Is `@RabbitRPC` used for receiving messages (in Microservices)?
-- [ ] Does the routing key use the dedicated domain routing key enum?
+- [ ] Does the routing key use the dedicated domain routing key enum from `@libs/messaging`?
 

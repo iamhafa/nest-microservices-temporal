@@ -35,8 +35,8 @@ export class AuthController {
 ## 🎖 Authorization Guard (RBAC)
 
 - For endpoints restricted to specific roles, decorate the method or class with `@Roles(UserRole.ADMIN, ...)` from `@libs/auth`.
-- If you use `@Roles()`, you must ensure `RolesGuard` is configured or active. Note that `RolesGuard` is currently imported and used on a need-basis or defined globally where relevant.
-- Roles are defined in the `UserRole` enum (`@libs/contract/user/enum/user-role.enum`).
+- `RolesGuard` is registered globally in `ApiGatewayModule` as an `APP_GUARD`. Any endpoint decorated with `@Roles()` is automatically evaluated against the user's role.
+- Roles are defined in the `UserRole` enum (`@libs/contract/user/enum/user-role.enum` or `@libs/contract`).
 
 ```typescript
 import { Roles } from '@libs/auth';

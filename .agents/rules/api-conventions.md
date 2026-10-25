@@ -23,9 +23,9 @@ When writing or modifying code in this workspace, ALWAYS adhere to the following
 
 3. **API Gateway Endpoints (`apps/api-gateway`)**:
    - For update or action endpoints (e.g., `PATCH`, `POST`), **place the resource `id` inside the `@Body` DTO** rather than using `@Param('id')` in the URL whenever possible. This allows you to forward a single payload via RabbitMQ without manual merging.
-   - Inject `RmqPublisherService` from `@libs/common` and use `this.rmqPublisher.request('routing-key', payload)` to forward requests to microservices and return the response Promise. Do NOT use `@nestjs/microservices` ClientProxy.
+   - Inject `RmqPublisherService` from `@libs/messaging` and use `this.rmqPublisher.request(DomainRoutingKey.ACTION, payload)` to forward requests to microservices and return the response Promise. Do NOT use string literals for routing keys; use the enums from `@libs/messaging`. Do NOT use `@nestjs/microservices` ClientProxy.
 
 4. **Microservice Handlers**:
    - Microservices DO NOT use controllers. All RabbitMQ handlers must reside directly in the Service layer (e.g., `<service-name>.service.ts`) using the `@RabbitRPC` decorator from `@golevelup/nestjs-rabbitmq`.
    - Business logic must reside in the Service layer.
-   - For database errors or business validations internally, throw standard NestJS exceptions or `AppException` and assume `HttpExceptionFilter` maps them correctly over RabbitMQ.
+   - For database errors or business validations internally, throw standard NestJS exceptions with an `errorCode` (e.g., `new NotFoundException('Product not found', { errorCode: ProductErrorCode.PRODUCT_NOT_FOUND })`). `RmqRpcExceptionFilter` automatically catches and serializes them over RabbitMQ.

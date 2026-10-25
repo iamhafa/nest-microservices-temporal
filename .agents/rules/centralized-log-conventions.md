@@ -29,10 +29,10 @@ This NestJS Microservices project uses a **Distributed Tracing** architecture ba
 - The Correlation ID cannot travel through the network via CLS. It is transported inside the RabbitMQ message properties under `headers: { 'X-Correlation-Id': '...' }` (alongside `X-User-Id`), attached automatically by `RmqPublisherService.request()`.
 
 ### 3. Microservice (Consumer)
-
-- When a Microservice (e.g., `order-service`, `product-service`) consumes a message, the `RmqContextInterceptor` (`libs/messaging/src/interceptor/rmq-context.interceptor.ts`) is triggered.
-- It extracts `X-Correlation-Id` (and `X-User-Id`) from the RabbitMQ message properties.
-- It wraps the execution context using `clsService.run()` and injects the values: `clsService.set('correlationId', correlationId)` and `clsService.set('userId', userId)`.
+ 
+- When a Microservice (e.g., `order-service`, `product-service`) consumes a message, the `SharedClsModule.forRoot()` (`libs/common/src/context/shared-cls.module.ts`) interceptor is triggered.
+- It intercepts the execution context using `isRabbitContext(context)` and extracts `X-Correlation-Id` and `X-User-Id` from `message.properties.headers`.
+- It injects them directly into CLS: `clsService.set('correlationId', correlationId)` and `clsService.set('userId', userId)`.
 - **Rule:** ALL async handlers and services called downstream within this message context will now share the same `correlationId`.
 
 ### 4. Logging & Operations
@@ -52,7 +52,7 @@ This NestJS Microservices project uses a **Distributed Tracing** architecture ba
 
 The CLS-based `correlationId` propagation **stops at the Temporal boundary**. Be aware of this limitation:
 
-- Workflows and Activities are executed by the Temporal worker, **NOT** through the RabbitMQ pipeline, so `RmqContextInterceptor` does not run and **CLS has no `correlationId` inside workflow/activity code**.
+- Workflows and Activities are executed by the Temporal worker, **NOT** through the RabbitMQ pipeline, so `SharedClsModule` interceptor does not run and **CLS has no `correlationId` inside workflow/activity code**.
 - The only link back to the originating request is the `correlationId` **embedded in the `workflowId`** (e.g. `place-order:{correlationId}`), searchable on the Temporal Web UI — NOT via a `{correlationId="..."}` query in Loki for activity logs.
 - Consequently, a single order maps to two separate views: (1) Loki logs (gateway + RPC service, keyed by `correlationId`) and (2) Temporal UI (workflow + activities, keyed by `workflowId`). The `correlationId` inside `workflowId` is the manual bridge between them.
 - If activity-level logs must carry the `correlationId`, either pass it explicitly as a workflow/activity argument, or derive it from `workflowInfo().workflowId` and `clsService.set()` it at the start of the activity.
@@ -64,7 +64,7 @@ The CLS-based `correlationId` propagation **stops at the Temporal boundary**. Be
 When developing or modifying services in this monorepo, you MUST adhere to the following rules:
 
 1. **Never generate new UUIDs mid-flow** to identify a process if a `correlationId` already exists in CLS. Use `cls.get('correlationId')`.
-2. **Always register `RmqContextInterceptor`** as an `APP_INTERCEPTOR` (via `{ provide: APP_INTERCEPTOR, useClass: RmqContextInterceptor }`) in the root module of any NestJS microservice that consumes RabbitMQ messages.
+2. **Always import `SharedClsModule.forRoot()`** in the root module of any NestJS microservice that consumes RabbitMQ messages.
 3. **Always inject `ClsService`** when generating unique IDs for Temporal Workflows rather than using `Date.now()`.
 4. **Do NOT pass the Correlation ID as a DTO property.** It should remain abstract and handled by Interceptors and CLS.
 

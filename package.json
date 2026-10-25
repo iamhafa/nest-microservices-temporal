@@ -9,6 +9,7 @@
     "preinstall": "npx only-allow pnpm",
     "build": "nest build",
     "format": "oxfmt \"apps/**/*.{ts,json}\" \"libs/**/*.{ts,json}\" \"*.json\" \".*.json\"",
+    "format:check": "oxfmt --check \"apps/**/*.{ts,json}\" \"libs/**/*.{ts,json}\" \"*.json\" \".*.json\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",

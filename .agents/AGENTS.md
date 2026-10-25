@@ -25,11 +25,11 @@ This project is a scalable, robust **microservices architecture** built with **N
 
 | Library | Path Alias | Description |
 | :--- | :--- | :--- |
-| `auth` | `@libs/auth` | JwtAuthGuard, RolesGuard, `@Public()` and `@Roles()` decorators |
-| `common` | `@libs/common` | Logger, Correlation ID context, global filters, utilities |
-| `contract` | `@libs/contract` | Cross-service DTOs (`/dto`) and Enums (`/enum`) |
-| `messaging` | `@libs/messaging` | `RmqPublisherService`, RabbitMQ module, context interceptor |
-| `temporal` | `@libs/temporal` | Activity interfaces, Task Queue enums, shared Temporal module |
+| `auth` | `@libs/auth` | JwtAuthGuard, RolesGuard (global), `@Public()` and `@Roles()` decorators |
+| `common` | `@libs/common` | Logger, SharedClsModule, RedisIdempotencyStore, HttpExceptionFilter |
+| `contract` | `@libs/contract` | Cross-service DTOs (`/dto`), Enums (`/enum`), Error Codes (`/error`) |
+| `messaging` | `@libs/messaging` | `RmqPublisherService`, `SharedRabbitMQModule`, `RmqRpcResponseInterceptor`, `RmqRpcExceptionFilter`, routing keys |
+| `temporal` | `@libs/temporal` | Activity interfaces, Task Queue enums (`WorkFlowTaskQueue`) |
 
 ---
 
@@ -44,17 +44,18 @@ flowchart TD
 ```
 
 1. **Client ↔ API Gateway**: HTTP/REST endpoints with JWT Authentication & Rate Limiting.
-2. **API Gateway ↔ Microservices**: RabbitMQ RPC via `RmqPublisherService.request<T>` (request/response only; no event publish/subscribe implemented yet).
-3. **Orchestrator ↔ Microservices**: Temporal Activities with dedicated task queues per service.
+2. **API Gateway ↔ Microservices**: RabbitMQ RPC via `RmqPublisherService.request<T>` (request/response pattern with auto header propagation).
+3. **Orchestrator ↔ Microservices**: Temporal Activities with dedicated task queues per service (`WorkFlowTaskQueue`).
 
 ---
 
 ## 🛡️ Key Architectural Rules
 
 - **Strict Service Isolation**: Microservices are NOT allowed to import files directly from other services (`apps/`). All shared contracts must reside in `@libs/contract`.
-- **Controller Boundary**: `.controller.ts` files are ONLY allowed in `apps/api-gateway`. Microservices handle internal RPC via `@RabbitRPC()` message handlers.
-- **Context Propagation**: `X-Correlation-Id` and `X-User-Id` are automatically propagated across HTTP, RabbitMQ, and Temporal calls via NestJS CLS (`ClsService`).
+- **Controller Boundary**: `.controller.ts` files are ONLY allowed in `apps/api-gateway`. Microservices handle internal RPC via `@RabbitRPC()` message handlers in `.service.ts`.
+- **Context Propagation**: `X-Correlation-Id` and `X-User-Id` are automatically propagated across HTTP (via CLS middleware) and RabbitMQ (via `RmqPublisherService` headers & `SharedClsModule.forRoot()`).
 - **Saga Pattern**: Distributed transactions spanning multiple services use Temporal Saga workflows with compensation logic.
+- **Testing Standard**: Modern monorepo testing powered by **Vitest** (`pnpm test`, `pnpm test:e2e`).
 
 ---
 
