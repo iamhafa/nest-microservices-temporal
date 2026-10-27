@@ -4,16 +4,39 @@ import { SharedRabbitMQModule } from '@libs/messaging';
 import { WorkFlowTaskQueue } from '@libs/temporal';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ResilienceModule } from '@nestjs/resilience';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TemporalModule, TemporalOptions } from 'nestjs-temporal-core';
 import { ChargePaymentActivity } from './activity/charge-payment.activity';
 import { RefundPaymentActivity } from './activity/refund-payment.activity';
 import { PaymentTransactionEntity } from './entity/payment-transaction.entity';
+import { PaymentService } from './payment-service.service';
 import { PaymentTransactionRepository } from './repository/payment-transaction.repository';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    ResilienceModule.forRoot({
+      presets: {
+        stripe: {
+          circuitBreaker: {
+            name: 'stripe-circuit-breaker',
+            failureRateThreshold: 50,
+            minimumCalls: 5,
+            openDuration: '30s',
+            halfOpenMaxCalls: 1,
+          },
+          retry: {
+            attempts: 2,
+            backoff: {
+              delay: '500ms',
+              maxDelay: '2s',
+            },
+          },
+          timeout: '10s',
+        },
+      },
+    }),
     StripeModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService): StripeModuleConfig => ({
@@ -54,8 +77,8 @@ import { PaymentTransactionRepository } from './repository/payment-transaction.r
         worker: {
           activityClasses: [ChargePaymentActivity, RefundPaymentActivity],
           workerOptions: {
-            maxConcurrentActivityTaskExecutions: 10, // Giới hạn tối đa 10 activity xử lý đồng thời trên worker này (Bulkhead ở cấp độ Worker)
-            maxActivitiesPerSecond: 5, // Giới hạn tần suất xử lý tối đa 5 activity/giây để bảo vệ Stripe API khỏi Rate Limit
+            maxConcurrentActivityTaskExecutions: 10,
+            maxActivitiesPerSecond: 5,
           },
         },
       }),
@@ -66,6 +89,7 @@ import { PaymentTransactionRepository } from './repository/payment-transaction.r
     SharedRabbitMQModule,
     SharedClsModule.forRoot(),
   ],
-  providers: [ChargePaymentActivity, RefundPaymentActivity, PaymentTransactionRepository],
+  providers: [PaymentService, ChargePaymentActivity, RefundPaymentActivity, PaymentTransactionRepository],
+  exports: [PaymentService],
 })
 export class PaymentServiceModule {}
