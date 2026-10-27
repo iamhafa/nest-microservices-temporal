@@ -40,6 +40,9 @@
   "files": [],
   "references": [
     {
+      "path": "./tsconfig.spec.json"
+    },
+    {
       "path": "./apps/api-gateway/tsconfig.app.json"
     },
     {
@@ -62,6 +65,21 @@
     },
     {
       "path": "./apps/user-service/tsconfig.app.json"
+    },
+    {
+      "path": "./libs/auth/tsconfig.lib.json"
+    },
+    {
+      "path": "./libs/common/tsconfig.lib.json"
+    },
+    {
+      "path": "./libs/contract/tsconfig.lib.json"
+    },
+    {
+      "path": "./libs/messaging/tsconfig.lib.json"
+    },
+    {
+      "path": "./libs/temporal/tsconfig.lib.json"
     }
   ]
 }
