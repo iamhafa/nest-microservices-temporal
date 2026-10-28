@@ -1,5 +1,6 @@
 import { StripeModule, StripeModuleConfig } from '@golevelup/nestjs-stripe';
 import { SharedClsModule, SharedLoggerModule } from '@libs/common';
+import { ResiliencePreset } from '@libs/contract/base';
 import { SharedRabbitMQModule } from '@libs/messaging';
 import { WorkFlowTaskQueue } from '@libs/temporal';
 import { Module } from '@nestjs/common';
@@ -18,22 +19,22 @@ import { PaymentTransactionRepository } from './repository/payment-transaction.r
     ConfigModule.forRoot({ isGlobal: true }),
     ResilienceModule.forRoot({
       presets: {
-        stripe: {
+        [ResiliencePreset.STRIPE_PAYMENT_GATEWAY]: {
           circuitBreaker: {
             name: 'stripe-circuit-breaker',
-            failureRateThreshold: 50,
-            minimumCalls: 5,
-            openDuration: '30s',
-            halfOpenMaxCalls: 1,
+            failureRateThreshold: 50, // Trip open if failure rate reaches >= 50%
+            minimumCalls: 5, // Minimum requests required before calculating failure rate
+            openDuration: '30s', // Cooldown duration in Open state before testing recovery
+            halfOpenMaxCalls: 1, // Single probe request allowed in Half-Open state
           },
           retry: {
-            attempts: 2,
+            attempts: 2, // Max attempts (1 initial call + 1 local retry)
             backoff: {
-              delay: '500ms',
-              maxDelay: '2s',
+              delay: '500ms', // Initial delay before retrying
+              maxDelay: '2s', // Maximum backoff delay cap
             },
           },
-          timeout: '10s',
+          timeout: '10s', // Hard deadline per request to avoid hanging calls
         },
       },
     }),
@@ -65,7 +66,6 @@ import { PaymentTransactionRepository } from './repository/payment-transaction.r
         },
       }),
     }),
-
     TemporalModule.registerAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService): TemporalOptions => ({
@@ -90,6 +90,5 @@ import { PaymentTransactionRepository } from './repository/payment-transaction.r
     SharedClsModule.forRoot(),
   ],
   providers: [PaymentService, ChargePaymentActivity, RefundPaymentActivity, PaymentTransactionRepository],
-  exports: [PaymentService],
 })
 export class PaymentServiceModule {}

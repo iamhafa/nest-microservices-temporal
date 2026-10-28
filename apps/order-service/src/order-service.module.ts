@@ -38,7 +38,6 @@ import { OrderRepository } from './repository/order.repository';
         },
       }),
     }),
-
     TemporalModule.registerAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService): TemporalOptions => ({

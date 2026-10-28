@@ -35,7 +35,6 @@ import { ProductModule } from './modules/product/product.module';
         },
       }),
     }),
-
     TemporalModule.registerAsync({
       isGlobal: true, // ProductService is in ProductModule (child module) → TemporalService must be global
       inject: [ConfigService],

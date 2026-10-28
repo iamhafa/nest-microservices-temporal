@@ -1,5 +1,6 @@
 import { InjectStripeClient } from '@golevelup/nestjs-stripe';
-import { PaymentErrorCode } from '@libs/contract/payment/error/payment-code.error';
+import { ResiliencePreset } from '@libs/contract/base';
+import { PaymentErrorCode } from '@libs/contract/payment';
 import {
   BadRequestException,
   Injectable,
@@ -32,12 +33,12 @@ export class PaymentService implements OnModuleInit {
     private readonly resilienceService: ResilienceService,
     private readonly paymentTransactionRepository: PaymentTransactionRepository,
   ) {
-    this.stripePolicy = this.resilienceService.preset('stripe');
+    this.stripePolicy = this.resilienceService.preset(ResiliencePreset.STRIPE_PAYMENT_GATEWAY);
   }
 
-  onModuleInit() {
-    this.resilienceEvents.events$.subscribe((event: ResilienceEvent) => {
-      if (event.policy === 'stripe-circuit-breaker' || event.policy === 'stripe') {
+  onModuleInit(): void {
+    this.resilienceEvents.events$.subscribe((event: ResilienceEvent): void => {
+      if (event.policy === 'stripe-circuit-breaker' || event.policy === ResiliencePreset.STRIPE_PAYMENT_GATEWAY) {
         if (event.type === 'circuit-open') {
           this.logger.warn(`--- [Stripe] Circuit Breaker OPEN! (state changed from ${event.from} to ${event.to}) ---`);
         } else if (event.type === 'circuit-closed') {
@@ -47,7 +48,7 @@ export class PaymentService implements OnModuleInit {
         } else if (event.type === 'retry') {
           this.logger.warn(`--- [Stripe] Retry attempt #${event.attempt} after ${event.delayMs}ms ---`);
         }
-      }
+      } else this.logger.debug(event);
     });
   }
 
@@ -270,12 +271,14 @@ export class PaymentService implements OnModuleInit {
         );
       } catch (error) {
         if (error instanceof CircuitOpenError) {
+          this.logger.error(`[Order ${orderId}] Stripe API is failing fast due to Circuit Breaker (Open).`);
           throw new ServiceUnavailableException('Stripe service is temporarily unavailable (Circuit Breaker)', {
             errorCode: PaymentErrorCode.PROCESSING_FAILED,
           });
         }
 
         if (error instanceof ResilienceTimeoutError) {
+          this.logger.error(`[Order ${orderId}] Stripe API request timed out.`);
           throw new ServiceUnavailableException('Stripe request timed out', {
             errorCode: PaymentErrorCode.PROCESSING_FAILED,
           });

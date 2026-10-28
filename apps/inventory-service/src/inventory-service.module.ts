@@ -34,7 +34,6 @@ import { InventoryRepository } from './repository/inventory.repository';
         },
       }),
     }),
-
     TemporalModule.registerAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService): TemporalOptions => ({
