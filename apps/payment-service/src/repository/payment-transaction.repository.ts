@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager, Repository } from 'typeorm';
-import { PaymentTransactionEntity } from '../entity/payment-transaction.entity';
+import { PaymentTransactionEntity } from '../entity/payment-transaction.entity.js';
 
 @Injectable()
 export class PaymentTransactionRepository extends Repository<PaymentTransactionEntity> {

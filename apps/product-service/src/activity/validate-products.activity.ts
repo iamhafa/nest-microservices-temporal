@@ -2,8 +2,8 @@ import { IValidateProductsActivity } from '@libs/temporal';
 import { Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { In } from 'typeorm';
-import { ProductEntity } from '../modules/product/entity/product.entity';
-import { ProductRepository } from '../modules/product/repository/product.repository';
+import { ProductEntity } from '../modules/product/entity/product.entity.js';
+import { ProductRepository } from '../modules/product/repository/product.repository.js';
 
 @Activity({ name: 'validate-products-activity' })
 export class ValidateProductsActivity implements IValidateProductsActivity {

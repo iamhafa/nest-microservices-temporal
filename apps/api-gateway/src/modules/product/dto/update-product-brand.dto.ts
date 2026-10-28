@@ -1,6 +1,6 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { IsInt, IsNotEmpty, Min } from 'class-validator';
-import { CreateProductBrandDto } from './create-product-brand.dto';
+import { CreateProductBrandDto } from './create-product-brand.dto.js';
 import { IUpdateProductBrandDto } from '@libs/contract/product';
 
 export class UpdateProductBrandDto extends PartialType(CreateProductBrandDto) implements IUpdateProductBrandDto {

@@ -1,7 +1,7 @@
 import { IGetPaymentIdActivity } from '@libs/temporal';
 import { Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
-import { OrderRepository } from '../repository/order.repository';
+import { OrderRepository } from '../repository/order.repository.js';
 
 @Activity({ name: 'get-payment-id-activity' })
 export class GetPaymentIdActivity implements IGetPaymentIdActivity {

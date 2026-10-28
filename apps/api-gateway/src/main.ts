@@ -6,7 +6,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationError } from 'class-validator';
 import { Logger } from 'nestjs-pino';
-import { ApiGatewayModule } from './api-gateway.module';
+import { ApiGatewayModule } from './api-gateway.module.js';
 
 async function bootstrap() {
   // Kìm các log khởi tạo vào buffer để chờ custom logger (Pino) format

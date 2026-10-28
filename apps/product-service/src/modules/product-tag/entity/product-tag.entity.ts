@@ -13,7 +13,7 @@ import {
   type Relation,
   UpdateDateColumn,
 } from 'typeorm';
-import { ProductEntity } from '../../product/entity/product.entity';
+import { ProductEntity } from '../../product/entity/product.entity.js';
 
 @Entity('product_tags')
 @Index('idx_tag_slug', ['slug'], { unique: true })

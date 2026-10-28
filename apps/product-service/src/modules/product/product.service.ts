@@ -7,12 +7,12 @@ import { Injectable, InternalServerErrorException, NotFoundException } from '@ne
 import { ClsService } from 'nestjs-cls';
 import { TemporalService, WorkflowExecutionResult } from 'nestjs-temporal-core';
 import { In } from 'typeorm';
-import { ProductBrandRepository } from '../product-brand/repository/product-brand.repository';
-import { ProductCategoryRepository } from '../product-category/repository/product-category.repository';
-import { ProductTagEntity } from '../product-tag/entity/product-tag.entity';
-import { ProductTagRepository } from '../product-tag/repository/product-tag.repository';
-import { ProductEntity } from './entity/product.entity';
-import { ProductRepository } from './repository/product.repository';
+import { ProductBrandRepository } from '../product-brand/repository/product-brand.repository.js';
+import { ProductCategoryRepository } from '../product-category/repository/product-category.repository.js';
+import { ProductTagEntity } from '../product-tag/entity/product-tag.entity.js';
+import { ProductTagRepository } from '../product-tag/repository/product-tag.repository.js';
+import { ProductEntity } from './entity/product.entity.js';
+import { ProductRepository } from './repository/product.repository.js';
 
 @Injectable()
 export class ProductService {

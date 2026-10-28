@@ -1,9 +1,9 @@
 import { SystemErrorCode } from '@libs/contract/base';
-import { UserRole } from '@libs/contract/user/enum/user-role.enum';
+import { UserRole } from '@libs/contract/user';
 import { CanActivate, ContextType, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { ROLES_KEY } from '../decorator/roles.decorator';
-import { IAuthRequest } from '../interface/jwt.interface';
+import { ROLES_KEY } from '../decorator/roles.decorator.js';
+import { IAuthRequest } from '../interface/jwt.interface.js';
 
 @Injectable()
 export class RolesGuard implements CanActivate {

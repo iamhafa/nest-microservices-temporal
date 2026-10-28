@@ -2,8 +2,8 @@ import { SystemErrorCode } from '@libs/contract/base';
 import { ArgumentsHost, Catch, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { HttpArgumentsHost } from '@nestjs/common/internal';
 import { BaseExceptionFilter } from '@nestjs/core';
+import { isObject, isString } from 'class-validator';
 import { Response } from 'express';
-import { get, isString } from 'lodash';
 
 @Catch()
 export class HttpExceptionFilter extends BaseExceptionFilter {
@@ -22,16 +22,21 @@ export class HttpExceptionFilter extends BaseExceptionFilter {
 
       // Extract message and details from exception response
       // When response is an object (e.g. from ValidationPipe), extract details array
+      const responseObj = isObject(exceptionResponse) ? (exceptionResponse as Record<string, unknown>) : undefined;
+
       const message: string = isString(exceptionResponse)
         ? exceptionResponse
-        : get(exceptionResponse, 'message', exception.message);
+        : ((responseObj?.message as string) ?? exception.message);
 
-      const details = get(exceptionResponse, 'details') as { field: string; message: string }[] | undefined;
+      const details = responseObj?.details as { field: string; message: string }[] | undefined;
 
       return response.status(status).json({
         success: false,
         error: {
-          code: exception.errorCode ?? get(exceptionResponse, 'code') ?? SystemErrorCode.UNCAUGHT_EXCEPTION,
+          code:
+            (exception as { errorCode?: string }).errorCode ??
+            (responseObj?.code as string) ??
+            SystemErrorCode.UNCAUGHT_EXCEPTION,
           message,
           details,
         },

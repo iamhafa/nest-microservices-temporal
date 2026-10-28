@@ -4,10 +4,10 @@ import { IValidateProductMetadataActivity } from '@libs/temporal';
 import { Logger, NotFoundException } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { In } from 'typeorm';
-import { ProductBrandRepository } from '../modules/product-brand/repository/product-brand.repository';
-import { ProductCategoryRepository } from '../modules/product-category/repository/product-category.repository';
-import { ProductTagEntity } from '../modules/product-tag/entity/product-tag.entity';
-import { ProductTagRepository } from '../modules/product-tag/repository/product-tag.repository';
+import { ProductBrandRepository } from '../modules/product-brand/repository/product-brand.repository.js';
+import { ProductCategoryRepository } from '../modules/product-category/repository/product-category.repository.js';
+import { ProductTagEntity } from '../modules/product-tag/entity/product-tag.entity.js';
+import { ProductTagRepository } from '../modules/product-tag/repository/product-tag.repository.js';
 
 @Activity({ name: 'validate-product-metadata-activity' })
 export class ValidateProductMetadataActivity implements IValidateProductMetadataActivity {

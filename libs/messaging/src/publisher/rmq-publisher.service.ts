@@ -4,16 +4,16 @@ import { GatewayTimeoutException, HttpException, HttpStatus, Injectable, Logger 
 import { MessagePropertyHeaders } from 'amqplib';
 import { ClsService } from 'nestjs-cls';
 
-import { RmqExchange } from '../enum/exchange/rmq-exchange.enum';
-import { InventoryRoutingKey } from '../enum/routing-key/inventory-routing-key.enum';
-import { OrderRoutingKey } from '../enum/routing-key/order-routing-key.enum';
-import { PaymentRoutingKey } from '../enum/routing-key/payment-routing-key.enum';
-import { ProductBrandRoutingKey } from '../enum/routing-key/product-brand-routing-key.enum';
-import { ProductCategoryRoutingKey } from '../enum/routing-key/product-category-routing-key.enum';
-import { ProductRoutingKey } from '../enum/routing-key/product-routing-key.enum';
-import { ProductTagRoutingKey } from '../enum/routing-key/product-tag-routing-key.enum';
-import { ShippingRoutingKey } from '../enum/routing-key/shipping-routing-key.enum';
-import { UserRoutingKey } from '../enum/routing-key/user-routing-key.enum';
+import { RmqExchange } from '../enum/exchange/rmq-exchange.enum.js';
+import { InventoryRoutingKey } from '../enum/routing-key/inventory-routing-key.enum.js';
+import { OrderRoutingKey } from '../enum/routing-key/order-routing-key.enum.js';
+import { PaymentRoutingKey } from '../enum/routing-key/payment-routing-key.enum.js';
+import { ProductBrandRoutingKey } from '../enum/routing-key/product-brand-routing-key.enum.js';
+import { ProductCategoryRoutingKey } from '../enum/routing-key/product-category-routing-key.enum.js';
+import { ProductRoutingKey } from '../enum/routing-key/product-routing-key.enum.js';
+import { ProductTagRoutingKey } from '../enum/routing-key/product-tag-routing-key.enum.js';
+import { ShippingRoutingKey } from '../enum/routing-key/shipping-routing-key.enum.js';
+import { UserRoutingKey } from '../enum/routing-key/user-routing-key.enum.js';
 
 @Injectable()
 export class RmqPublisherService {

@@ -3,8 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { Request, Response } from 'express';
 import { ClsModule, ClsService } from 'nestjs-cls';
 import { LoggerModule, Params } from 'nestjs-pino';
-import { EnvironmentModule } from '../environment/environment.module';
-import { EnvironmentService } from '../environment/environment.service';
+import { EnvironmentModule } from '../environment/environment.module.js';
+import { EnvironmentService } from '../environment/environment.service.js';
 
 @Module({})
 export class SharedLoggerModule {

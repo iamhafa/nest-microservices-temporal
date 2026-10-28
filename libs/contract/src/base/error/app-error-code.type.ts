@@ -1,10 +1,10 @@
-import { InventoryErrorCode } from '../../inventory';
-import { OrderErrorCode } from '../../order';
-import { PaymentErrorCode } from '../../payment';
-import { ProductErrorCode } from '../../product';
-import { ShippingErrorCode } from '../../shipping';
-import { UserErrorCode } from '../../user';
-import { SystemErrorCode } from './system-error-codes';
+import { InventoryErrorCode } from '../../inventory/index.js';
+import { OrderErrorCode } from '../../order/index.js';
+import { PaymentErrorCode } from '../../payment/index.js';
+import { ProductErrorCode } from '../../product/index.js';
+import { ShippingErrorCode } from '../../shipping/index.js';
+import { UserErrorCode } from '../../user/index.js';
+import { SystemErrorCode } from './system-error-codes.js';
 
 export type AppErrorCode =
   | SystemErrorCode

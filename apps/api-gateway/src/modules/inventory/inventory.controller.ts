@@ -1,7 +1,7 @@
 import { InventoryRoutingKey, RmqPublisherService } from '@libs/messaging';
 import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseIntPipe, Patch } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { AdjustInventoryDto, AvailableStockResponseDto, InventoryResponseDto } from './dto';
+import { AdjustInventoryDto, AvailableStockResponseDto, InventoryResponseDto } from './dto/index.js';
 
 @ApiBearerAuth('Authorization')
 @ApiTags('Inventory')

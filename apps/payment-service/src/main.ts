@@ -2,7 +2,7 @@ import { RmqRpcExceptionFilter, RmqRpcResponseInterceptor } from '@libs/messagin
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { Logger } from 'nestjs-pino';
-import { PaymentServiceModule } from './payment-service.module';
+import { PaymentServiceModule } from './payment-service.module.js';
 
 async function bootstrap() {
   // Kìm các log khởi tạo vào buffer để chờ custom logger (Pino) format

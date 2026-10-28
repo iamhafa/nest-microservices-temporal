@@ -10,7 +10,7 @@ import {
   type Relation,
   UpdateDateColumn,
 } from 'typeorm';
-import { OrderItemEntity } from './order-item.entity';
+import { OrderItemEntity } from './order-item.entity.js';
 
 @Entity('orders')
 @Index('idx_order_user_id', ['user_id'])

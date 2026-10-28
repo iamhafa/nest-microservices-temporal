@@ -3,7 +3,7 @@ import { IUpdateOrderStatusActivity } from '@libs/temporal';
 import { Logger, NotFoundException } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { UpdateResult } from 'typeorm';
-import { OrderRepository } from '../repository/order.repository';
+import { OrderRepository } from '../repository/order.repository.js';
 
 @Activity({ name: 'update-order-status-activity' })
 export class UpdateOrderStatusActivity implements IUpdateOrderStatusActivity {

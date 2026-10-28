@@ -13,7 +13,13 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { randomUUID } from 'crypto';
-import { CancelOrderDto, CreateOrderDto, OrderResponseDto, UpdateOrderStatusDto, WorkflowInitiatedResponseDto } from './dto';
+import {
+  CancelOrderDto,
+  CreateOrderDto,
+  OrderResponseDto,
+  UpdateOrderStatusDto,
+  WorkflowInitiatedResponseDto,
+} from './dto/index.js';
 
 @ApiBearerAuth('Authorization')
 @ApiTags('Order')

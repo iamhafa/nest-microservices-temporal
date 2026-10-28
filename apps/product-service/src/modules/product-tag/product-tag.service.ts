@@ -2,8 +2,8 @@ import { RabbitPayload, RabbitRPC } from '@golevelup/nestjs-rabbitmq';
 import { ProductTagRoutingKey, RmqExchange, RmqQueue } from '@libs/messaging';
 import { type ICreateProductTagDto, type IUpdateProductTagDto, ProductErrorCode } from '@libs/contract/product';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { ProductTagEntity } from './entity/product-tag.entity';
-import { ProductTagRepository } from './repository/product-tag.repository';
+import { ProductTagEntity } from './entity/product-tag.entity.js';
+import { ProductTagRepository } from './repository/product-tag.repository.js';
 
 @Injectable()
 export class ProductTagService {

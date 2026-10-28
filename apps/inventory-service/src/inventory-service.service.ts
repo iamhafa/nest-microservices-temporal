@@ -3,8 +3,8 @@ import { type IAdjustInventoryDto, InventoryErrorCode } from '@libs/contract/inv
 import { InventoryRoutingKey, RmqExchange, RmqQueue } from '@libs/messaging';
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { UpdateResult } from 'typeorm';
-import { InventoryEntity } from './entity/inventory.entity';
-import { InventoryRepository } from './repository/inventory.repository';
+import { InventoryEntity } from './entity/inventory.entity.js';
+import { InventoryRepository } from './repository/inventory.repository.js';
 
 @Injectable()
 export class InventoryService {

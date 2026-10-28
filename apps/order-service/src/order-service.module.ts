@@ -5,18 +5,18 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TemporalModule, TemporalOptions } from 'nestjs-temporal-core';
-import { CreateOrderActivity } from './activity/create-order.activity';
-import { DeleteOrderActivity } from './activity/delete-order.activity';
-import { GetOrderItemsActivity } from './activity/get-order-items.activity';
-import { GetOrderTotalAmountActivity } from './activity/get-order-total-amount.activity';
-import { GetPaymentIdActivity } from './activity/get-payment-id.activity';
-import { SavePaymentIdActivity } from './activity/save-payment-id.activity';
-import { UpdateOrderStatusActivity } from './activity/update-order-status.activity';
-import { OrderItemEntity } from './entity/order-item.entity';
-import { OrderEntity } from './entity/order.entity';
-import { OrderService } from './order-service.service';
-import { OrderItemRepository } from './repository/order-item.repository';
-import { OrderRepository } from './repository/order.repository';
+import { CreateOrderActivity } from './activity/create-order.activity.js';
+import { DeleteOrderActivity } from './activity/delete-order.activity.js';
+import { GetOrderItemsActivity } from './activity/get-order-items.activity.js';
+import { GetOrderTotalAmountActivity } from './activity/get-order-total-amount.activity.js';
+import { GetPaymentIdActivity } from './activity/get-payment-id.activity.js';
+import { SavePaymentIdActivity } from './activity/save-payment-id.activity.js';
+import { UpdateOrderStatusActivity } from './activity/update-order-status.activity.js';
+import { OrderItemEntity } from './entity/order-item.entity.js';
+import { OrderEntity } from './entity/order.entity.js';
+import { OrderService } from './order-service.service.js';
+import { OrderItemRepository } from './repository/order-item.repository.js';
+import { OrderRepository } from './repository/order.repository.js';
 
 @Module({
   imports: [

@@ -2,8 +2,8 @@ import { RabbitPayload, RabbitRPC } from '@golevelup/nestjs-rabbitmq';
 import { ProductCategoryRoutingKey, RmqExchange, RmqQueue } from '@libs/messaging';
 import { type ICreateProductCategoryDto, type IUpdateProductCategoryDto, ProductErrorCode } from '@libs/contract/product';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { ProductCategoryEntity } from './entity/product-category.entity';
-import { ProductCategoryRepository } from './repository/product-category.repository';
+import { ProductCategoryEntity } from './entity/product-category.entity.js';
+import { ProductCategoryRepository } from './repository/product-category.repository.js';
 
 @Injectable()
 export class ProductCategoryService {

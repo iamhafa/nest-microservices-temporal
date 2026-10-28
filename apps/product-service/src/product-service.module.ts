@@ -5,15 +5,15 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TemporalModule, TemporalOptions } from 'nestjs-temporal-core';
-import { CreateProductActivity } from './activity/create-product.activity';
-import { DeleteProductActivity } from './activity/delete-product.activity';
-import { GetProductPricesActivity } from './activity/get-product-prices.activity';
-import { ValidateProductMetadataActivity } from './activity/validate-product-metadata.activity';
-import { ValidateProductsActivity } from './activity/validate-products.activity';
-import { ProductBrandModule } from './modules/product-brand/product-brand.module';
-import { ProductCategoryModule } from './modules/product-category/product-category.module';
-import { ProductTagModule } from './modules/product-tag/product-tag.module';
-import { ProductModule } from './modules/product/product.module';
+import { CreateProductActivity } from './activity/create-product.activity.js';
+import { DeleteProductActivity } from './activity/delete-product.activity.js';
+import { GetProductPricesActivity } from './activity/get-product-prices.activity.js';
+import { ValidateProductMetadataActivity } from './activity/validate-product-metadata.activity.js';
+import { ValidateProductsActivity } from './activity/validate-products.activity.js';
+import { ProductBrandModule } from './modules/product-brand/product-brand.module.js';
+import { ProductCategoryModule } from './modules/product-category/product-category.module.js';
+import { ProductTagModule } from './modules/product-tag/product-tag.module.js';
+import { ProductModule } from './modules/product/product.module.js';
 
 @Module({
   imports: [

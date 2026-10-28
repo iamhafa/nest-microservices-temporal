@@ -1,9 +1,9 @@
-import { DeliveryStatus } from '@libs/contract/shipping/enum/delivery-status.enum';
+import { DeliveryStatus } from '@libs/contract/shipping';
 import { ICreateShipmentActivity } from '@libs/temporal';
 import { Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
-import { ShippingEntity } from '../entity/shipping.entity';
-import { ShippingRepository } from '../repository/shipping.repository';
+import { ShippingEntity } from '../entity/shipping.entity.js';
+import { ShippingRepository } from '../repository/shipping.repository.js';
 
 @Activity({ name: 'create-shipment-activity' })
 export class CreateShipmentActivity implements ICreateShipmentActivity {

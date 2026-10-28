@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager, Repository } from 'typeorm';
-import { OrderItemEntity } from '../entity/order-item.entity';
+import { OrderItemEntity } from '../entity/order-item.entity.js';
 
 @Injectable()
 export class OrderItemRepository extends Repository<OrderItemEntity> {

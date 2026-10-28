@@ -1,4 +1,4 @@
-import { DeliveryStatus } from '../enum/delivery-status.enum';
+import { DeliveryStatus } from '../enum/delivery-status.enum.js';
 
 export interface IShippingResponseDto {
   id: number;

@@ -1,4 +1,4 @@
-import { ProductServiceModule } from '../src/product-service.module';
+import { ProductServiceModule } from '../src/product-service.module.js';
 
 describe('ProductServiceModule (e2e)', () => {
   it('should be defined', () => {

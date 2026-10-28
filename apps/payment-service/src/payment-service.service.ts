@@ -17,10 +17,10 @@ import {
   ResilienceService,
   ResilienceTimeoutError,
 } from '@nestjs/resilience';
-import { isNull, isUndefined } from 'lodash';
+import { isDefined } from 'class-validator';
 import { Stripe } from 'stripe';
-import { PaymentStatus, PaymentTransactionEntity } from './entity/payment-transaction.entity';
-import { PaymentTransactionRepository } from './repository/payment-transaction.repository';
+import { PaymentStatus, PaymentTransactionEntity } from './entity/payment-transaction.entity.js';
+import { PaymentTransactionRepository } from './repository/payment-transaction.repository.js';
 
 @Injectable()
 export class PaymentService implements OnModuleInit {
@@ -197,7 +197,7 @@ export class PaymentService implements OnModuleInit {
         throw error;
       }
     } else {
-      if (isUndefined(totalAmount) || isNull(totalAmount)) {
+      if (!isDefined(totalAmount)) {
         this.logger.error(
           `[Order ${orderId}] Transaction not found in DB and totalAmount is not provided. Cannot verify Stripe intent.`,
         );

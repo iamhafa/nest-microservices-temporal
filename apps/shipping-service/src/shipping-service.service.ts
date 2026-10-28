@@ -2,8 +2,8 @@ import { RabbitPayload, RabbitRPC } from '@golevelup/nestjs-rabbitmq';
 import { RmqExchange, RmqQueue, ShippingRoutingKey } from '@libs/messaging';
 import { type IUpdateDeliveryStatusDto, ShippingErrorCode } from '@libs/contract/shipping';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { ShippingEntity } from './entity/shipping.entity';
-import { ShippingRepository } from './repository/shipping.repository';
+import { ShippingEntity } from './entity/shipping.entity.js';
+import { ShippingRepository } from './repository/shipping.repository.js';
 
 @Injectable()
 export class ShippingService {

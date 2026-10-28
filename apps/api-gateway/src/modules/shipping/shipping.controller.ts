@@ -1,7 +1,7 @@
 import { RmqPublisherService, ShippingRoutingKey } from '@libs/messaging';
 import { Body, Controller, Get, Patch } from '@nestjs/common';
 import { ApiBearerAuth, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { ShippingResponseDto, UpdateDeliveryStatusDto } from './dto';
+import { ShippingResponseDto, UpdateDeliveryStatusDto } from './dto/index.js';
 
 @ApiBearerAuth('Authorization')
 @ApiTags('Shipping')

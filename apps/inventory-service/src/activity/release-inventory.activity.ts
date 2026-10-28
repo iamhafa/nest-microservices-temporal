@@ -4,7 +4,7 @@ import { IReleaseInventoryActivity } from '@libs/temporal';
 import { InternalServerErrorException, Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { EntityManager, UpdateResult } from 'typeorm';
-import { InventoryEntity } from '../entity/inventory.entity';
+import { InventoryEntity } from '../entity/inventory.entity.js';
 
 @Activity({ name: 'release-inventory-activity' })
 export class ReleaseInventoryActivity implements IReleaseInventoryActivity {

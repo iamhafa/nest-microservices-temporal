@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { DeliveryStatus } from '../enum/delivery-status.enum';
+import { DeliveryStatus } from '../enum/delivery-status.enum.js';
 
 export class ShippingResponseDto {
   @ApiProperty({ example: 1, description: 'Shipping ID' })

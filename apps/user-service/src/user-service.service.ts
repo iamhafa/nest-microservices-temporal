@@ -11,8 +11,8 @@ import { RmqExchange, RmqQueue, UserRoutingKey } from '@libs/messaging';
 import { ConflictException, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { compare, hash } from 'bcrypt';
-import { UserEntity } from './entity/user.entity';
-import { UserRepository } from './repository/user.repository';
+import { UserEntity } from './entity/user.entity.js';
+import { UserRepository } from './repository/user.repository.js';
 
 @Injectable()
 export class UserService {

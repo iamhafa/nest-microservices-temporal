@@ -5,14 +5,14 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TemporalModule, TemporalOptions } from 'nestjs-temporal-core';
-import { ConfirmInventoryActivity } from './activity/confirm-inventory.activity';
-import { InitializeInventoryActivity } from './activity/initialize-inventory.activity';
-import { ReleaseInventoryActivity } from './activity/release-inventory.activity';
-import { ReserveInventoryActity } from './activity/reserve-inventory.actity';
-import { RestoreInventoryActivity } from './activity/restore-inventory.activity';
-import { InventoryEntity } from './entity/inventory.entity';
-import { InventoryService } from './inventory-service.service';
-import { InventoryRepository } from './repository/inventory.repository';
+import { ConfirmInventoryActivity } from './activity/confirm-inventory.activity.js';
+import { InitializeInventoryActivity } from './activity/initialize-inventory.activity.js';
+import { ReleaseInventoryActivity } from './activity/release-inventory.activity.js';
+import { ReserveInventoryActity } from './activity/reserve-inventory.actity.js';
+import { RestoreInventoryActivity } from './activity/restore-inventory.activity.js';
+import { InventoryEntity } from './entity/inventory.entity.js';
+import { InventoryService } from './inventory-service.service.js';
+import { InventoryRepository } from './repository/inventory.repository.js';
 
 @Module({
   imports: [

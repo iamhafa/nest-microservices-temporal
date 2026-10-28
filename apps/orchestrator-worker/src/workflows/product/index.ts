@@ -1,1 +1,1 @@
-export * from './create-product.workflow';
+export * from './create-product.workflow.js';

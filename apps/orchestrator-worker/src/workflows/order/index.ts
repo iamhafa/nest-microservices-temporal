@@ -1,2 +1,2 @@
-export * from './cancel-order.workflow';
-export * from './place-order.workflow';
+export * from './cancel-order.workflow.js';
+export * from './place-order.workflow.js';

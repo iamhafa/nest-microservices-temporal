@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { ProductBrandController } from './product-brand.controller';
-import { ProductCategoryController } from './product-category.controller';
-import { ProductController } from './product.controller';
-import { ProductTagController } from './product-tag.controller';
+import { ProductBrandController } from './product-brand.controller.js';
+import { ProductCategoryController } from './product-category.controller.js';
+import { ProductController } from './product.controller.js';
+import { ProductTagController } from './product-tag.controller.js';
 
 @Module({
   imports: [],

@@ -4,7 +4,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ClsModule } from 'nestjs-cls';
 import { TemporalModule, TemporalOptions } from 'nestjs-temporal-core';
-import { join } from 'path';
+import { join } from 'node:path';
 
 @Module({
   imports: [
@@ -20,14 +20,14 @@ import { join } from 'path';
         workers: [
           {
             taskQueue: WorkFlowTaskQueue.ORDER,
-            workflowsPath: join(__dirname, 'workflows/order'),
+            workflowsPath: join(import.meta.dirname, 'workflows/order'),
             workerOptions: {
               maxConcurrentWorkflowTaskExecutions: 50, // Giới hạn 50 Workflow Task xử lý đồng thời cho Order Saga
             },
           },
           {
             taskQueue: WorkFlowTaskQueue.PRODUCT,
-            workflowsPath: join(__dirname, 'workflows/product'),
+            workflowsPath: join(import.meta.dirname, 'workflows/product'),
             workerOptions: {
               maxConcurrentWorkflowTaskExecutions: 50, // Giới hạn 50 Workflow Task xử lý đồng thời cho Product Workflow
             },

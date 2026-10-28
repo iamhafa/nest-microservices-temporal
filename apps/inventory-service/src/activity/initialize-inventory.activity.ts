@@ -2,7 +2,7 @@ import { IInitializeInventoryActivity } from '@libs/temporal';
 import { Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { EntityManager } from 'typeorm';
-import { InventoryEntity } from '../entity/inventory.entity';
+import { InventoryEntity } from '../entity/inventory.entity.js';
 
 @Activity({ name: 'initialize-inventory-activity' })
 export class InitializeInventoryActivity implements IInitializeInventoryActivity {

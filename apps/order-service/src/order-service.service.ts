@@ -5,8 +5,8 @@ import { WorkFlowTaskQueue } from '@libs/temporal';
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { ClsService } from 'nestjs-cls';
 import { TemporalService, WorkflowExecutionResult } from 'nestjs-temporal-core';
-import { OrderEntity } from './entity/order.entity';
-import { OrderRepository } from './repository/order.repository';
+import { OrderEntity } from './entity/order.entity.js';
+import { OrderRepository } from './repository/order.repository.js';
 
 @Injectable()
 export class OrderService {

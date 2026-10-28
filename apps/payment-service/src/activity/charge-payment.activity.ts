@@ -1,6 +1,6 @@
 import { IChargePaymentActivity } from '@libs/temporal';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
-import { PaymentService } from '../payment-service.service';
+import { PaymentService } from '../payment-service.service.js';
 
 @Activity({ name: 'charge-payment-activity' })
 export class ChargePaymentActivity implements IChargePaymentActivity {

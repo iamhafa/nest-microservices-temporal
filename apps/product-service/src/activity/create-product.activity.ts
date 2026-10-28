@@ -2,10 +2,10 @@ import type { ICreateProductDto } from '@libs/contract/product';
 import { ICreateProductActivity } from '@libs/temporal';
 import { Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
-import { ProductImageEntity } from '../modules/product/entity/product-image.entity';
-import { ProductEntity } from '../modules/product/entity/product.entity';
-import { ProductImageRepository } from '../modules/product/repository/product-image.repository';
-import { ProductRepository } from '../modules/product/repository/product.repository';
+import { ProductImageEntity } from '../modules/product/entity/product-image.entity.js';
+import { ProductEntity } from '../modules/product/entity/product.entity.js';
+import { ProductImageRepository } from '../modules/product/repository/product-image.repository.js';
+import { ProductRepository } from '../modules/product/repository/product.repository.js';
 
 @Activity({ name: 'create-product-activity' })
 export class CreateProductActivity implements ICreateProductActivity {

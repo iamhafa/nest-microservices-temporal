@@ -1,10 +1,10 @@
 import { OrderErrorCode } from '@libs/contract/order';
 import { IDeleteOrderActivity } from '@libs/temporal';
 import { Logger, NotFoundException } from '@nestjs/common';
-import { isNumber } from 'lodash';
+import { isNumber } from 'class-validator';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { DeleteResult } from 'typeorm';
-import { OrderRepository } from '../repository/order.repository';
+import { OrderRepository } from '../repository/order.repository.js';
 
 @Activity({ name: 'delete-order-activity' })
 export class DeleteOrderActivity implements IDeleteOrderActivity {

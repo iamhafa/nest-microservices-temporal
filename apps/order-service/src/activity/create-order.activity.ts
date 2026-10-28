@@ -3,10 +3,10 @@ import { OrderStatus } from '@libs/contract/order';
 import { ICreateOrderActivity } from '@libs/temporal';
 import { Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
-import { OrderItemEntity } from '../entity/order-item.entity';
-import { OrderEntity } from '../entity/order.entity';
-import { OrderItemRepository } from '../repository/order-item.repository';
-import { OrderRepository } from '../repository/order.repository';
+import { OrderItemEntity } from '../entity/order-item.entity.js';
+import { OrderEntity } from '../entity/order.entity.js';
+import { OrderItemRepository } from '../repository/order-item.repository.js';
+import { OrderRepository } from '../repository/order.repository.js';
 
 @Activity({ name: 'create-order-activity' })
 export class CreateOrderActivity implements ICreateOrderActivity {

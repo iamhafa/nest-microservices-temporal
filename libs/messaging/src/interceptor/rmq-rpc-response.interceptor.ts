@@ -1,7 +1,7 @@
 import { isRabbitContext } from '@golevelup/nestjs-rabbitmq';
 import { IRpcSuccessResponse } from '@libs/contract/base';
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
-import { has, isBoolean, isNil, isObject } from 'lodash';
+import { isBoolean, isObject } from 'class-validator';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -12,13 +12,13 @@ export class RmqRpcResponseInterceptor implements NestInterceptor {
       return next.handle().pipe(
         map((data: IRpcSuccessResponse) => {
           // Avoid double wrapping if already wrapped
-          if (isObject(data) && has(data, 'success') && isBoolean(data.success)) {
+          if (isObject(data) && 'success' in data && isBoolean(data.success)) {
             return data;
           }
 
           return {
             success: true,
-            data: !isNil(data) ? data : null,
+            data: data ?? null,
           };
         }),
       );

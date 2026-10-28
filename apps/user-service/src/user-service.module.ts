@@ -4,9 +4,9 @@ import { SharedRabbitMQModule } from '@libs/messaging';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserEntity } from './entity/user.entity';
-import { UserRepository } from './repository/user.repository';
-import { UserService } from './user-service.service';
+import { UserEntity } from './entity/user.entity.js';
+import { UserRepository } from './repository/user.repository.js';
+import { UserService } from './user-service.service.js';
 
 @Module({
   imports: [

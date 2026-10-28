@@ -10,8 +10,8 @@ import {
   ApiTags,
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
-import { CreateProductDto, ProductResponseDto, UpdateProductDto } from './dto';
-import { WorkflowInitiatedResponseDto } from '../order/dto';
+import { CreateProductDto, ProductResponseDto, UpdateProductDto } from './dto/index.js';
+import { WorkflowInitiatedResponseDto } from '../order/dto/index.js';
 
 @ApiBearerAuth('Authorization')
 @ApiTags('Product')

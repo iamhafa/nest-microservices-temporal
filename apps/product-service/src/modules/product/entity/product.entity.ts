@@ -18,10 +18,10 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { ProductBrandEntity } from '../../product-brand/entity/product-brand.entity';
-import { ProductCategoryEntity } from '../../product-category/entity/product-category.entity';
-import { ProductTagEntity } from '../../product-tag/entity/product-tag.entity';
-import { ProductImageEntity } from './product-image.entity';
+import { ProductBrandEntity } from '../../product-brand/entity/product-brand.entity.js';
+import { ProductCategoryEntity } from '../../product-category/entity/product-category.entity.js';
+import { ProductTagEntity } from '../../product-tag/entity/product-tag.entity.js';
+import { ProductImageEntity } from './product-image.entity.js';
 
 @Entity('products')
 @Index('idx_product_slug', ['slug'], { unique: true })

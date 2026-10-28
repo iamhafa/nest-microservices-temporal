@@ -2,7 +2,7 @@ import { RmqRpcExceptionFilter, RmqRpcResponseInterceptor } from '@libs/messagin
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { Logger } from 'nestjs-pino';
-import { InventoryServiceModule } from './inventory-service.module';
+import { InventoryServiceModule } from './inventory-service.module.js';
 
 async function bootstrap() {
   // Kìm các log khởi tạo vào buffer để chờ custom logger (Pino) format

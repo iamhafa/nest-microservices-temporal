@@ -1,4 +1,4 @@
-import { AppErrorCode } from '../error/app-error-code.type';
+import { AppErrorCode } from '../error/app-error-code.type.js';
 
 export interface IRpcErrorDetails {
   field: string;

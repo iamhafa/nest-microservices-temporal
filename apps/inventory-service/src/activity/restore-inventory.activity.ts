@@ -4,7 +4,7 @@ import { IRestoreInventoryActivity } from '@libs/temporal';
 import { InternalServerErrorException, Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { EntityManager, UpdateResult } from 'typeorm';
-import { InventoryEntity } from '../entity/inventory.entity';
+import { InventoryEntity } from '../entity/inventory.entity.js';
 
 @Activity({ name: 'restore-inventory-activity' })
 export class RestoreInventoryActivity implements IRestoreInventoryActivity {

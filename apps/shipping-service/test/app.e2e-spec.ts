@@ -1,4 +1,4 @@
-import { ShippingServiceModule } from '../src/shipping-service.module';
+import { ShippingServiceModule } from '../src/shipping-service.module.js';
 
 describe('ShippingServiceModule (e2e)', () => {
   it('should be defined', () => {

@@ -2,8 +2,8 @@ import { RabbitPayload, RabbitRPC } from '@golevelup/nestjs-rabbitmq';
 import { ProductBrandRoutingKey, RmqExchange, RmqQueue } from '@libs/messaging';
 import { type ICreateProductBrandDto, type IUpdateProductBrandDto, ProductErrorCode } from '@libs/contract/product';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { ProductBrandEntity } from './entity/product-brand.entity';
-import { ProductBrandRepository } from './repository/product-brand.repository';
+import { ProductBrandEntity } from './entity/product-brand.entity.js';
+import { ProductBrandRepository } from './repository/product-brand.repository.js';
 
 @Injectable()
 export class ProductBrandService {

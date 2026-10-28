@@ -5,10 +5,10 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TemporalModule, TemporalOptions } from 'nestjs-temporal-core';
-import { CreateShipmentActivity } from './activity/create-shipment.activity';
-import { ShippingEntity } from './entity/shipping.entity';
-import { ShippingRepository } from './repository/shipping.repository';
-import { ShippingService } from './shipping-service.service';
+import { CreateShipmentActivity } from './activity/create-shipment.activity.js';
+import { ShippingEntity } from './entity/shipping.entity.js';
+import { ShippingRepository } from './repository/shipping.repository.js';
+import { ShippingService } from './shipping-service.service.js';
 
 @Module({
   imports: [

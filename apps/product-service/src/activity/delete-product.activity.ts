@@ -2,7 +2,7 @@ import { ProductErrorCode } from '@libs/contract/product';
 import { IDeleteProductActivity } from '@libs/temporal';
 import { BadRequestException, Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
-import { ProductRepository } from '../modules/product/repository/product.repository';
+import { ProductRepository } from '../modules/product/repository/product.repository.js';
 
 @Activity({ name: 'delete-product-activity' })
 export class DeleteProductActivity implements IDeleteProductActivity {

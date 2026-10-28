@@ -1,1 +1,1 @@
-export * from './error/payment-code.error';
+export * from './error/payment-code.error.js';

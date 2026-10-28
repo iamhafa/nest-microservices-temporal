@@ -30,7 +30,7 @@
       "@libs/common": ["./libs/common/src/index.ts"],
       "@libs/common/*": ["./libs/common/src/*"],
       "@libs/contract": ["./libs/contract/src/index.ts"],
-      "@libs/contract/*": ["./libs/contract/src/*"],
+      "@libs/contract/*": ["./libs/contract/src/*/index.ts", "./libs/contract/src/*"],
       "@libs/messaging": ["./libs/messaging/src/index.ts"],
       "@libs/messaging/*": ["./libs/messaging/src/*"],
       "@libs/temporal": ["./libs/temporal/src/index.ts"],

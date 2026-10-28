@@ -10,7 +10,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { CreateProductTagDto, ProductTagResponseDto, UpdateProductTagDto } from './dto';
+import { CreateProductTagDto, ProductTagResponseDto, UpdateProductTagDto } from './dto/index.js';
 
 @ApiBearerAuth('Authorization')
 @ApiTags('Product Tag')

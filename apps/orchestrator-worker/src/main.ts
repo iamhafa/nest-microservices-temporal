@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { Logger } from 'nestjs-pino';
-import { OrchestratorWorkerModule } from './orchestrator-worker.module';
+import { OrchestratorWorkerModule } from './orchestrator-worker.module.js';
 
 async function bootstrap() {
   // Kìm các log khởi tạo vào buffer để chờ custom logger (Pino) format

@@ -4,7 +4,7 @@ import { IReserveInventoryActivity } from '@libs/temporal';
 import { BadRequestException, Logger } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { EntityManager, UpdateResult } from 'typeorm';
-import { InventoryEntity } from '../entity/inventory.entity';
+import { InventoryEntity } from '../entity/inventory.entity.js';
 
 @Activity({ name: 'reserve-inventory-activity' })
 export class ReserveInventoryActity implements IReserveInventoryActivity {

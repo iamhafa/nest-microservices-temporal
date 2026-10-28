@@ -11,11 +11,11 @@ import { PrometheusModule, PrometheusOptions } from '@willsoto/nestjs-prometheus
 import { randomUUID } from 'crypto';
 import { Request, Response } from 'express';
 import { ClsModule, ClsService } from 'nestjs-cls';
-import { InventoryModule } from './modules/inventory/inventory.module';
-import { OrderModule } from './modules/order/order.module';
-import { ProductModule } from './modules/product/product.module';
-import { ShippingModule } from './modules/shipping/shipping.module';
-import { UserModule } from './modules/user/user.module';
+import { InventoryModule } from './modules/inventory/inventory.module.js';
+import { OrderModule } from './modules/order/order.module.js';
+import { ProductModule } from './modules/product/product.module.js';
+import { ShippingModule } from './modules/shipping/shipping.module.js';
+import { UserModule } from './modules/user/user.module.js';
 
 @Module({
   imports: [

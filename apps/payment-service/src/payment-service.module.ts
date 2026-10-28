@@ -8,11 +8,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ResilienceModule } from '@nestjs/resilience';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TemporalModule, TemporalOptions } from 'nestjs-temporal-core';
-import { ChargePaymentActivity } from './activity/charge-payment.activity';
-import { RefundPaymentActivity } from './activity/refund-payment.activity';
-import { PaymentTransactionEntity } from './entity/payment-transaction.entity';
-import { PaymentService } from './payment-service.service';
-import { PaymentTransactionRepository } from './repository/payment-transaction.repository';
+import { ChargePaymentActivity } from './activity/charge-payment.activity.js';
+import { RefundPaymentActivity } from './activity/refund-payment.activity.js';
+import { PaymentTransactionEntity } from './entity/payment-transaction.entity.js';
+import { PaymentService } from './payment-service.service.js';
+import { PaymentTransactionRepository } from './repository/payment-transaction.repository.js';
 
 @Module({
   imports: [

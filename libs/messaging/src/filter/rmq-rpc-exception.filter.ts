@@ -1,6 +1,6 @@
 import { IRpcErrorDetails, IRpcErrorPayload, IRpcErrorResponse, SystemErrorCode } from '@libs/contract/base';
 import { Catch, ExceptionFilter, HttpException, HttpStatus, Logger } from '@nestjs/common';
-import { get, isString } from 'lodash';
+import { isObject, isString } from 'class-validator';
 
 @Catch()
 export class RmqRpcExceptionFilter implements ExceptionFilter {
@@ -18,14 +18,16 @@ export class RmqRpcExceptionFilter implements ExceptionFilter {
 
       // Extract message and details from exception response
       // When response is an object (e.g. from ValidationPipe), extract details array
+      const responseObj = isObject(exceptionResponse) ? (exceptionResponse as Record<string, unknown>) : undefined;
+
       const message: string = isString(exceptionResponse)
         ? exceptionResponse
-        : get(exceptionResponse, 'message', exception.message);
+        : ((responseObj?.message as string) ?? exception.message);
 
-      const details = get(exceptionResponse, 'details') as IRpcErrorDetails[] | undefined;
+      const details = responseObj?.details as IRpcErrorDetails[] | undefined;
 
       payload = {
-        code: exception.errorCode ?? SystemErrorCode.UNCAUGHT_EXCEPTION,
+        code: (exception as { errorCode?: string }).errorCode ?? SystemErrorCode.UNCAUGHT_EXCEPTION,
         message,
         status: exception.getStatus(),
         details,
