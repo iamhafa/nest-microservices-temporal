@@ -11,12 +11,12 @@ This skill provides step-by-step guidance and code templates for scaffolding and
 
 ## 🏗 Architecture Quick Reference
 
-| Artifact | Location | Convention |
-| :--- | :--- | :--- |
-| **Workflows** | `apps/orchestrator-worker/src/workflows/<domain>/` | Exported as `async function <domain>Workflow(...)` |
-| **Activity Interfaces** | `libs/temporal/src/activity/interface/` | Interface `I<Service>Activity` |
-| **Task Queue Enums** | `libs/temporal/src/enum/queue/workflow-task.queue.ts` | Enum value `<SERVICE> = '<service>-workflow-task-queue'` |
-| **Activity Implementation** | `apps/<service>-service/src/activity/` | NestJS `@Activity()` class implementing interface |
+| Artifact                    | Location                                              | Convention                                               |
+| :-------------------------- | :---------------------------------------------------- | :------------------------------------------------------- |
+| **Workflows**               | `apps/orchestrator-worker/src/workflows/<domain>/`    | Exported as `async function <domain>Workflow(...)`       |
+| **Activity Interfaces**     | `libs/temporal/src/activity/interface/`               | Interface `I<Service>Activity`                           |
+| **Task Queue Enums**        | `libs/temporal/src/enum/queue/workflow-task.queue.ts` | Enum value `<SERVICE> = '<service>-workflow-task-queue'` |
+| **Activity Implementation** | `apps/<service>-service/src/activity/`                | NestJS `@Activity()` class implementing interface        |
 
 ---
 
@@ -32,7 +32,8 @@ export interface IPaymentActivity {
   refundPayment(orderId: number, paymentId: number): Promise<void>; // Compensation method
 }
 ```
-*Don't forget to export it in `libs/temporal/src/index.ts` (`@libs/temporal`).*
+
+_Don't forget to export it in `libs/temporal/src/index.ts` (`@libs/temporal`)._
 
 ---
 
@@ -113,7 +114,7 @@ export async function placeOrderWorkflow(input: PlaceOrderWorkflowInput): Promis
 }
 ```
 
-*Re-export the workflow in `apps/orchestrator-worker/src/workflows/<domain>/index.ts`.*
+_Re-export the workflow in `apps/orchestrator-worker/src/workflows/<domain>/index.ts`._
 
 ---
 

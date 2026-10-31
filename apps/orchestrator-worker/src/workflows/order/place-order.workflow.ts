@@ -9,12 +9,13 @@ import {
   type IRefundPaymentActivity,
   type IReleaseInventoryActivity,
   type IReserveInventoryActivity,
+  type IRestoreInventoryActivity,
   type ISavePaymentIdActivity,
   type IUpdateOrderStatusActivity,
   type IValidateProductsActivity,
   WorkFlowTaskQueue,
 } from '@libs/temporal';
-import { ActivityInterfaceFor, ApplicationFailure, proxyActivities } from '@temporalio/workflow';
+import { ActivityInterfaceFor, ApplicationFailure, log, proxyActivities } from '@temporalio/workflow';
 
 const productActivities: ActivityInterfaceFor<{
   validateProducts: IValidateProductsActivity['execute'];
@@ -33,6 +34,7 @@ const inventoryProxyActivities: ActivityInterfaceFor<{
   reserveInventory: IReserveInventoryActivity['execute'];
   releaseInventory: IReleaseInventoryActivity['execute'];
   confirmInventory: IConfirmInventoryActivity['execute'];
+  restoreInventory: IRestoreInventoryActivity['execute'];
 }> = proxyActivities({
   startToCloseTimeout: '30 seconds',
   taskQueue: WorkFlowTaskQueue.INVENTORY,
@@ -43,9 +45,10 @@ const inventoryProxyActivities: ActivityInterfaceFor<{
   },
 });
 
-const paymentActivities: ActivityInterfaceFor<{
+// Charge: limited retries, then the saga gives up and compensates.
+// Card declined is non-retryable; an open circuit breaker delays the next retry via nextRetryDelay.
+const paymentChargeActivities: ActivityInterfaceFor<{
   chargePayment: IChargePaymentActivity['execute'];
-  refundPayment: IRefundPaymentActivity['execute'];
 }> = proxyActivities({
   startToCloseTimeout: '30 seconds',
   taskQueue: WorkFlowTaskQueue.PAYMENT,
@@ -53,6 +56,20 @@ const paymentActivities: ActivityInterfaceFor<{
     maximumAttempts: 3,
     backoffCoefficient: 2,
     initialInterval: '1 second',
+  },
+});
+
+// Refund (compensation): must eventually succeed, so retry without an attempt limit for up to 24 hours.
+const paymentRefundActivities: ActivityInterfaceFor<{
+  refundPayment: IRefundPaymentActivity['execute'];
+}> = proxyActivities({
+  taskQueue: WorkFlowTaskQueue.PAYMENT,
+  startToCloseTimeout: '30 seconds',
+  scheduleToCloseTimeout: '24 hours',
+  retry: {
+    initialInterval: '5 seconds',
+    backoffCoefficient: 2,
+    maximumInterval: '2 minutes',
   },
 });
 
@@ -84,11 +101,17 @@ const orderActivities: ActivityInterfaceFor<{
 });
 
 export async function placeOrderWorkflow(createOrderDto: ICreateOrderDto, userId: number) {
-  console.log('Payload:', createOrderDto);
+  log.info(`${placeOrderWorkflow.name} payload:`, { createOrderDto });
+
   const { items, address } = createOrderDto;
   let orderId: number | undefined;
   let paymentId: number | undefined;
   let totalAmount: number | undefined;
+
+  // Progress flags: compensation only undoes the steps that actually ran.
+  let inventoryReserved: boolean = false;
+  let chargeAttempted: boolean = false;
+  let inventoryConfirmed: boolean = false;
 
   try {
     // 0th: Validate products exist & active
@@ -106,15 +129,20 @@ export async function placeOrderWorkflow(createOrderDto: ICreateOrderDto, userId
 
     // 3rd: Reserve inventory
     await inventoryProxyActivities.reserveInventory(orderId, items);
+    inventoryReserved = true;
 
     // 4th: Charge payment → PAID
     totalAmount = await orderActivities.getOrderTotalAmount(orderId);
-    paymentId = await paymentActivities.chargePayment(orderId, totalAmount);
+    // Set before calling: Stripe may have charged even if the activity reports a failure.
+    chargeAttempted = true;
+
+    paymentId = await paymentChargeActivities.chargePayment(orderId, totalAmount);
     await orderActivities.savePaymentId(orderId, paymentId);
     await orderActivities.updateOrderStatus(orderId, OrderStatus.PAID);
 
     // 5th: Confirm inventory (trừ kho vĩnh viễn)
     await inventoryProxyActivities.confirmInventory(orderId, items);
+    inventoryConfirmed = true;
 
     // 6th: Create shipment → SHIPPING
     const shipmentId: number = await shippingActivities.createShipment(orderId, address);
@@ -127,27 +155,43 @@ export async function placeOrderWorkflow(createOrderDto: ICreateOrderDto, userId
       paymentId,
     };
   } catch (error) {
-    console.log('Error:', error);
+    const message: string = error instanceof Error ? error.message : 'Unknown error';
+
+    log.error(`[Order ${orderId}] ${placeOrderWorkflow.name} failed: ${message}`, {
+      orderId,
+      error,
+      inventoryReserved,
+      chargeAttempted,
+      inventoryConfirmed,
+    });
 
     if (orderId) {
-      // 1st: refund nếu đã thanh toán (dùng orderId và totalAmount để bảo vệ chống lặp và xử lý các giao dịch chưa kịp lưu DB)
-      await paymentActivities.refundPayment(orderId, totalAmount);
+      // 1st: refund nếu đã gọi charge (Stripe có thể đã trừ tiền dù activity báo lỗi)
+      if (chargeAttempted) {
+        await paymentRefundActivities.refundPayment(orderId, totalAmount);
+      }
 
-      // 2nd: hoàn lại inventory nếu đã reserve
-      await inventoryProxyActivities.releaseInventory(orderId, items);
+      // 2nd: trả lại kho: đã confirm → cộng lại stock, mới reserve → nhả reserved
+      if (inventoryConfirmed) {
+        await inventoryProxyActivities.restoreInventory(orderId, items);
+      } else if (inventoryReserved) {
+        await inventoryProxyActivities.releaseInventory(orderId, items);
+      }
 
-      // 3rd: Update status to FAILED or DELETE depending on visibility rules
-      await orderActivities.updateOrderStatus(
-        orderId,
-        OrderStatus.FAILED,
-        error instanceof Error ? error.message : 'Unknown error',
-      );
+      // 3rd: Update status to PLACE_FAILED
+      await orderActivities.updateOrderStatus(orderId, OrderStatus.PLACE_FAILED, message);
     }
 
     if (error instanceof ApplicationFailure) {
+      log.error(`[Order ${orderId}] Rethrowing ApplicationFailure: ${error.message}`, {
+        orderId,
+        type: error.type,
+        nonRetryable: error.nonRetryable,
+      });
+
       throw error;
     }
-    const message: string = error instanceof Error ? error.message : 'Workflow execution failed';
+
     throw ApplicationFailure.nonRetryable(message);
   }
 }

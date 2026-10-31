@@ -29,7 +29,7 @@ This NestJS Microservices project uses a **Distributed Tracing** architecture ba
 - The Correlation ID cannot travel through the network via CLS. It is transported inside the RabbitMQ message properties under `headers: { 'X-Correlation-Id': '...' }` (alongside `X-User-Id`), attached automatically by `RmqPublisherService.request()`.
 
 ### 3. Microservice (Consumer)
- 
+
 - When a Microservice (e.g., `order-service`, `product-service`) consumes a message, the `SharedClsModule.forRoot()` (`libs/common/src/context/shared-cls.module.ts`) interceptor is triggered.
 - It intercepts the execution context using `isRabbitContext(context)` and extracts `X-Correlation-Id` and `X-User-Id` from `message.properties.headers`.
 - It injects them directly into CLS: `clsService.set('correlationId', correlationId)` and `clsService.set('userId', userId)`.
@@ -67,4 +67,3 @@ When developing or modifying services in this monorepo, you MUST adhere to the f
 2. **Always import `SharedClsModule.forRoot()`** in the root module of any NestJS microservice that consumes RabbitMQ messages.
 3. **Always inject `ClsService`** when generating unique IDs for Temporal Workflows rather than using `Date.now()`.
 4. **Do NOT pass the Correlation ID as a DTO property.** It should remain abstract and handled by Interceptors and CLS.
-

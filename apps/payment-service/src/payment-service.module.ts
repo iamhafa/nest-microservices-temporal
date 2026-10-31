@@ -27,14 +27,9 @@ import { PaymentTransactionRepository } from './repository/payment-transaction.r
             openDuration: '30s', // Cooldown duration in Open state before testing recovery
             halfOpenMaxCalls: 1, // Single probe request allowed in Half-Open state
           },
-          retry: {
-            attempts: 2, // Max attempts (1 initial call + 1 local retry)
-            backoff: {
-              delay: '500ms', // Initial delay before retrying
-              maxDelay: '2s', // Maximum backoff delay cap
-            },
-          },
-          timeout: '10s', // Hard deadline per request to avoid hanging calls
+          /**
+           * No retry/timeout here: Temporal owns retries, the Stripe SDK owns the request timeout.
+           */
         },
       },
     }),
@@ -42,11 +37,12 @@ import { PaymentTransactionRepository } from './repository/payment-transaction.r
       inject: [ConfigService],
       useFactory: (configService: ConfigService): StripeModuleConfig => ({
         apiKey: configService.getOrThrow<string>('STRIPE_SECRET_KEY'),
-        timeout: configService.get<number>('STRIPE_TIMEOUT', 30000),
         appInfo: {
           name: 'nest-microservices-temporal',
           version: '0.0.1',
         },
+        maxNetworkRetries: 0, // Temporal owns retries; one request per call so the circuit breaker counts every failure
+        timeout: 9000, // Only per-request timeout; keep well below the activity startToCloseTimeout (30s)
       }),
     }),
     TypeOrmModule.forRootAsync({
@@ -74,6 +70,10 @@ import { PaymentTransactionRepository } from './repository/payment-transaction.r
           namespace: config.getOrThrow<string>('TEMPORAL_NAMESPACE'),
         },
         taskQueue: WorkFlowTaskQueue.PAYMENT,
+        errorMapping: true, // 4xx HttpException from activities → non-retryable ApplicationFailure
+        runtime: {
+          logger: 'nest', // Send Temporal SDK logs to Pino (full meta, no depth limit)
+        },
         worker: {
           activityClasses: [ChargePaymentActivity, RefundPaymentActivity],
           workerOptions: {
@@ -86,7 +86,7 @@ import { PaymentTransactionRepository } from './repository/payment-transaction.r
 
     // Custom dynamic modules
     SharedLoggerModule.forRoot({ serviceName: 'payment-service' }),
-    SharedRabbitMQModule,
+    SharedRabbitMQModule.forRoot(),
     SharedClsModule.forRoot(),
   ],
   providers: [PaymentService, ChargePaymentActivity, RefundPaymentActivity, PaymentTransactionRepository],

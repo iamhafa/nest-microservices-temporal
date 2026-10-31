@@ -10,11 +10,14 @@ All microservices and the API Gateway MUST follow these standardized patterns fo
 ## 🏗 Exception Architecture
 
 ### 1. Standard NestJS Exceptions with Error Codes
+
 Do NOT create custom exception wrapper classes. Use standard NestJS `HttpException` subclasses (`UnprocessableEntityException`, `BadRequestException`, `NotFoundException`, `ServiceUnavailableException`, etc.) and pass the domain error code via options:
+
 - **`code`**: A unique domain-specific error code (e.g., `OrderErrorCode.ORDER_NOT_FOUND`).
 - **`details`**: Optional array of validation errors `{ field, message }`.
 
 Example:
+
 ```typescript
 throw new BadRequestException('Order not found', {
   errorCode: OrderErrorCode.ORDER_NOT_FOUND,
@@ -22,7 +25,9 @@ throw new BadRequestException('Order not found', {
 ```
 
 ### 2. Standardized Response Format
+
 The `HttpExceptionFilter` at the API Gateway and `RmqRpcExceptionFilter` in microservices ensure all error responses follow this exact JSON structure:
+
 ```json
 {
   "success": false,
@@ -47,15 +52,15 @@ The `HttpExceptionFilter` at the API Gateway and `RmqRpcExceptionFilter` in micr
 
 Error codes are enums defined in `libs/contract/src/<domain>/error/<domain>-code.error.ts`.
 
-| Prefix / Enum | Domain | Path |
-| :--- | :--- | :--- |
-| `SystemErrorCode` | System/Base | `libs/contract/src/base/error/system-error-codes.ts` |
-| `UserErrorCode` | User | `libs/contract/src/user/error/user-code.error.ts` |
-| `OrderErrorCode` | Order | `libs/contract/src/order/error/order-code.error.ts` |
-| `ProductErrorCode` | Product | `libs/contract/src/product/error/product-code.error.ts` |
-| `InventoryErrorCode` | Inventory | `libs/contract/src/inventory/error/inventory-code.error.ts` |
-| `PaymentErrorCode` | Payment | `libs/contract/src/payment/error/payment-code.error.ts` |
-| `ShippingErrorCode` | Shipping | `libs/contract/src/shipping/error/shipping-code.error.ts` |
+| Prefix / Enum        | Domain      | Path                                                        |
+| :------------------- | :---------- | :---------------------------------------------------------- |
+| `SystemErrorCode`    | System/Base | `libs/contract/src/base/error/system-error-codes.ts`        |
+| `UserErrorCode`      | User        | `libs/contract/src/user/error/user-code.error.ts`           |
+| `OrderErrorCode`     | Order       | `libs/contract/src/order/error/order-code.error.ts`         |
+| `ProductErrorCode`   | Product     | `libs/contract/src/product/error/product-code.error.ts`     |
+| `InventoryErrorCode` | Inventory   | `libs/contract/src/inventory/error/inventory-code.error.ts` |
+| `PaymentErrorCode`   | Payment     | `libs/contract/src/payment/error/payment-code.error.ts`     |
+| `ShippingErrorCode`  | Shipping    | `libs/contract/src/shipping/error/shipping-code.error.ts`   |
 
 ## 📂 Directory & File Conventions
 

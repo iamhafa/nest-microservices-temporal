@@ -18,7 +18,7 @@ export class PaymentTransactionEntity {
   @Column({ unique: true, comment: 'Stripe Payment Intent ID' })
   stripe_payment_id: string;
 
-  @Column({ comment: 'Amount in smallest currency unit (e.g. USD)' })
+  @Column({ comment: 'Amount in smallest currency unit as returned by Stripe (e.g. cents for USD)' })
   amount: number;
 
   @Column({ default: 'usd' })

@@ -74,7 +74,7 @@ try {
   Step 1: Validate → Step 2: Reserve → Step 3: Pay → Step 4: Confirm → Step 5: Ship
 } catch {
   // Compensation steps (reverse order of completed steps)
-  Compensate payment → Compensate inventory → Update status to FAILED
+  Compensate payment → Compensate inventory → Update status to PLACE_FAILED
 }
 ```
 
@@ -82,7 +82,7 @@ try {
 
 1. Track compensatable resources (e.g., `paymentId`) as variables declared before `try`.
 2. In `catch`, check what was completed before compensating (e.g., `if (paymentId)` before refund).
-3. Always update the order status to `FAILED` as the last compensation step.
+3. Always update the order status to failure (`PLACE_FAILED` or `CANCEL_FAILED`) as the last compensation step.
 4. Compensation order is **reverse** of the forward execution order.
 
 ## 🛡 Activity Interface Design Rules

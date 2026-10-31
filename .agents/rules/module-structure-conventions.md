@@ -49,6 +49,7 @@ Consistency between external/internal API data is mandatory. General coding styl
 Each business capability is organized as a cohesive NestJS module.
 
 ### 1. API Gateway Structure (`apps/api-gateway`)
+
 ```
 apps/api-gateway/src/modules/<feature>/
 ├── <feature>.controller.ts      ← REST endpoints (Swagger, JWT, Rate-limit)
@@ -57,6 +58,7 @@ apps/api-gateway/src/modules/<feature>/
 ```
 
 ### 2. Standard Microservice Structure (`apps/<service-name>`)
+
 ```
 apps/<service-name>/src/
 ├── main.ts                      ← Bootstrap (RabbitMQ consumer, global filters/interceptors)
@@ -68,6 +70,7 @@ apps/<service-name>/src/
 ```
 
 ### 3. Complex Microservice Structure (e.g. `product-service`)
+
 ```
 apps/product-service/src/modules/<feature>/
 ├── entity/                      ← TypeORM entities for this feature
@@ -82,6 +85,7 @@ apps/product-service/src/modules/<feature>/
 ## 📝 Service Logging
 
 1. **Logger Initialization**: Every Service instantiates its own logger using the `Logger` class from `@nestjs/common`:
+
    ```typescript
    private readonly logger = new Logger(ProductService.name);
    ```
@@ -101,6 +105,7 @@ When interacting with external APIs or 3rd-party libraries (e.g., Stripe):
 4. **Standard NestJS Exception with Error Code**: Do NOT throw raw third-party errors. Map them to standard NestJS exceptions with a domain error code:
 
    Example:
+
    ```typescript
    import { PaymentErrorCode } from '@libs/contract/payment/error/payment-code.error';
    import { BadRequestException, InternalServerErrorException, ServiceUnavailableException } from '@nestjs/common';

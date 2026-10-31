@@ -3,21 +3,16 @@ import { ResiliencePreset } from '@libs/contract/base';
 import { PaymentErrorCode } from '@libs/contract/payment';
 import {
   BadRequestException,
+  HttpStatus,
   Injectable,
   InternalServerErrorException,
   Logger,
   OnModuleInit,
   ServiceUnavailableException,
 } from '@nestjs/common';
-import {
-  CircuitOpenError,
-  ResilienceEvent,
-  ResilienceEvents,
-  ResiliencePolicy,
-  ResilienceService,
-  ResilienceTimeoutError,
-} from '@nestjs/resilience';
-import { isDefined } from 'class-validator';
+import { CircuitOpenError, ResilienceEvent, ResilienceEvents, ResiliencePolicy, ResilienceService } from '@nestjs/resilience';
+import { ApplicationFailure } from '@temporalio/common';
+import { isDefined, isNumber } from 'class-validator';
 import { Stripe } from 'stripe';
 import { PaymentStatus, PaymentTransactionEntity } from './entity/payment-transaction.entity.js';
 import { PaymentTransactionRepository } from './repository/payment-transaction.repository.js';
@@ -45,8 +40,6 @@ export class PaymentService implements OnModuleInit {
           this.logger.log(`--- [Stripe] Circuit Breaker CLOSED! ---`);
         } else if (event.type === 'circuit-half-open') {
           this.logger.log(`--- [Stripe] Circuit Breaker HALF-OPEN! ---`);
-        } else if (event.type === 'retry') {
-          this.logger.warn(`--- [Stripe] Retry attempt #${event.attempt} after ${event.delayMs}ms ---`);
         }
       } else this.logger.debug(event);
     });
@@ -74,7 +67,7 @@ export class PaymentService implements OnModuleInit {
       const paymentIntent: Stripe.PaymentIntent = await this.stripePolicy.execute(() => {
         return this.stripeClient.paymentIntents.create(
           {
-            amount: totalAmount,
+            amount: Math.round(totalAmount * 100), // Stripe expects cents, order total is in dollars
             currency: 'usd',
             payment_method: 'pm_card_visa',
             confirm: true,
@@ -108,31 +101,56 @@ export class PaymentService implements OnModuleInit {
         status: PaymentStatus.SUCCESS,
       });
 
-      const savedPaymentTransaction = await this.paymentTransactionRepository.save(paymentTransaction);
+      const savedPaymentTransaction: PaymentTransactionEntity = await this.paymentTransactionRepository.save(paymentTransaction);
 
       this.logger.log(`[Order ${orderId}] Payment successful: ${paymentIntent.id}`);
       return savedPaymentTransaction.id;
     } catch (error) {
+      // Circuit breaker is open: the request never reached Stripe.
+      // Ask Temporal to retry exactly when the breaker lets a probe call through.
       if (error instanceof CircuitOpenError) {
-        this.logger.error(`[Order ${orderId}] Stripe API is failing fast due to Circuit Breaker (Open).`);
-        throw new ServiceUnavailableException('Stripe service is temporarily unavailable (Circuit Breaker)', {
-          errorCode: PaymentErrorCode.PROCESSING_FAILED,
+        this.logger.error(`[Order ${orderId}] Stripe circuit breaker is OPEN. Temporal will retry in ${error.retryAfterMs}ms.`);
+
+        throw ApplicationFailure.create({
+          message: `Stripe service is temporarily unavailable (Circuit Breaker). Retry after ${error.retryAfterMs}ms`,
+          type: CircuitOpenError.name,
+          nextRetryDelay: error.retryAfterMs,
+          cause: error,
         });
       }
 
-      if (error instanceof ResilienceTimeoutError) {
-        this.logger.error(`[Order ${orderId}] Stripe API request timed out.`);
-        throw new ServiceUnavailableException('Stripe request timed out', {
-          errorCode: PaymentErrorCode.PROCESSING_FAILED,
-        });
+      // Business errors (card declined, invalid request, payment not succeeded) never fix themselves.
+      if (this.isStripeClientError(error) || error instanceof BadRequestException) {
+        this.logger.error(`[Order ${orderId}] Payment rejected, will not retry: ${error.message}`);
+
+        throw ApplicationFailure.nonRetryable(
+          error.message,
+          error instanceof Stripe.errors.StripeError ? error.type : error.name,
+        );
       }
 
+      // Transient errors (Stripe 5xx, network, DB): let Temporal retry with its backoff.
       this.logger.error(
         `[Order ${orderId}] Failed to charge payment: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
 
       throw error;
     }
+  }
+
+  /** Stripe 4xx except 408 (timeout) and 429 (rate limit), which are worth retrying. */
+  private isStripeClientError(error: unknown): error is Stripe.errors.StripeError {
+    if (!(error instanceof Stripe.errors.StripeError) || !isNumber(error.statusCode)) {
+      return false;
+    }
+    const { statusCode } = error;
+
+    return (
+      statusCode >= HttpStatus.BAD_REQUEST &&
+      statusCode < HttpStatus.INTERNAL_SERVER_ERROR &&
+      statusCode !== HttpStatus.REQUEST_TIMEOUT &&
+      statusCode !== HttpStatus.TOO_MANY_REQUESTS
+    );
   }
 
   async refundPayment(orderId: number, totalAmount?: number): Promise<void> {
@@ -168,6 +186,9 @@ export class PaymentService implements OnModuleInit {
         });
 
         if (refund.status !== 'succeeded') {
+          this.logger.warn(
+            `[Order ${orderId}] Refund ${refund.id} for payment intent ${existingTransaction.stripe_payment_id} not succeeded (status: ${refund.status}).`,
+          );
           throw new InternalServerErrorException(`[Order ${orderId}] Refund failed: ${refund.status}`, {
             errorCode: PaymentErrorCode.PROCESSING_FAILED,
           });
@@ -182,13 +203,6 @@ export class PaymentService implements OnModuleInit {
         if (error instanceof CircuitOpenError) {
           this.logger.error(`[Order ${orderId}] Stripe API is failing fast due to Circuit Breaker (Open).`);
           throw new ServiceUnavailableException('Stripe service is temporarily unavailable (Circuit Breaker)', {
-            errorCode: PaymentErrorCode.PROCESSING_FAILED,
-          });
-        }
-
-        if (error instanceof ResilienceTimeoutError) {
-          this.logger.error(`[Order ${orderId}] Stripe API request timed out.`);
-          throw new ServiceUnavailableException('Stripe request timed out', {
             errorCode: PaymentErrorCode.PROCESSING_FAILED,
           });
         }
@@ -215,7 +229,7 @@ export class PaymentService implements OnModuleInit {
         const paymentIntent: Stripe.PaymentIntent = await this.stripePolicy.execute(() => {
           return this.stripeClient.paymentIntents.create(
             {
-              amount: totalAmount,
+              amount: Math.round(totalAmount * 100), // Stripe expects cents, order total is in dollars
               currency: 'usd',
               payment_method: 'pm_card_visa',
               confirm: true,
@@ -252,6 +266,9 @@ export class PaymentService implements OnModuleInit {
         });
 
         if (refund.status !== 'succeeded') {
+          this.logger.warn(
+            `[Order ${orderId}] Refund ${refund.id} for dangling payment intent ${paymentIntent.id} not succeeded (status: ${refund.status}).`,
+          );
           throw new InternalServerErrorException(`[Order ${orderId}] Stripe refund failed: ${refund.status}`, {
             errorCode: PaymentErrorCode.PROCESSING_FAILED,
           });
@@ -265,7 +282,7 @@ export class PaymentService implements OnModuleInit {
           status: PaymentStatus.REFUNDED,
         });
 
-        const createdPayment = await this.paymentTransactionRepository.save(paymentTransaction);
+        const createdPayment: PaymentTransactionEntity = await this.paymentTransactionRepository.save(paymentTransaction);
         this.logger.log(
           `[Order ${orderId}] Refunded dangling stripe charge and saved transaction record id: ${createdPayment.id}`,
         );
@@ -273,13 +290,6 @@ export class PaymentService implements OnModuleInit {
         if (error instanceof CircuitOpenError) {
           this.logger.error(`[Order ${orderId}] Stripe API is failing fast due to Circuit Breaker (Open).`);
           throw new ServiceUnavailableException('Stripe service is temporarily unavailable (Circuit Breaker)', {
-            errorCode: PaymentErrorCode.PROCESSING_FAILED,
-          });
-        }
-
-        if (error instanceof ResilienceTimeoutError) {
-          this.logger.error(`[Order ${orderId}] Stripe API request timed out.`);
-          throw new ServiceUnavailableException('Stripe request timed out', {
             errorCode: PaymentErrorCode.PROCESSING_FAILED,
           });
         }

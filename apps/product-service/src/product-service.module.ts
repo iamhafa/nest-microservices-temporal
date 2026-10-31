@@ -44,6 +44,10 @@ import { ProductModule } from './modules/product/product.module.js';
           namespace: config.getOrThrow<string>('TEMPORAL_NAMESPACE'),
         },
         taskQueue: WorkFlowTaskQueue.PRODUCT,
+        errorMapping: true, // 4xx HttpException from activities → non-retryable ApplicationFailure
+        runtime: {
+          logger: 'nest', // Send Temporal SDK logs to Pino (full meta, no depth limit)
+        },
         worker: {
           activityClasses: [
             ValidateProductMetadataActivity,
@@ -61,7 +65,7 @@ import { ProductModule } from './modules/product/product.module.js';
 
     // Custom dynamic modules
     SharedLoggerModule.forRoot({ serviceName: 'product-service' }),
-    SharedRabbitMQModule,
+    SharedRabbitMQModule.forRoot(),
     SharedClsModule.forRoot(),
 
     // Feature modules

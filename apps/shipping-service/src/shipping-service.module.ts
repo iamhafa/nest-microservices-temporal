@@ -38,6 +38,10 @@ import { ShippingService } from './shipping-service.service.js';
           namespace: config.getOrThrow<string>('TEMPORAL_NAMESPACE'),
         },
         taskQueue: WorkFlowTaskQueue.SHIPPING,
+        errorMapping: true, // 4xx HttpException from activities → non-retryable ApplicationFailure
+        runtime: {
+          logger: 'nest', // Send Temporal SDK logs to Pino (full meta, no depth limit)
+        },
         worker: {
           activityClasses: [CreateShipmentActivity],
           workerOptions: {
@@ -50,7 +54,7 @@ import { ShippingService } from './shipping-service.service.js';
 
     // Custom dynamic modules
     SharedLoggerModule.forRoot({ serviceName: 'shipping-service' }),
-    SharedRabbitMQModule,
+    SharedRabbitMQModule.forRoot(),
     SharedClsModule.forRoot(),
   ],
   providers: [ShippingService, CreateShipmentActivity, ShippingRepository],

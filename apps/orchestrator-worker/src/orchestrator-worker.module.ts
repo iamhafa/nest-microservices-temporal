@@ -17,6 +17,9 @@ import { join } from 'node:path';
           address: config.getOrThrow<string>('TEMPORAL_HOST'),
           namespace: config.getOrThrow<string>('TEMPORAL_NAMESPACE'),
         },
+        runtime: {
+          logger: 'nest', // Send Temporal SDK logs to Pino (full meta, no depth limit)
+        },
         workers: [
           {
             taskQueue: WorkFlowTaskQueue.ORDER,

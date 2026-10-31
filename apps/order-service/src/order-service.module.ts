@@ -46,6 +46,10 @@ import { OrderRepository } from './repository/order.repository.js';
           namespace: config.getOrThrow<string>('TEMPORAL_NAMESPACE'),
         },
         taskQueue: WorkFlowTaskQueue.ORDER,
+        errorMapping: true, // 4xx HttpException from activities → non-retryable ApplicationFailure
+        runtime: {
+          logger: 'nest', // Send Temporal SDK logs to Pino (full meta, no depth limit)
+        },
         worker: {
           activityClasses: [
             CreateOrderActivity,
@@ -64,7 +68,7 @@ import { OrderRepository } from './repository/order.repository.js';
     }),
     // Custom dynamic modules
     SharedLoggerModule.forRoot({ serviceName: 'order-service' }),
-    SharedRabbitMQModule,
+    SharedRabbitMQModule.forRoot(),
     SharedClsModule.forRoot(),
   ],
   providers: [

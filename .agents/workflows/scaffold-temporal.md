@@ -16,6 +16,7 @@ When creating a new Temporal workflow, perform these steps sequentially:
 ## ✅ Verification Gates
 
 Before presenting the final code to the user and considering the Temporal scaffolding complete, YOU MUST VERIFY:
+
 - [ ] Are Activity Interfaces defined and exported in `libs/temporal/src/index.ts`?
 - [ ] Is there a dedicated `TaskQueue` assigned for the service in `WorkFlowTaskQueue` enum?
 - [ ] Is the Workflow file properly exported in its domain's `index.ts`?

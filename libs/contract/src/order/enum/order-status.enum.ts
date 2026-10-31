@@ -14,9 +14,12 @@ export enum OrderStatus {
   /** 5. Đơn hàng bị hủy (do khách chủ động hoặc do Saga rollback thành công) */
   CANCELLED = 'CANCELLED',
 
-  /** 6. Lỗi hệ thống hoặc lỗi nghiệp vụ không thể tự phục hồi (Cần manual check) */
-  FAILED = 'FAILED',
+  /** 6. Đặt đơn thất bại (Saga rollback, bồi hoàn hoàn tất) */
+  PLACE_FAILED = 'PLACE_FAILED',
 
-  /** 7. Hoàn tiền (Nếu hệ thống có tính năng trả hàng) */
+  /** 7. Hủy đơn thất bại (Quá trình hủy/hoàn tiền gặp lỗi, cần can thiệp thủ công) */
+  CANCEL_FAILED = 'CANCEL_FAILED',
+
+  /** 8. Hoàn tiền (Nếu hệ thống có tính năng trả hàng) */
   REFUNDED = 'REFUNDED',
 }

@@ -18,6 +18,7 @@ Routing Key được định nghĩa dưới dạng **enum** trong `libs/messagin
 **Format thực tế:** `<domain>.<action>`
 
 Trong đó:
+
 1. **`<domain>`**: Tên domain/feature, viết thường (ví dụ: `order`, `product`, `user`, `inventory`, `shipping`, `payment`).
 2. **`<action>`**: Hành động, viết **kebab-case** khi có nhiều từ.
 
@@ -48,11 +49,10 @@ Tất cả các kết nối đến RabbitMQ (cho cả Consumer và Producer) **B
 - **Module Configuration**:
   - `SharedRabbitMQModule` được gắn decorator `@Global()` trong `@libs/messaging`.
   - Được import 1 lần tại root module của **API Gateway** (`ApiGatewayModule`) và root module của từng **Microservice** (VD: `UserServiceModule`, `OrderServiceModule`).
-  
 - **Đối với API Gateway**:
   - Trong Controller hoặc Service của Gateway, tiêm (inject) `RmqPublisherService` thay vì `AmqpConnection` để gửi message đi.
   - Việc dùng `RmqPublisherService` đảm bảo mọi gói tin gửi đi đều tự động được nhúng `X-Correlation-Id` và `X-User-Id` (lấy từ CLS context) vào trong Headers phục vụ Distributed Tracing & User propagation.
-  
+
   ```typescript
   import { RmqPublisherService, UserRoutingKey } from '@libs/messaging';
 
@@ -74,7 +74,7 @@ Tất cả các kết nối đến RabbitMQ (cho cả Consumer và Producer) **B
     app.useGlobalInterceptors(new RmqRpcResponseInterceptor());
     ```
   - Message handler được định nghĩa trực tiếp trong file `*.service.ts` bằng decorator `@RabbitRPC`.
-  
+
   ```typescript
   import { RabbitRPC, RabbitPayload } from '@golevelup/nestjs-rabbitmq';
   import { RmqExchange, RmqQueue, UserRoutingKey } from '@libs/messaging';
@@ -84,7 +84,7 @@ Tất cả các kết nối đến RabbitMQ (cho cả Consumer và Producer) **B
     @RabbitRPC({
       exchange: RmqExchange.ECOMMERCE,
       routingKey: UserRoutingKey.REGISTER, // <- dùng enum
-      queue: RmqQueue.USER_QUEUE,          // <- dùng enum RmqQueue, KHÔNG hardcode string
+      queue: RmqQueue.USER_QUEUE, // <- dùng enum RmqQueue, KHÔNG hardcode string
     })
     async registerUser(@RabbitPayload() dto: RegisterUserDto) {
       // Logic
@@ -104,12 +104,14 @@ Hệ thống sử dụng `nestjs-cls` để duy trì `X-Correlation-Id` và `X-U
    - Lỗi: `RmqRpcExceptionFilter` bắt `HttpException` và trả về `{ success: false, error: { code, message, status, details } }`.
    - Phía Gateway: `RmqPublisherService` tự giải nén, nếu `!response.success` sẽ ném lại `HttpException` chuẩn để `HttpExceptionFilter` của Gateway trả về cho client.
 
-**LUẬT BẤT THÀNH VĂN:** 
+**LUẬT BẤT THÀNH VĂN:**
+
 - **Tuyệt đối KHÔNG** gán đè `clsService.getId()` vào thuộc tính `correlationId` mặc định của AMQP (`amqpConnection.request({ correlationId: ... })`).
 - `correlationId` của AMQP được thư viện dùng riêng biệt cho cơ chế gửi/nhận RPC nội bộ.
 - `X-Correlation-Id` của chúng ta phải được truyền thông qua `headers: { 'X-Correlation-Id': ... }`.
 
 ## 🚫 Lệnh cấm
+
 1. CẤM tạo file `*.controller.ts` ở các Microservices.
 2. CẤM import hoặc sử dụng `ClientsModule` hay `ClientProxy` từ `@nestjs/microservices`.
 3. CẤM gán tĩnh (hardcode) giá trị linh động (như `ClsService.getId()`) bên trong `useFactory` của `RabbitMQModule.forRootAsync` vì factory này chỉ chạy 1 lần lúc bootstrap app.
@@ -131,9 +133,9 @@ Hệ thống sử dụng `nestjs-cls` để duy trì `X-Correlation-Id` và `X-U
 ## ✅ Verification Gates
 
 Before completing a RabbitMQ integration, verify:
+
 - [ ] Is `SharedRabbitMQModule` imported from `@libs/messaging`?
 - [ ] Is `SharedClsModule.forRoot()` imported in the microservice's root module?
 - [ ] Is `RmqPublisherService` injected for sending messages (in API Gateway)?
 - [ ] Is `@RabbitRPC` used for receiving messages (in Microservices)?
 - [ ] Does the routing key use the dedicated domain routing key enum from `@libs/messaging`?
-

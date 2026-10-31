@@ -8,28 +8,28 @@ This project is a scalable, robust **microservices architecture** built with **N
 
 ## 🚀 Microservices Architecture (`apps/`)
 
-| Service | Role | Database | Temporal Activity |
-| :--- | :--- | :---: | :---: |
-| `api-gateway` | HTTP REST entrypoint, routes requests to microservices via RabbitMQ | ❌ | ❌ |
-| `order-service` | Order management (CRUD, status updates) | ✅ | ✅ |
-| `inventory-service` | Inventory management (reserve, confirm, release, restore) | ✅ | ✅ |
-| `payment-service` | Payment processing via Stripe (charge, refund) | ✅ | ✅ |
-| `shipping-service` | Shipment creation and tracking | ✅ | ✅ |
-| `product-service` | Product catalog management and validation | ✅ | ✅ |
-| `user-service` | User management and authentication | ✅ | ❌ |
-| `orchestrator-worker` | Executes Temporal workflows (Saga orchestrator) | ❌ | ❌ |
+| Service               | Role                                                                | Database | Temporal Activity |
+| :-------------------- | :------------------------------------------------------------------ | :------: | :---------------: |
+| `api-gateway`         | HTTP REST entrypoint, routes requests to microservices via RabbitMQ |    ❌    |        ❌         |
+| `order-service`       | Order management (CRUD, status updates)                             |    ✅    |        ✅         |
+| `inventory-service`   | Inventory management (reserve, confirm, release, restore)           |    ✅    |        ✅         |
+| `payment-service`     | Payment processing via Stripe (charge, refund)                      |    ✅    |        ✅         |
+| `shipping-service`    | Shipment creation and tracking                                      |    ✅    |        ✅         |
+| `product-service`     | Product catalog management and validation                           |    ✅    |        ✅         |
+| `user-service`        | User management and authentication                                  |    ✅    |        ❌         |
+| `orchestrator-worker` | Executes Temporal workflows (Saga orchestrator)                     |    ❌    |        ❌         |
 
 ---
 
 ## 📚 Shared Libraries (`libs/`)
 
-| Library | Path Alias | Description |
-| :--- | :--- | :--- |
-| `auth` | `@libs/auth` | JwtAuthGuard, RolesGuard (global), `@Public()` and `@Roles()` decorators |
-| `common` | `@libs/common` | Logger, SharedClsModule, RedisIdempotencyStore, HttpExceptionFilter |
-| `contract` | `@libs/contract` | Cross-service DTOs (`/dto`), Enums (`/enum`), Error Codes (`/error`) |
+| Library     | Path Alias        | Description                                                                                                       |
+| :---------- | :---------------- | :---------------------------------------------------------------------------------------------------------------- |
+| `auth`      | `@libs/auth`      | JwtAuthGuard, RolesGuard (global), `@Public()` and `@Roles()` decorators                                          |
+| `common`    | `@libs/common`    | Logger, SharedClsModule, RedisIdempotencyStore, HttpExceptionFilter                                               |
+| `contract`  | `@libs/contract`  | Cross-service DTOs (`/dto`), Enums (`/enum`), Error Codes (`/error`)                                              |
 | `messaging` | `@libs/messaging` | `RmqPublisherService`, `SharedRabbitMQModule`, `RmqRpcResponseInterceptor`, `RmqRpcExceptionFilter`, routing keys |
-| `temporal` | `@libs/temporal` | Activity interfaces, Task Queue enums (`WorkFlowTaskQueue`) |
+| `temporal`  | `@libs/temporal`  | Activity interfaces, Task Queue enums (`WorkFlowTaskQueue`)                                                       |
 
 ---
 
@@ -71,6 +71,7 @@ flowchart TD
 ## 🤖 MCP (Model Context Protocol) Configuration
 
 Local MCP servers are configured in `.agents/mcp_config.json`:
+
 - `mcp-product-service-db`
 - `mcp-order-service-db`
 - `mcp-inventory-service-db`
@@ -84,36 +85,38 @@ Local MCP servers are configured in `.agents/mcp_config.json`:
 
 ## 🧱 Infrastructure Services (`docker-compose.yaml`)
 
-| Container / Service | Image | Description & Ports |
-| :--- | :--- | :--- |
-| `postgres-database` | `postgres:16` | PostgreSQL database (`:5432`) serving microservices and Temporal persistence |
-| `temporal-init` | `temporalio/admin-tools:latest` | One-shot migration tool initializing `temporal` and `temporal_visibility` schemas |
-| `temporal-server` | `temporalio/server:latest` | Production-ready Temporal Core Server gRPC (`:7233`) |
-| `temporal-ui` | `temporalio/ui:latest` | Temporal Web UI dashboard (`:8233`) |
-| `temporal-admin-tools` | `temporalio/admin-tools:latest` | CLI admin container for Temporal troubleshooting |
-| `rabbitmq` | `rabbitmq:4-management-alpine` | Message broker RPC & Management UI (`:5672`, `:15672`) |
-| `redis` | `redis:7-alpine` | Shared cache layer (`:6379`) |
-| `loki` | `grafana/loki:3.5.0` | Centralized log ingestion (`:3100`) |
-| `prometheus` | `prom/prometheus:latest` | Metrics scraping & time-series storage (`:9090`) |
-| `grafana` | `grafana/grafana:12.0.0` | Centralized observability dashboards (`:3001`) |
+| Container / Service    | Image                           | Description & Ports                                                               |
+| :--------------------- | :------------------------------ | :-------------------------------------------------------------------------------- |
+| `postgres-database`    | `postgres:16`                   | PostgreSQL database (`:5432`) serving microservices and Temporal persistence      |
+| `temporal-init`        | `temporalio/admin-tools:latest` | One-shot migration tool initializing `temporal` and `temporal_visibility` schemas |
+| `temporal-server`      | `temporalio/server:latest`      | Production-ready Temporal Core Server gRPC (`:7233`)                              |
+| `temporal-ui`          | `temporalio/ui:latest`          | Temporal Web UI dashboard (`:8233`)                                               |
+| `temporal-admin-tools` | `temporalio/admin-tools:latest` | CLI admin container for Temporal troubleshooting                                  |
+| `rabbitmq`             | `rabbitmq:4-management-alpine`  | Message broker RPC & Management UI (`:5672`, `:15672`)                            |
+| `redis`                | `redis:7-alpine`                | Shared cache layer (`:6379`)                                                      |
+| `loki`                 | `grafana/loki:3.5.0`            | Centralized log ingestion (`:3100`)                                               |
+| `prometheus`           | `prom/prometheus:latest`        | Metrics scraping & time-series storage (`:9090`)                                  |
+| `grafana`              | `grafana/grafana:12.0.0`        | Centralized observability dashboards (`:3001`)                                    |
 
 ---
 
 ## 📦 Run the Project
 
 ### 1. Infrastructure Setup
+
 ```bash
 # Start all infrastructure containers (PostgreSQL, Temporal Cluster, RabbitMQ, Redis, Observability Stack)
 docker compose up -d
 ```
 
-
 ### 2. Environment Setup
+
 ```bash
 cp .env.example .env
 ```
 
 ### 3. Start Microservices (Development Watch Mode)
+
 ```bash
 pnpm install
 

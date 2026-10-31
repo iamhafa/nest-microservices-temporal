@@ -9,11 +9,11 @@ This project ships a self-hosted observability stack. `correlationId` propagatio
 
 ## 🧱 Infrastructure (docker-compose.yaml)
 
-| Container | Purpose | Host port |
-| --------- | ------- | --------- |
-| `loki` | Log aggregation backend | 3100 |
-| `prometheus` | Metrics scraping/storage (config: `.infrastructure/prometheus/prometheus-config.yaml`) | 9090 |
-| `grafana` | Dashboards for logs + metrics (datasources provisioned in `.infrastructure/grafana/grafana-config.yaml`) | 3001 |
+| Container    | Purpose                                                                                                  | Host port |
+| ------------ | -------------------------------------------------------------------------------------------------------- | --------- |
+| `loki`       | Log aggregation backend                                                                                  | 3100      |
+| `prometheus` | Metrics scraping/storage (config: `.infrastructure/prometheus/prometheus-config.yaml`)                   | 9090      |
+| `grafana`    | Dashboards for logs + metrics (datasources provisioned in `.infrastructure/grafana/grafana-config.yaml`) | 3001      |
 
 - Grafana/Prometheus/Loki talk to each other by **service name** on the Docker network (e.g. `http://prometheus:9090`, `http://loki:3100`, `postgres-database:5432`), NEVER `localhost` (localhost inside a container = the container itself).
 - Grafana does NOT need outbound internet. Import dashboards by pasting/uploading JSON, not by grafana.com ID (blocked behind corporate proxy).
@@ -26,6 +26,7 @@ This project ships a self-hosted observability stack. `correlationId` propagatio
 - `/metrics` requests are excluded from access logging (`autoLogging.ignore`).
 
 **Rules:**
+
 1. Never use `console.log` in app code; use the NestJS `Logger` (routed to Pino via `app.useLogger`).
 2. Set a meaningful `serviceName` per app when wiring `SharedLoggerModule` so Loki can filter by service.
 3. `LOKI_URL` MUST include the `http://` scheme.
@@ -42,6 +43,7 @@ This project ships a self-hosted observability stack. `correlationId` propagatio
 The 7 non-gateway services (`user`, `product`, `order`, `payment`, `shipping`, `inventory`, `orchestrator-worker`) bootstrap with `app.init()` (RabbitMQ consumers / Temporal workers) and **do not listen on an HTTP port**. Prometheus is pull-based, so they are NOT scrapeable as-is.
 
 To expose metrics for these services you MUST either:
+
 - Open a dedicated HTTP metrics port per service (`app.listen(<port>)` instead of `app.init()`) + add a scrape job in `prometheus-config.yml`, OR
 - Use container-level metrics (cAdvisor/node-exporter) once the services are dockerized (infra metrics only, no app-level metrics).
 
@@ -51,12 +53,12 @@ Do NOT assume a new service is scrapeable just because it imports a Prometheus m
 
 A Temporal worker process has THREE distinct log streams - do not assume all logs go to Pino/Loki:
 
-| Stream | Source | Goes through Pino? |
-| ------ | ------ | ------------------ |
-| App logs (bootstrap, modules, activities via NestJS `Logger`) | `@nestjs/common` Logger -> Pino | Yes |
-| `nestjs-temporal-core` library logs (init, worker discovery) | internal `TemporalLogger` -> NestJS Logger | Yes |
-| Temporal SDK Core logs (`[INFO] Worker state changed { sdkComponent: 'worker' }`) | `@temporalio/worker` Runtime (Rust core) | No (default logger) |
-| Workflow `console.log` | Temporal workflow sink | No |
+| Stream                                                                            | Source                                     | Goes through Pino?  |
+| --------------------------------------------------------------------------------- | ------------------------------------------ | ------------------- |
+| App logs (bootstrap, modules, activities via NestJS `Logger`)                     | `@nestjs/common` Logger -> Pino            | Yes                 |
+| `nestjs-temporal-core` library logs (init, worker discovery)                      | internal `TemporalLogger` -> NestJS Logger | Yes                 |
+| Temporal SDK Core logs (`[INFO] Worker state changed { sdkComponent: 'worker' }`) | `@temporalio/worker` Runtime (Rust core)   | No (default logger) |
+| Workflow `console.log`                                                            | Temporal workflow sink                     | No                  |
 
 - `nestjs-temporal-core` has NO option to pass a Pino instance directly; only `enableLogger`/`logLevel`.
 - To route SDK Core logs into Pino, call `Runtime.install({ logger })` from `@temporalio/worker` at the very top of `main.ts`, BEFORE any worker is created.
@@ -65,6 +67,7 @@ A Temporal worker process has THREE distinct log streams - do not assume all log
 ## ✅ Verification Gates
 
 Before completing observability work, verify:
+
 - [ ] `LOKI_URL` includes the `http://` scheme and logging is gated by `NODE_ENV`.
 - [ ] Any newly "instrumented" service actually listens on an HTTP port for `/metrics` (or is covered by container-level metrics).
 - [ ] Grafana datasources/dashboards reference containers by service name, not `localhost`.

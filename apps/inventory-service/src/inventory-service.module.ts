@@ -42,6 +42,10 @@ import { InventoryRepository } from './repository/inventory.repository.js';
           namespace: config.getOrThrow<string>('TEMPORAL_NAMESPACE'),
         },
         taskQueue: WorkFlowTaskQueue.INVENTORY,
+        errorMapping: true, // 4xx HttpException from activities → non-retryable ApplicationFailure
+        runtime: {
+          logger: 'nest', // Send Temporal SDK logs to Pino (full meta, no depth limit)
+        },
         worker: {
           activityClasses: [
             ReserveInventoryActity,
@@ -59,7 +63,7 @@ import { InventoryRepository } from './repository/inventory.repository.js';
 
     // Custom dynamic modules
     SharedLoggerModule.forRoot({ serviceName: 'inventory-service' }),
-    SharedRabbitMQModule,
+    SharedRabbitMQModule.forRoot(),
     SharedClsModule.forRoot(),
   ],
   providers: [
