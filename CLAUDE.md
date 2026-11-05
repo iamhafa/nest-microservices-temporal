@@ -1,1 +1,1 @@
-Read .agents/AGENTS.md for more information.
+Read AGENTS.md for more information.

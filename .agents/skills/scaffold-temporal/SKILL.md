@@ -1,4 +1,5 @@
 ---
+name: scaffold-temporal
 description: create a new temporal workflow or activity and scaffold its layers
 ---
 
@@ -14,10 +15,8 @@ When creating a new Temporal workflow, perform these steps sequentially:
 6. Implement Saga compensation in try/catch if the workflow involves multiple services.
 
 ## ✅ Verification Gates
-
-Before presenting the final code to the user and considering the Temporal scaffolding complete, YOU MUST VERIFY:
-
 - [ ] Are Activity Interfaces defined and exported in `libs/temporal/src/index.ts`?
 - [ ] Is there a dedicated `TaskQueue` assigned for the service in `WorkFlowTaskQueue` enum?
 - [ ] Is the Workflow file properly exported in its domain's `index.ts`?
 - [ ] If this workflow orchestrates multiple services, are Try/Catch compensation blocks correctly implemented in reverse order?
+
