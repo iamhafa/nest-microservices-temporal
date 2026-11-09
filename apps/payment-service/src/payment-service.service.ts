@@ -3,16 +3,22 @@ import { ResiliencePreset } from '@libs/contract/base';
 import { PaymentErrorCode } from '@libs/contract/payment';
 import {
   BadRequestException,
-  HttpStatus,
   Injectable,
   InternalServerErrorException,
   Logger,
   OnModuleInit,
   ServiceUnavailableException,
 } from '@nestjs/common';
-import { CircuitOpenError, ResilienceEvent, ResilienceEvents, ResiliencePolicy, ResilienceService } from '@nestjs/resilience';
+import {
+  CircuitOpenError,
+  isClientError,
+  ResilienceEvent,
+  ResilienceEvents,
+  ResiliencePolicy,
+  ResilienceService,
+} from '@nestjs/resilience';
 import { ApplicationFailure } from '@temporalio/common';
-import { isDefined, isNumber } from 'class-validator';
+import { isDefined } from 'class-validator';
 import { Stripe } from 'stripe';
 import { PaymentStatus, PaymentTransactionEntity } from './entity/payment-transaction.entity.js';
 import { PaymentTransactionRepository } from './repository/payment-transaction.repository.js';
@@ -120,7 +126,8 @@ export class PaymentService implements OnModuleInit {
       }
 
       // Business errors (card declined, invalid request, payment not succeeded) never fix themselves.
-      if (this.isStripeClientError(error) || error instanceof BadRequestException) {
+      // isClientError: 4xx HttpException + SDK errors with 4xx statusCode, except 408/429.
+      if (error instanceof Error && isClientError(error)) {
         this.logger.error(`[Order ${orderId}] Payment rejected, will not retry: ${error.message}`);
 
         throw ApplicationFailure.nonRetryable(
@@ -136,21 +143,6 @@ export class PaymentService implements OnModuleInit {
 
       throw error;
     }
-  }
-
-  /** Stripe 4xx except 408 (timeout) and 429 (rate limit), which are worth retrying. */
-  private isStripeClientError(error: unknown): error is Stripe.errors.StripeError {
-    if (!(error instanceof Stripe.errors.StripeError) || !isNumber(error.statusCode)) {
-      return false;
-    }
-    const { statusCode } = error;
-
-    return (
-      statusCode >= HttpStatus.BAD_REQUEST &&
-      statusCode < HttpStatus.INTERNAL_SERVER_ERROR &&
-      statusCode !== HttpStatus.REQUEST_TIMEOUT &&
-      statusCode !== HttpStatus.TOO_MANY_REQUESTS
-    );
   }
 
   async refundPayment(orderId: number, totalAmount?: number): Promise<void> {
